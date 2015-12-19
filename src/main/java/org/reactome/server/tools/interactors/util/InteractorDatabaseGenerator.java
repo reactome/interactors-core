@@ -1,7 +1,6 @@
 package org.reactome.server.tools.interactors.util;
 
 import org.reactome.server.tools.interactors.database.SQLiteConnection;
-import org.reactome.server.tools.interactors.database.SQLiteTempDbConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +34,9 @@ public class InteractorDatabaseGenerator {
 
             logger.info("Creating interaction");
             statement.executeUpdate(QueryStatement.CREATE_TABLE_INTERACTION);
+
+            logger.info("Creating paricipants");
+            statement.executeUpdate(QueryStatement.CREATE_TABLE_INTERACTION_DETAILS);
 
 
             /** Pre-populate tables **/

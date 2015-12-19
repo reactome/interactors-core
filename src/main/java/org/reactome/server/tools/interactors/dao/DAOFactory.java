@@ -1,5 +1,6 @@
 package org.reactome.server.tools.interactors.dao;
 
+import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionDetailsImpl;
 import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionImpl;
 import org.reactome.server.tools.interactors.dao.impl.JDBCInteractorImpl;
 
@@ -16,4 +17,9 @@ public class DAOFactory {
     public static InteractionDAO createInterationDAO() {
         return new JDBCInteractionImpl();
     }
+
+    public static InteractionDetailsDAO createInterationDetailsDAO() {
+        return new JDBCInteractionDetailsImpl();
+    }
+
 }

@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactome.server.tools.interactors.dao.DAOFactory;
 import org.reactome.server.tools.interactors.dao.InteractorDAO;
-import org.reactome.server.tools.interactors.model.Interaction;
+import org.reactome.server.tools.interactors.model.InteractionDetails;
 import org.reactome.server.tools.interactors.model.InteractionResource;
 import org.reactome.server.tools.interactors.model.Interactor;
 import org.reactome.server.tools.interactors.model.InteractorResource;
@@ -84,7 +84,7 @@ public class TestPsicquic {
                             String interactorIdA = binaryInteraction.getInteractorA().getIdentifiers().iterator().next().getIdentifier();
                             String interactorIdB = binaryInteraction.getInteractorB().getIdentifiers().iterator().next().getIdentifier();
 
-                            Interaction interaction = new Interaction();
+                            InteractionDetails interaction = new InteractionDetails();
 
                             //interaction.setInteractorA();
                             //interaction.setInteractorB();
@@ -98,7 +98,7 @@ public class TestPsicquic {
                                 String interactionAc = cr.getIdentifier();
 
 
-                                interaction.setInteractionId(interactionAc);
+                               // interaction.setInteractionId(interactionAc);
 
                                 //System.out.println("Interaction (" + interactionAc + "): " + interactorIdA + " interacts with " + interactorIdB);
 

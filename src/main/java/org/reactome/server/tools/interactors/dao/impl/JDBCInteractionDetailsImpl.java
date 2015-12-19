@@ -1,8 +1,7 @@
 package org.reactome.server.tools.interactors.dao.impl;
 
-import org.reactome.server.tools.interactors.dao.InteractionDAO;
+import org.reactome.server.tools.interactors.dao.InteractionDetailsDAO;
 import org.reactome.server.tools.interactors.database.SQLiteConnection;
-import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.InteractionDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,55 +16,54 @@ import java.util.List;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
-public class JDBCInteractionImpl implements InteractionDAO {
+public class JDBCInteractionDetailsImpl implements InteractionDetailsDAO {
 
     final Logger logger = LoggerFactory.getLogger(JDBCInteractorImpl.class);
 
     private SQLiteConnection database = SQLiteConnection.getInstance();
 
-    private final String TABLE = "INTERACTION";
-    private final String ALL_COLUMNS = "INTERACTOR_A, INTERACTOR_B, AUTHOR_SCORE, MISCORE, INTERACTION_RESOURCE_ID";
+    private final String TABLE = "INTERACTION_DETAILS";
+    private final String ALL_COLUMNS = "INTERACTION_ID, INTERACTION_AC";
     private final String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
 
-    public Interaction create(Interaction interaction) throws SQLException {
+    public InteractionDetails create(InteractionDetails interactionDetails) throws SQLException {
         Connection conn = database.getConnection();
-
+        System.out.println(conn);
         try {
             String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
-                    + "VALUES(?, ?, ?, ?,?)";
+                    + "VALUES(?, ?)";
 
             PreparedStatement pstm = conn.prepareStatement(query);
-            pstm.setLong(1, interaction.getInteractorA().getId());
-            pstm.setLong(2, interaction.getInteractorB().getId());
-            pstm.setDouble(3, interaction.getAuthorScore());
-            pstm.setDouble(4, interaction.getIntactScore());
-            pstm.setLong(5, interaction.getInteractionResourceId());
+            pstm.setLong(1, interactionDetails.getInteractionId());
+            pstm.setString(2, interactionDetails.getInteractionAc());
 
-            if (pstm.executeUpdate() > 0) {
+
+            if(pstm.executeUpdate() > 0) {
                 try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        interaction.setId(generatedKeys.getLong(1));
+                        interactionDetails.setId(generatedKeys.getLong(1));
                     } else {
-                        throw new SQLException("Creating Interaction failed, no ID obtained.");
+                        throw new SQLException("Creating InteractorDetails failed, no ID obtained.");
                     }
                 }
             }
+
         } finally {
             //conn.close();
         }
 
-        return interaction;
+        return interactionDetails;
     }
 
-    public boolean update(Interaction interaction) throws SQLException {
+    public boolean update(InteractionDetails interaction) throws SQLException {
         return false;
     }
 
-    public Interaction getById(String id) throws SQLException {
+    public InteractionDetails getById(String id) throws SQLException {
         return null;
     }
 
-    public List<Interaction> getAll() throws SQLException {
+    public List<InteractionDetails> getAll() throws SQLException {
         return null;
     }
 

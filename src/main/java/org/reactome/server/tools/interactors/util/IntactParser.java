@@ -1,15 +1,16 @@
 package org.reactome.server.tools.interactors.util;
 
-import org.reactome.server.tools.interactors.dao.DAOFactory;
-import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.model.Interaction;
+import org.reactome.server.tools.interactors.model.InteractionDetails;
 import org.reactome.server.tools.interactors.model.Interactor;
+import org.reactome.server.tools.interactors.service.InteractionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -18,14 +19,19 @@ import java.util.*;
 
 public class IntactParser {
 
+    final Logger logger = LoggerFactory.getLogger(IntactParser.class);
+
     /** This is the default intact file URL, a program argument can be specified in order to use a different URL **/
     private static String INTACT_FILE_URL = "ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact-micluster.txt";
-    private static String INTACT_SCORE_LABEL = "intact-score";
+
+    private static String INTACT_SCORE_LABEL = "intact-miscore";
     private static String AUTHOR_SCORE_LABEL = "author score";
 
-    private List<String> parserErrorMessages = new ArrayList<String>();
+    private List<String> parserErrorMessages = new ArrayList<>();
 
-    public InteractionDAO interactionDAO = DAOFactory.createInterationDAO();
+    private List<String> dbErrorMessages = new ArrayList<>();
+
+    public InteractionService interactionService = InteractionService.getInstance();
 
     /**
      *
@@ -48,36 +54,81 @@ public class IntactParser {
             /** Intact Identifiers **/
             // intact:EBI-7122727|intact:EBI-7122766|intact:EBI-7122684|intact:EBI-7121552
 
-            System.out.println(header);
-
             int lines = 1;
+
+            List<Interaction> interactionList = new ArrayList<>();
+            List<Interaction> secondAttemptInteractionList = new ArrayList<>();
             while ((inputLine = in.readLine()) != null) {
                 String[] content = inputLine.split("\\t");
 
-                List<Interaction> interaction = interactionFromFile(content);
+                Interaction interaction = interactionFromFile(content);
 
-                //interactionDAO.persist(interaction);
+                interactionList.add(interaction);
 
-
+                /** Go to the database every 1000 interacions **/
+                if((lines % 1000) == 0){
+                    logger.info("Performing a DB save");
+                    try {
+                        interactionService.save(interactionList);
+                        interactionList.clear();
+                    }catch (SQLException e){
+                        logger.error("Exception thrown during DB save: " + e.getMessage());
+                        e.printStackTrace();
+                        dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
+                        secondAttemptInteractionList.addAll(interactionList);
+                    }
+                }
                 lines++;
             }
 
-            System.out.println(lines);
             in.close();
 
-        } catch (IOException ex) {
-            // there was some connection problem, or the file did not exist on the server,
-            // or your URL was not in the right format.
-            // think about what to do now, and put it here.
-            ex.printStackTrace(); // for now, simply output it.
-        }
 
+            logger.info("There are [" + parserErrorMessages.size() + "] error messages in the IntAct file.");
+            writeOutputFile(parserErrorMessages, "parser-error-messages.txt");
+//            for (String parserErrorMessage : parserErrorMessages) {
+//                //System.out.println(parserErrorMessage);
+//            }
+
+            logger.info("There are [" + dbErrorMessages.size() + "] db error messages.");
+            writeOutputFile(dbErrorMessages, "db-error-messages.txt");
+//            for (String dbErrorMessage : dbErrorMessages) {
+//                //System.out.println(dbErrorMessage);
+//            }
+
+
+        } catch (IOException ex) {
+           logger.error("Can't get the IntAct file. Please check the provided URL.");
+        }
     }
 
-    public static void main(String[] args) {
-        String aa = "chebi:CHEBI:27083480";
-        String[] aabb = aa.split("\\|");
+    private void writeOutputFile(List<String> messages, String filename) {
+        logger.info("Creating output file. [" + filename + "]. Messages [" + messages.size() + "]");
+        try {
+            File fout = new File(filename);
+            FileOutputStream fos = new FileOutputStream(fout);
 
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+
+            for (String message : messages) {
+                bw.write(message);
+                bw.newLine();
+            }
+
+            bw.flush();
+            bw.close();
+
+        }catch(IOException e){
+            logger.error("Can't create the output file.", e);
+        }
+    }
+
+
+    /**
+     * You can parse
+     * @param args
+     */
+    public static void main(String[] args) {
         String file = INTACT_FILE_URL;
         if (args.length > 0){
             file = args[0];
@@ -93,10 +144,13 @@ public class IntactParser {
      * @param line
      * @return
      */
-    public List<Interaction> interactionFromFile(String[] line){
+    public Interaction interactionFromFile(String[] line){
 
         Interactor interactorA = new Interactor();
+        interactorA.setInteractorResourceId(1L);  // TODO This cannot be HARD CODED
+
         Interactor interactorB = new Interactor();
+        interactorB.setInteractorResourceId(1L);  // TODO This cannot be HARD CODED
 
         /**
          * Even though identifiers from multiple databases can be separated by "|", it is recommended to give only one
@@ -107,28 +161,35 @@ public class IntactParser {
          * auto-catalysis. Ex: uniprotkb:P12346
          */
         /** sample of ID Interactor A => intact:EBI-7121510 **/
-        String[] accRawA = line[IntactParserIndex.ID_INTERACTOR_A].split(":");
-        interactorA.setAcc(accRawA[1]);
+        String[] intactIdRawA = line[IntactParserIndex.ID_INTERACTOR_A].split(":");
+        interactorA.setIntactId(intactIdRawA[1]);
 
         /** sample of Alt. ID(s) interactor A => uniprotkb:Q1231 **/
         parseAlternativeIds(line[IntactParserIndex.ALTERNATIVE_INTERACTOR_A], interactorA);
 
         /** sample of ID Interactor B => intact:EBI-7121510 **/
-        String[] accRawB = line[IntactParserIndex.ID_INTERACTOR_B].split(":");
-        interactorB.setAcc(accRawB[1]);
+        String[] intactIdRawB = line[IntactParserIndex.ID_INTERACTOR_B].split(":");
+        interactorB.setIntactId(intactIdRawB[1]);
 
         /** sample of Alt. ID(s) interactor B =>  uniprotkb:Q15301 **/
         parseAlternativeIds(line[IntactParserIndex.ALTERNATIVE_INTERACTOR_B], interactorB);
 
         /** Create interaction **/
-        List<Interaction> interactions = prepareInteractions(line, interactorA, interactorB);
+        Interaction interaction = prepareInteractions(line, interactorA, interactorB);
 
-        return interactions;
+        return interaction;
     }
 
-    private List<Interaction> prepareInteractions(String[] line, Interactor interactorA, Interactor interactorB) {
+    private Interaction prepareInteractions(String[] line, Interactor interactorA, Interactor interactorB) {
+        Interaction interaction = new Interaction();
 
-        List<Interaction> interactions = new ArrayList<>();
+        interaction.setInteractorA(interactorA);
+        interaction.setInteractorB(interactorB);
+
+        // TODO This cannot be HARD CODED
+        interaction.setInteractionResourceId(1L);
+
+        parseConfidenceValue(line[IntactParserIndex.CONFIDENCE_VALUE], interaction);
 
         /** Get interaction ID column **/
         String allInteractionIds = line[IntactParserIndex.INTERACTION_IDENTIFIER];
@@ -138,36 +199,36 @@ public class IntactParser {
             String[] interactionId = interactionIdCompound.split(":");
             String id = interactionId[1];
 
-            Interaction interaction = new Interaction();
-            interaction.setInteractionId(id);
+            InteractionDetails interactionDetails = new InteractionDetails();
+            interactionDetails.setInteractionAc(id);
 
-            interaction.setInteractorA(interactorA);
-            interaction.setInteractorB(interactorB);
+            interaction.addInteractionDetails(interactionDetails);
 
-            parseConfidenceValue(line[IntactParserIndex.CONFIDENCE_VALUE],interaction);
-
-            interactions.add(interaction);
         }
 
-        return interactions;
+        return interaction;
 
     }
 
+    /**
+     * Alternative ID in the file the is the accession value that we want.
+     *
+     * @param value
+     * @param interactor
+     */
     private void parseAlternativeIds(String value, Interactor interactor) {
         if (!value.equals("-")){ // not null
-            String[] alternativeIdsRaw = value.split("\\|");
-            for (String alternativeIds : alternativeIdsRaw) {
-                /** Considering only the first split. Otherwise ChEBI id breaks the split. e.g chebi:CHEBI:23423 **/
-                String[] alternativeId = alternativeIds.split(":", 2);
-                interactor.addAlternativeIds(alternativeId[1]);
-            }
+            /** Considering only the first split. Otherwise ChEBI id breaks the split. e.g chebi:CHEBI:23423 **/
+            String[] alternativeId = value.split(":", 2);
+            interactor.setAcc(alternativeId[1]);
         }else {
-            parserErrorMessages.add("Interactor alternative ID(s) are null.");
+            /** In case alternative ID is null we will the IntAct id as the accession. This is done in the IntactPortal **/
+            interactor.setAcc(value);
+            parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Interactor alternative ID(s) are null.");
         }
     }
 
     private void parseConfidenceValue(String value, Interaction interaction) {
-
         if (!value.equals("-")){ // not null
             String[] alternativeIdsRaw = value.split("\\|");
             for (String alternativeIds : alternativeIdsRaw) {
@@ -176,14 +237,14 @@ public class IntactParser {
                     if(isNumeric(alternativeId[1])){
                         interaction.setAuthorScore(new Double(alternativeId[1]));
                     }else {
-                        parserErrorMessages.add("The author score is not a number." + alternativeId[1]);
+                        parserErrorMessages.add("Interactor A [" + interaction.getInteractorA().getIntactId() + "] - Interactor B [" + interaction.getInteractorB().getIntactId() + "] - The author score is not a number [" + alternativeId[1] + "]");
                     }
                 }
                 if(alternativeId[0].equalsIgnoreCase(INTACT_SCORE_LABEL)){
                     if(isNumeric(alternativeId[1])){
                         interaction.setIntactScore(new Double(alternativeId[1]));
                     }else {
-                        parserErrorMessages.add("The intact-score is not a number." + alternativeId[1]);
+                        parserErrorMessages.add("Interactor A [" + interaction.getInteractorA().getIntactId() + "] - Interactor B [" + interaction.getInteractorB().getIntactId() + "] - The intact-miscore is not a number [" + alternativeId[1] + "]");
                     }
                 }
             }

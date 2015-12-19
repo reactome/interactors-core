@@ -1,7 +1,6 @@
 package org.reactome.server.tools.interactors.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Timestamp;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -17,7 +16,7 @@ public class Interactor {
     /**
      * This is the intact id
      */
-    private String acc;
+    private String intactId;
 
     /**
      * Intact
@@ -25,9 +24,14 @@ public class Interactor {
     private Long interactorResourceId;
 
     /**
+     * Timestamp
+     */
+    private Timestamp createDate;
+
+    /**
      * Alternative ID for ID. In general they are UniprotID or RefSeq
      */
-    private List<String> alternativeIds;
+    private String acc;
 
     public Long getId() {
         return id;
@@ -42,7 +46,20 @@ public class Interactor {
     }
 
     public void setAcc(String acc) {
-        this.acc = acc;
+        if(acc.equals("-")){
+            this.acc = this.intactId;
+        }else {
+            this.acc = acc;
+        }
+
+    }
+
+    public String getIntactId() {
+        return intactId;
+    }
+
+    public void setIntactId(String intactId) {
+        this.intactId = intactId;
     }
 
     public Long getInteractorResourceId() {
@@ -53,12 +70,22 @@ public class Interactor {
         this.interactorResourceId = interactorResourceId;
     }
 
-   public void addAlternativeIds(String alternativeId){
-       if(alternativeIds == null){
-           alternativeIds = new ArrayList<String>();
-       }
+    public Timestamp getCreateDate() {
+        return createDate;
+    }
 
-       alternativeIds.add(alternativeId);
-   }
+    public void setCreateDate(Timestamp createDate) {
+        this.createDate = createDate;
+    }
 
+    @Override
+    public String toString() {
+        return "Interactor{" +
+                "id=" + id +
+                ", intactId='" + intactId + '\'' +
+                ", interactorResourceId=" + interactorResourceId +
+                ", createDate=" + createDate +
+                ", acc='" + acc + '\'' +
+                '}';
+    }
 }

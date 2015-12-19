@@ -21,8 +21,8 @@ public class JDBCInteractorImpl implements InteractorDAO {
     private SQLiteConnection database = SQLiteConnection.getInstance();
 
     private String TABLE = "INTERACTOR";
-    private String ALL_COLUMNS = "ACC, INTERACTOR_RESOURCE_ID";
-    private String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
+    private String ALL_COLUMNS = "ACC, INTACT_ID, INTERACTOR_RESOURCE_ID";
+    private String ALL_COLUMNS_SEL = "ID, CREATE_DATE, ".concat(ALL_COLUMNS);
 
     public JDBCInteractorImpl() {
 
@@ -33,24 +33,20 @@ public class JDBCInteractorImpl implements InteractorDAO {
 
         try {
             String insert = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
-                    + "VALUES(?, ?)";
+                    + "VALUES(?, ?, ?)";
 
             PreparedStatement pstm = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
             pstm.setString(1, interactor.getAcc());
-            pstm.setLong(2, interactor.getInteractorResourceId());
+            pstm.setString(2, interactor.getIntactId());
+            pstm.setLong(3, interactor.getInteractorResourceId());
 
-            int affectedRows = pstm.executeUpdate();
-
-            if (affectedRows == 0) {
-                throw new SQLException("Creating Interactor failed, no rows affected.");
-            }
-
-            try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    interactor.setId(generatedKeys.getLong(1));
-                    System.out.println(generatedKeys.getLong(1));
-                } else {
-                    throw new SQLException("Creating user failed, no ID obtained.");
+            if(pstm.executeUpdate() > 0) {
+                try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        interactor.setId(generatedKeys.getLong(1));
+                    } else {
+                        throw new SQLException("Creating Interactor failed, no ID obtained.");
+                    }
                 }
             }
 
@@ -114,6 +110,11 @@ public class JDBCInteractorImpl implements InteractorDAO {
         return ret;
     }
 
+    public boolean exists(String acc) throws SQLException {
+        Interactor i = getByAccession(acc);
+        return (i != null);
+    }
+
     public boolean delete(String id) throws SQLException {
         Connection conn = database.getConnection();
 
@@ -161,7 +162,9 @@ public class JDBCInteractorImpl implements InteractorDAO {
         Interactor ret = new Interactor();
         ret.setId(rs.getLong("ID"));
         ret.setAcc(rs.getString("ACC"));
+        ret.setIntactId(rs.getString("INTACT_ID"));
         ret.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_ID"));
+        //ret.setCreateDate(rs.getTimestamp("CREATE_DATE"));
 
         return ret;
     }
