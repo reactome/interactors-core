@@ -38,14 +38,17 @@ public class InteractorDatabaseGenerator {
             logger.info("Creating paricipants");
             statement.executeUpdate(QueryStatement.CREATE_TABLE_INTERACTION_DETAILS);
 
+            /** Create indexes **/
+            statement.executeUpdate(QueryStatement.CREATE_INTERACTOR_ACC_INDEX);
 
             /** Pre-populate tables **/
             logger.info("Populate table interaction resource");
             statement.executeUpdate(QueryStatement.INSERT_INTERACTION_RESOURCE_INTACT);
 
             logger.info("Populate table interactor resource");
-            statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_CHEBI);
+            statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_UNDEFINED);
             statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_UNIPROT);
+            statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_CHEBI);
 
             logger.info("Database has been created properly");
 

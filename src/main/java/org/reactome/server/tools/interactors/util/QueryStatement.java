@@ -20,6 +20,7 @@ public class QueryStatement {
                 "INTACT_ID VARCHAR, " +
                 "INTERACTOR_RESOURCE_ID INTEGER NOT NULL, " +
                 "CREATE_DATE DEFAULT CURRENT_TIMESTAMP, " +
+                "ALIAS VARCHAR, " +
                 "FOREIGN KEY(INTERACTOR_RESOURCE_ID) REFERENCES  INTERACTOR_RESOURCE(ID) " +
             ")";
 
@@ -30,7 +31,7 @@ public class QueryStatement {
                     "INTERACTOR_B INTEGER NOT NULL, " +
                     "AUTHOR_SCORE NUMERIC, " +
                     "MISCORE NUMERIC, " +
-                    "INTERACTION_RESOURCE_ID VARCHAR, " +
+                    "INTERACTION_RESOURCE_ID NUMERIC, " +
                     "FOREIGN KEY(INTERACTOR_A) REFERENCES INTERACTOR(ID), " +
                     "FOREIGN KEY(INTERACTOR_B) REFERENCES INTERACTOR(ID), " +
                     "FOREIGN KEY(INTERACTION_RESOURCE_ID) REFERENCES  INTERACTION_RESOURCE(ID) " +
@@ -41,17 +42,19 @@ public class QueryStatement {
                     "ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "INTERACTION_ID INTEGER," +
                     "INTERACTION_AC VARCHAR NOT NULL, " +
-                    "FOREIGN KEY(INTERACTION_ID) REFERENCES INTERACTION_ID(ID) " +
+                    "FOREIGN KEY(INTERACTION_ID) REFERENCES INTERACTION(ID) " +
              ")";
 
-    /** INSERT **/
-    public static String INSERT_INTERACTOR_RESOURCE_UNIPROT = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('UniProt','http://www.uniprot.org/uniprot/##ID##')";
+    /** INSERTS **/
+    /** Example:EBI-7121639 **/
+    public static String INSERT_INTERACTOR_RESOURCE_UNDEFINED = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('undefined','do-not-have-url')";
+    public static String INSERT_INTERACTOR_RESOURCE_UNIPROT = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('UniProtKB','http://www.uniprot.org/uniprot/##ID##')";
     public static String INSERT_INTERACTOR_RESOURCE_CHEBI = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('ChEBI','https://www.ebi.ac.uk/chebi/searchId.do?chebiId=##ID##')";
 
     public static String INSERT_INTERACTION_RESOURCE_INTACT = "INSERT OR REPLACE INTO INTERACTION_RESOURCE (NAME, URL) VALUES ('IntAct','http://www.ebi.ac.uk/intact/interaction/##ID##')";
 
     /** CREATE INDEX STATEMENTS **/
-
+    public static String CREATE_INTERACTOR_ACC_INDEX = "CREATE INDEX INTERACTOR_ACC_IDX ON INTERACTOR (ACC);";
 
     /** CREATE FOREIGN KEYS RELATIONSHIP **/
 

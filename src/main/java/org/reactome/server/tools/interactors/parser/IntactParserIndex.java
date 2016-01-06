@@ -1,4 +1,4 @@
-package org.reactome.server.tools.interactors.util;
+package org.reactome.server.tools.interactors.parser;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>

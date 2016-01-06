@@ -21,7 +21,7 @@ public class Interactor {
     /**
      * Intact
      */
-    private Long interactorResourceId;
+    private Long interactorResourceId = new Long(0);
 
     /**
      * Timestamp
@@ -32,6 +32,12 @@ public class Interactor {
      * Alternative ID for ID. In general they are UniprotID or RefSeq
      */
     private String acc;
+
+    /**
+     * The alias is basically the protein name. A text representation for the protein.
+     * This is going to be in the synonym list.
+     */
+    private String alias;
 
     public Long getId() {
         return id;
@@ -49,7 +55,7 @@ public class Interactor {
         if(acc.equals("-")){
             this.acc = this.intactId;
         }else {
-            this.acc = acc;
+            this.acc = acc.replaceAll("\"", "");
         }
 
     }
@@ -78,6 +84,14 @@ public class Interactor {
         this.createDate = createDate;
     }
 
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias.replaceAll("\"", "");
+    }
+
     @Override
     public String toString() {
         return "Interactor{" +
@@ -86,6 +100,7 @@ public class Interactor {
                 ", interactorResourceId=" + interactorResourceId +
                 ", createDate=" + createDate +
                 ", acc='" + acc + '\'' +
+                ", alias='" + alias + '\'' +
                 '}';
     }
 }

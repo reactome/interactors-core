@@ -18,7 +18,7 @@ import java.util.List;
 
 public class JDBCInteractionDetailsImpl implements InteractionDetailsDAO {
 
-    final Logger logger = LoggerFactory.getLogger(JDBCInteractorImpl.class);
+    final Logger logger = LoggerFactory.getLogger(JDBCInteractionDetailsImpl.class);
 
     private SQLiteConnection database = SQLiteConnection.getInstance();
 
@@ -28,7 +28,7 @@ public class JDBCInteractionDetailsImpl implements InteractionDetailsDAO {
 
     public InteractionDetails create(InteractionDetails interactionDetails) throws SQLException {
         Connection conn = database.getConnection();
-        System.out.println(conn);
+
         try {
             String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
                     + "VALUES(?, ?)";
@@ -36,7 +36,6 @@ public class JDBCInteractionDetailsImpl implements InteractionDetailsDAO {
             PreparedStatement pstm = conn.prepareStatement(query);
             pstm.setLong(1, interactionDetails.getInteractionId());
             pstm.setString(2, interactionDetails.getInteractionAc());
-
 
             if(pstm.executeUpdate() > 0) {
                 try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
@@ -53,6 +52,53 @@ public class JDBCInteractionDetailsImpl implements InteractionDetailsDAO {
         }
 
         return interactionDetails;
+    }
+
+    /**
+     * Create interactions details using batch approach
+     *
+     * @param interactionDetails
+     * @return
+     * @throws SQLException
+     */
+    public boolean create(List<InteractionDetails> interactionDetails) throws SQLException {
+        Connection conn = database.getConnection();
+        conn.setAutoCommit(false);
+
+        try {
+            String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
+                    + "VALUES(?, ?)";
+
+            PreparedStatement pstm = conn.prepareStatement(query);
+
+            for (InteractionDetails interactionDetail : interactionDetails) {
+                pstm.setLong(1, interactionDetail.getInteractionId());
+                pstm.setString(2, interactionDetail.getInteractionAc());
+
+                pstm.addBatch();
+//                if (pstm.executeUpdate() > 0) {
+//                    try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
+//                        if (generatedKeys.next()) {
+//                            interactionDetails.setId(generatedKeys.getLong(1));
+//                        } else {
+//                            throw new SQLException("Creating InteractorDetails failed, no ID obtained.");
+//                        }
+//                    }
+//                }
+            }
+
+            pstm.executeBatch();
+
+            conn.commit();
+        } catch(SQLException s){
+            logger.error("");
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+        }
+
+        return true;
+
     }
 
     public boolean update(InteractionDetails interaction) throws SQLException {

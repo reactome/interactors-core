@@ -31,4 +31,7 @@ local.properties
 *.launch
 
 interactors.db
+interactors_final.db
 interactors.log
+intact-micluster.txt
+parser-error-messages.txt

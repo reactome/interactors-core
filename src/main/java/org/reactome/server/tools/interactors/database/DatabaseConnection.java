@@ -18,8 +18,7 @@ public abstract class DatabaseConnection {
     protected Connection connection;
 
     //TODO SET A PATH TO THE DATABASE
-    protected final String FINAL_DATABASE = "interactors.db";
-    //protected final String TEMP_DATABASE = "interactors-temp.db";
+    protected final String FINAL_DATABASE = "/Users/reactome/interactors/interactors.db";
 
     public Connection getConnection() {
         return connection;

@@ -22,9 +22,7 @@ public class TestInteractionImpl {
     @Before
     public void setUp() {
         interactionDAO = DAOFactory.createInterationDAO();
-        interactionID = UUID.randomUUID().toString();
     }
-
 
 //    @Test
 //    public void testInteractorDAO() {
