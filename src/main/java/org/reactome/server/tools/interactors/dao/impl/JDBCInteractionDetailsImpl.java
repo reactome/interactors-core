@@ -2,14 +2,17 @@ package org.reactome.server.tools.interactors.dao.impl;
 
 import org.reactome.server.tools.interactors.dao.InteractionDetailsDAO;
 import org.reactome.server.tools.interactors.database.SQLiteConnection;
+import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.InteractionDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.transform.Result;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -117,4 +120,46 @@ public class JDBCInteractionDetailsImpl implements InteractionDetailsDAO {
         return false;
     }
 
+    public List<InteractionDetails> getByInteraction(Long interactionId) throws SQLException {
+        Connection conn = database.getConnection();
+
+        List<InteractionDetails> interactionsDetails = new ArrayList<>();
+
+        try {
+            // TODO: IMPROVE HERE
+            String query = "SELECT * FROM INTERACTION_DETAILS WHERE INTERACTION_ID = ?";
+
+            PreparedStatement pstm = conn.prepareStatement(query);
+            pstm.setLong(1, interactionId);
+
+            ResultSet rs = pstm.executeQuery();
+
+            while(rs.next()){
+                InteractionDetails interactionDetails = buildInteractionDetails(rs);
+
+                interactionsDetails.add(interactionDetails);
+            }
+
+
+
+        }catch (SQLException e){
+            logger.error("An error has occurred during interaction batch insert. Please check the following exception.");
+            throw new SQLException(e);
+
+        } finally {
+            //conn.close();
+        }
+
+        return interactionsDetails;
+
+    }
+
+    public InteractionDetails buildInteractionDetails(ResultSet rs) throws SQLException {
+        InteractionDetails interactionDetails = new InteractionDetails();
+        interactionDetails.setId(rs.getLong("ID"));
+        interactionDetails.setInteractionId(rs.getLong("INTERACTION_ID"));
+        interactionDetails.setInteractionAc(rs.getString("INTERACTION_AC"));
+
+        return interactionDetails;
+    }
 }

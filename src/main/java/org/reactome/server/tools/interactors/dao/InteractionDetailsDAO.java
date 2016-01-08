@@ -13,4 +13,7 @@ public interface InteractionDetailsDAO extends BaseDAO<InteractionDetails> {
     // add here something specific for Interactor
 
     boolean create(List<InteractionDetails> interactionDetails) throws SQLException;
+
+    List<InteractionDetails> getByInteraction(Long interactionId) throws SQLException;
+
 }

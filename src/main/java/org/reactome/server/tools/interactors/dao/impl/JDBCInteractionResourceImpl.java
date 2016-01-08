@@ -64,6 +64,33 @@ public class JDBCInteractionResourceImpl implements InteractionResourceDAO {
         return ret;
     }
 
+
+    public InteractionResource getByName(String name) throws SQLException {
+        logger.debug("Retrieving InteractionResource by name");
+
+        InteractionResource interactionResource = null;
+
+        String query = "SELECT " + ALL_COLUMNS_SEL +
+                        " FROM " + TABLE +
+                        " WHERE LOWER(name) = ?";
+
+        Connection conn = database.getConnection();
+
+        try {
+            PreparedStatement pstm = conn.prepareStatement(query);
+            pstm.setString(1,name.toLowerCase());
+
+            ResultSet rs = pstm.executeQuery();
+            if (rs.next()) {
+                interactionResource = buildInteractionResource(rs);
+            }
+
+        } finally {
+            //conn.close();
+        }
+
+        return interactionResource;
+    }
     public boolean delete(String id) throws SQLException {
         return false;
     }
