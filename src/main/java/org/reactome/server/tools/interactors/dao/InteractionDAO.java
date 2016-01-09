@@ -15,8 +15,8 @@ public interface InteractionDAO extends BaseDAO<Interaction> {
 
     boolean create(List<Interaction> interaction) throws SQLException;
 
-    List<Interaction> getByAcc(String acc, String resourceId) throws SQLException;
+    List<Interaction> getByAcc(String acc, Long resourceId) throws SQLException;
 
-    List<Interaction> getByAcc(List<String> acc, String resourceId) throws SQLException;
+    List<Interaction> getByAcc(List<String> acc, Long resourceId) throws SQLException;
 
 }

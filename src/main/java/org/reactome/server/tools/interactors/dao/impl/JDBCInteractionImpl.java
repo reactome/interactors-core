@@ -128,14 +128,14 @@ public class JDBCInteractionImpl implements InteractionDAO {
         return false;
     }
 
-    public List<Interaction> getByAcc(String acc, String resourceId) throws SQLException{
+    public List<Interaction> getByAcc(String acc, Long resourceId) throws SQLException{
         List<String> accList = new ArrayList<>(1);
         accList.add(acc);
 
         return getByAcc(accList, resourceId);
     }
 
-    public List<Interaction> getByAcc(List<String> accs, String resourceId) throws SQLException{
+    public List<Interaction> getByAcc(List<String> accs, Long resourceId) throws SQLException{
         Connection conn = database.getConnection();
 
         List<Interaction> interactions = new ArrayList<>();
@@ -158,7 +158,7 @@ public class JDBCInteractionImpl implements InteractionDAO {
                 PreparedStatement pstm = conn.prepareStatement(query);
                 pstm.setString(1, acc);
                 pstm.setString(2, acc);
-                pstm.setString(3, resourceId);
+                pstm.setLong(3, resourceId);
 
                 ResultSet rs = pstm.executeQuery();
                 while(rs.next()){

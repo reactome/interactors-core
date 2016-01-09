@@ -46,4 +46,7 @@ public class InteractionResourceService {
         return interactionResourceDAO.getAll();
     }
 
+    public InteractionResource getByName(String resource) throws SQLException {
+        return interactionResourceDAO.getByName(resource);
+    }
 }
