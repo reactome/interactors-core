@@ -9,8 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -128,14 +127,14 @@ public class JDBCInteractionImpl implements InteractionDAO {
         return false;
     }
 
-    public List<Interaction> getByAcc(String acc, Long resourceId) throws SQLException{
+    public List<Interaction> getByAcc(String acc, Long resourceId, Integer page, Integer pageSize) throws SQLException{
         List<String> accList = new ArrayList<>(1);
         accList.add(acc);
 
-        return getByAcc(accList, resourceId);
+        return getByAcc(accList, resourceId, page, pageSize);
     }
 
-    public List<Interaction> getByAcc(List<String> accs, Long resourceId) throws SQLException{
+    public List<Interaction> getByAcc(List<String> accs, Long resourceId, Integer page, Integer pageSize) throws SQLException{
         Connection conn = database.getConnection();
 
         List<Interaction> interactions = new ArrayList<>();
@@ -153,6 +152,16 @@ public class JDBCInteractionImpl implements InteractionDAO {
                            "AND      (INTERACTION.INTERACTOR_A = (select id from interactor where ACC = ?) OR INTERACTION.INTERACTOR_B = (select id from interactor where ACC = ?)) " +
                            "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
                            "ORDER BY INTERACTION.MISCORE DESC";
+
+            /** Both are greater than -1, paginated is enabled **/
+            if(page > -1 && pageSize > -1){
+                int limit = (pageSize * page) - pageSize;
+                String limitQuery = String.format(" LIMIT %d, %d", limit, pageSize);
+
+                query = query.concat(limitQuery);
+            }
+
+            System.out.println("Get Interactions Final query: " + query);
 
             for (String acc : accs) {
                 PreparedStatement pstm = conn.prepareStatement(query);
@@ -178,6 +187,58 @@ public class JDBCInteractionImpl implements InteractionDAO {
         }
 
         return interactions;
+    }
+
+    @Override
+    public Map<String, Integer> countByAccesssions(Collection<String> accs, Long resourceId) throws SQLException {
+        Connection conn = database.getConnection();
+
+        Map<String, Integer> interactionsCountMap = new HashMap<>();
+
+        try {
+            String csvValues = "";
+            for (String acc : accs) {
+                csvValues = csvValues.concat("'").concat(acc).concat("'").concat(",");
+            }
+            csvValues = csvValues.substring(0, csvValues.length()-1);
+
+            String query = "SELECT   accession, SUM(count_) as total_ " +
+                            "FROM (" +
+                                "SELECT   COUNT(*) AS count_, INTERACTORA.acc AS accession " +
+                                "FROM     INTERACTION, INTERACTOR AS INTERACTORA " +
+                                "WHERE    INTERACTORA.ID = INTERACTION.INTERACTOR_A " +
+                                "AND      INTERACTION.INTERACTOR_A IN (select id from interactor where ACC in (" + csvValues + ")) " +
+                                "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
+                                "GROUP BY INTERACTORA.acc " +
+                                "UNION ALL " +
+                                "SELECT   COUNT(*) AS count_, INTERACTORB.acc AS accession " +
+                                "FROM     INTERACTION, INTERACTOR AS INTERACTORB " +
+                                "WHERE    INTERACTORB.ID = INTERACTION.INTERACTOR_B " +
+                                "AND      INTERACTION.INTERACTOR_B IN (select id from interactor where ACC in (" + csvValues + ")) " +
+                                "AND      INTERACTION.INTERACTOR_A <> INTERACTION.INTERACTOR_B " +
+                                "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
+                                "GROUP BY INTERACTORB.acc " +
+                            ")" +
+                            "GROUP BY accession";
+
+            PreparedStatement pstm = conn.prepareStatement(query);
+            pstm.setLong(1, resourceId);
+            pstm.setLong(2, resourceId);
+
+            ResultSet rs = pstm.executeQuery();
+            while(rs.next()){
+                interactionsCountMap.put(rs.getString("accession"), rs.getInt("total_"));
+            }
+
+        }catch (SQLException e){
+            logger.error("An error has occurred during interaction batch insert. Please check the following exception.");
+            throw new SQLException(e);
+
+        } finally {
+            //conn.close();
+        }
+
+        return interactionsCountMap;
     }
 
     private Interaction buildInteraction(String acc, ResultSet rs) throws SQLException {

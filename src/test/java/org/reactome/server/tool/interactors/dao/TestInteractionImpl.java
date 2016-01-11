@@ -1,10 +1,14 @@
 package org.reactome.server.tool.interactors.dao;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.reactome.server.tools.interactors.dao.DAOFactory;
 import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.dao.InteractorDAO;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -17,11 +21,18 @@ public class TestInteractionImpl {
     private InteractorDAO interactorDAO;
     private String interactionID;
 
-
-
     @Before
     public void setUp() {
         interactionDAO = DAOFactory.createInterationDAO();
+    }
+
+    @Test
+    public void testCountInteraction() throws SQLException{
+        List<String> interactions = new ArrayList<>();
+        interactions.add("Q13501");
+        interactions.add("P41743");
+
+        interactionDAO.countByAccesssions(interactions, 1L);
     }
 
 //    @Test

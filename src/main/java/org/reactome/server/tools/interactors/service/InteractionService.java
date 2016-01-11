@@ -21,7 +21,7 @@ import java.util.*;
 
 public class InteractionService {
 
-    final Logger logger = LoggerFactory.getLogger(JDBCInteractorImpl.class);
+    //final Logger logger = LoggerFactory.getLogger(InteractionService.class);
 
     private static InteractionService interactionService = null;
 
@@ -42,7 +42,7 @@ public class InteractionService {
     }
 
     /**
-     * Get interactions of a given accession and resource
+     * Get all interactions of a given accession and resource
      * @param acc
      * @param resource
      * @return Map of accession as key and its interactions
@@ -53,7 +53,37 @@ public class InteractionService {
         List<String> accs = new ArrayList<>(1);
         accs.add(acc);
 
-        return getInteractions(accs,resource);
+        return getInteractions(accs,resource, -1, -1);
+    }
+
+    /**
+     * Get all interactions of a given accession and resource
+     *
+     * @param accs
+     * @param resource
+     * @return Map of accession as key and its interactions
+     * @throws InvalidInteractionResourceException
+     * @throws SQLException
+     */
+    public Map<String, List<Interaction>> getInteractions(Collection<String> accs, String resource) throws InvalidInteractionResourceException, SQLException {
+        return getInteractions(accs,resource, -1, -1);
+    }
+
+    /**
+     * Get paginated interactions of a given accession and resource
+     * @param acc
+     * @param resource
+     * @param page
+     * @param pageSize
+     * @return Map of accession as key and its interactions
+     * @throws InvalidInteractionResourceException
+     * @throws SQLException
+     */
+    public Map<String, List<Interaction>> getInteractions(String acc, String resource, Integer page, Integer pageSize) throws InvalidInteractionResourceException, SQLException {
+        List<String> accs = new ArrayList<>(1);
+        accs.add(acc);
+
+        return getInteractions(accs,resource, page, pageSize);
     }
 
     /**
@@ -64,7 +94,7 @@ public class InteractionService {
      * @throws InvalidInteractionResourceException
      * @throws SQLException
      */
-    public Map<String, List<Interaction>> getInteractions(Collection<String> accs, String resource) throws InvalidInteractionResourceException, SQLException {
+    public Map<String, List<Interaction>> getInteractions(Collection<String> accs, String resource, Integer page, Integer pageSize) throws InvalidInteractionResourceException, SQLException {
 
         InteractionResource interactionResource = interactionResourceDAO.getByName(resource);
         if(interactionResource == null){
@@ -73,7 +103,7 @@ public class InteractionService {
 
         Map<String, List<Interaction>> interactionMaps = new HashMap<>();
         for (String acc : accs) {
-            List<Interaction> interactions = interactionDAO.getByAcc(acc, interactionResource.getId());
+            List<Interaction> interactions = interactionDAO.getByAcc(acc, interactionResource.getId(), page, pageSize);
 
             // Set details
             for (Interaction interaction : interactions) {
@@ -88,4 +118,39 @@ public class InteractionService {
         return interactionMaps;
 
     }
+
+    /**
+     * Count interaction by accession
+     * @param acc
+     * @param resource
+     * @return Map of accession and count
+     * @throws InvalidInteractionResourceException
+     * @throws SQLException
+     */
+    public Map<String, Integer> countInteractionsByAccession(String acc, String resource) throws InvalidInteractionResourceException, SQLException {
+        List<String> accs = new ArrayList<>(1);
+        accs.add(acc);
+
+        return countInteractionsByAccessions(accs, resource);
+    }
+
+    /**
+     * Count interaction by accession list
+     * @param accs
+     * @param resource
+     * @return Map of accession and count
+     * @throws InvalidInteractionResourceException
+     * @throws SQLException
+     */
+    public Map<String, Integer> countInteractionsByAccessions(Collection<String> accs, String resource) throws InvalidInteractionResourceException, SQLException {
+
+        InteractionResource interactionResource = interactionResourceDAO.getByName(resource);
+        if(interactionResource == null){
+            throw new InvalidInteractionResourceException();
+        }
+
+        return interactionDAO.countByAccesssions(accs, interactionResource.getId());
+
+    }
+
 }
