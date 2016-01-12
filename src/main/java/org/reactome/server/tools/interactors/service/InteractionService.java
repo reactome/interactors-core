@@ -153,4 +153,81 @@ public class InteractionService {
 
     }
 
+    /**
+     * Get all interactions of Intact Identifier and resource
+     * @param intactId
+     * @param resource
+     * @return Map of accession as key and its interactions
+     * @throws InvalidInteractionResourceException
+     * @throws SQLException
+     */
+    public Map<String, List<Interaction>> getInteractionsByIntactId(String intactId, String resource) throws InvalidInteractionResourceException, SQLException {
+        List<String> intactIdList = new ArrayList<>(1);
+        intactIdList.add(intactId);
+
+        return getInteractionsByIntactId(intactIdList,resource, -1, -1);
+    }
+
+    /**
+     * Get all interactions of Intact Identifier and resource
+     *
+     * @param intactIdList
+     * @param resource
+     * @return Map of accession as key and its interactions
+     * @throws InvalidInteractionResourceException
+     * @throws SQLException
+     */
+    public Map<String, List<Interaction>> getInteractionsByIntactId(Collection<String> intactIdList, String resource) throws InvalidInteractionResourceException, SQLException {
+        return getInteractionsByIntactId(intactIdList, resource, -1, -1);
+    }
+
+    /**
+     * Get paginated interactions of Intact Identifier and resource
+     * @param intactId
+     * @param resource
+     * @param page
+     * @param pageSize
+     * @return Map of accession as key and its interactions
+     * @throws InvalidInteractionResourceException
+     * @throws SQLException
+     */
+    public Map<String, List<Interaction>> getInteractionsByIntactId(String intactId, String resource, Integer page, Integer pageSize) throws InvalidInteractionResourceException, SQLException {
+        List<String> intactIdList = new ArrayList<>(1);
+        intactIdList.add(intactId);
+
+        return getInteractionsByIntactId(intactIdList, resource, page, pageSize);
+    }
+
+    /**
+     * Get interactions of a given list of Intact Identifier and resource
+     * @param intactIdList
+     * @param resource
+     * @return Map of Intact Identifier as key and its interactions
+     * @throws InvalidInteractionResourceException
+     * @throws SQLException
+     */
+    public Map<String, List<Interaction>> getInteractionsByIntactId(Collection<String> intactIdList, String resource, Integer page, Integer pageSize) throws InvalidInteractionResourceException, SQLException {
+
+        InteractionResource interactionResource = interactionResourceDAO.getByName(resource);
+        if(interactionResource == null){
+            throw new InvalidInteractionResourceException();
+        }
+
+        Map<String, List<Interaction>> interactionMaps = new HashMap<>();
+        for (String intactId : intactIdList) {
+            List<Interaction> interactions = interactionDAO.getByIntactId(intactId, interactionResource.getId(), page, pageSize);
+
+            // Set details
+            for (Interaction interaction : interactions) {
+                // TODO: pay attention here - maybe this method drains the performance. It will make a lot of queries in the DB
+                interaction.setInteractionDetailsList(interactionDetailsDAO.getByInteraction(interaction.getId()));
+            }
+
+            interactionMaps.put(intactId, interactions);
+
+        }
+
+        return interactionMaps;
+
+    }
 }

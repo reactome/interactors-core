@@ -5,10 +5,12 @@ import org.junit.Test;
 import org.reactome.server.tools.interactors.dao.DAOFactory;
 import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.dao.InteractorDAO;
+import org.reactome.server.tools.interactors.model.Interaction;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -29,10 +31,12 @@ public class TestInteractionImpl {
     @Test
     public void testCountInteraction() throws SQLException{
         List<String> interactions = new ArrayList<>();
-        interactions.add("Q13501");
-        interactions.add("P41743");
+        interactions.add("EBI-7121510");
 
-        interactionDAO.countByAccesssions(interactions, 1L);
+
+        List<Interaction> aaaa = interactionDAO.getByIntactId(interactions, 1L, -1, -1);
+
+        System.out.println(aaaa);
     }
 
 //    @Test

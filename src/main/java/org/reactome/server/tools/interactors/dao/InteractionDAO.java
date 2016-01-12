@@ -18,8 +18,10 @@ public interface InteractionDAO extends BaseDAO<Interaction> {
     boolean create(List<Interaction> interaction) throws SQLException;
 
     List<Interaction> getByAcc(String acc, Long resourceId, Integer page, Integer pageSize) throws SQLException;
+    List<Interaction> getByIntactId(String intactId, Long resourceId, Integer page, Integer pageSize) throws SQLException;
 
     List<Interaction> getByAcc(List<String> acc, Long resourceId, Integer page, Integer pageSize) throws SQLException;
+    List<Interaction> getByIntactId(List<String> intactIdList, Long resourceId, Integer page, Integer pageSize) throws SQLException;
 
     Map<String, Integer> countByAccesssions(Collection<String> accs, Long resourceId) throws SQLException;
 

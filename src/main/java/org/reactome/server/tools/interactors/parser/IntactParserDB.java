@@ -9,9 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -19,9 +17,9 @@ import java.util.*;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
-public class IntactParser {
+public class IntactParserDB {
 
-    static final Logger logger = LoggerFactory.getLogger(IntactParser.class);
+    static final Logger logger = LoggerFactory.getLogger(IntactParserDB.class);
 
     /** This is the default intact file URL, a program argument can be specified in order to use a different URL **/
     private static String INTACT_FILE_URL = "ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact-micluster.txt";
@@ -52,13 +50,10 @@ public class IntactParser {
      *
      * @param file
      */
-    public void parser(String file) {
+    public List<Interaction> parser(String file) {
+        List<Interaction> interactionList = new ArrayList<>();
+
         try {
-//            URL url = new URL(file);
-
-//            URLConnection connection = url.openConnection();
-//            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
             String inputLine;
             BufferedReader br = new BufferedReader(new FileReader(file));
 
@@ -70,10 +65,6 @@ public class IntactParser {
             /** Intact Identifiers **/
             // intact:EBI-7122727|intact:EBI-7122766|intact:EBI-7122684|intact:EBI-7121552
 
-            int lines = 1;
-
-            List<Interaction> interactionList = new ArrayList<>();
-            //List<Interaction> secondAttemptInteractionList = new ArrayList<>();
             while ((inputLine = br.readLine()) != null) {
                 String[] content = inputLine.split("\\t");
 
@@ -81,53 +72,63 @@ public class IntactParser {
                 Interaction interaction = interactionFromFile(content);
 
                 interactionList.add(interaction);
-
-                /** Go to the database every 1000 interactions **/
-                if((lines % 1000) == 0){
-                    logger.info("Performing a DB save. Rows parsed [{}]", lines);
-                    try {
-                        interactionParserService.save(interactionList);
-                        interactionList.clear();
-                    }catch (SQLException e){
-                        logger.error("Exception thrown during DB save: ", e);
-                        dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
-                        //secondAttemptInteractionList.addAll(interactionList);
-                    }
-                }
-                lines++;
             }
-
-            // Persist remaining items
-            try {
-                logger.info("Performing a DB save. Rows parsed [{}]", lines);
-
-                interactionParserService.save(interactionList);
-                interactionList.clear();
-            } catch (SQLException e){
-                logger.error("Exception thrown during DB save: ", e);
-                dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
-                //secondAttemptInteractionList.addAll(interactionList);
-            }
-
-            br.close();
 
         } catch (IOException ex) {
             logger.error("Can't get the IntAct file. Please check the logs.", ex);
         } catch (Exception ex) {
             logger.error("Got a generic exception. Please check the logs.", ex);
-        } finally {
-            if(parserErrorMessages.size() > 0) {
-                logger.info("There are [{}] error messages in the IntAct file.", parserErrorMessages.size());
-                writeOutputFile(parserErrorMessages, "parser-error-messages.txt");
-            }
-
-            if(dbErrorMessages.size() > 0 ) {
-                logger.info("There are [{}] db error messages.", dbErrorMessages.size());
-                writeOutputFile(dbErrorMessages, "db-error-messages.txt");
-            }
         }
 
+        return interactionList;
     }
+
+//                /** Go to the database every 1000 interactions **/
+//                if((lines % 1000) == 0){
+//                    logger.info("Performing a DB save. Rows parsed [{}]", lines);
+//                    try {
+//                        interactionParserService.save(interactionList);
+//                        interactionList.clear();
+//                    }catch (SQLException e){
+//                        logger.error("Exception thrown during DB save: ", e);
+//                        dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
+//                        //secondAttemptInteractionList.addAll(interactionList);
+//                    }
+//                }
+//                lines++;
+//
+//
+//            // Persist remaining items
+//            try {
+//                logger.info("Performing a DB save. Rows parsed [{}]", lines);
+//
+//                interactionParserService.save(interactionList);
+//                interactionList.clear();
+//            } catch (SQLException e){
+//                logger.error("Exception thrown during DB save: ", e);
+//                dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
+//                //secondAttemptInteractionList.addAll(interactionList);
+//            }
+//
+//            br.close();
+//
+//        } catch (IOException ex) {
+//            logger.error("Can't get the IntAct file. Please check the logs.", ex);
+//        } catch (Exception ex) {
+//            logger.error("Got a generic exception. Please check the logs.", ex);
+//        } finally {
+//            if(parserErrorMessages.size() > 0) {
+//                logger.info("There are [{}] error messages in the IntAct file.", parserErrorMessages.size());
+//                writeOutputFile(parserErrorMessages, "parser-error-messages.txt");
+//            }
+//
+//            if(dbErrorMessages.size() > 0 ) {
+//                logger.info("There are [{}] db error messages.", dbErrorMessages.size());
+//                writeOutputFile(dbErrorMessages, "db-error-messages.txt");
+//            }
+//        }
+
+//    }
 
     private void writeOutputFile(Collection<String> messages, String filename) {
         logger.info("Creating output file. [" + filename + "]. Messages [" + messages.size() + "]");
@@ -342,6 +343,7 @@ public class IntactParser {
     }
 
 
+
     /**
      * Call parse
      * This is a standalone process that will generate an interactors database and
@@ -362,12 +364,50 @@ public class IntactParser {
         /** LOCAL FILE **/
         file = INTACT_DEFAULT_FILENAME;
 
-        IntactParser intactParser = new IntactParser();
+        IntactParserDB intactParser = new IntactParserDB();
         intactParser.cacheResources();
-        intactParser.parser(file);
+        List<Interaction> interactionList = intactParser.parser(file);
+        intactParser.persist(interactionList);
 
         logger.info("Database has been populate properly.");
         logger.info("End IntAct File parsing. Elapsed Time [{}.ms]",(System.currentTimeMillis() - start));
+    }
+
+    private void persist(List<Interaction> interactionList) {
+        List<Interaction> tempInteractionList = new ArrayList<>(1000);
+        int lines = 0;
+        for (Interaction interaction : interactionList) {
+
+            // SET INTERACTOR RESOURCE...... PENDING
+
+            tempInteractionList.add(interaction);
+
+            lines++;
+
+            if((lines % 1000) == 0) {
+                logger.info("Performing a DB save. Rows parsed [{}]", lines);
+                try {
+                    interactionParserService.save(tempInteractionList);
+                    tempInteractionList.clear();
+                } catch (SQLException e) {
+                    logger.error("Exception thrown during DB save: ", e);
+                    dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
+                }
+            }
+        }
+
+        // Persist remaining items
+        try {
+            logger.info("Performing a DB save. Rows parsed [{}]", lines);
+
+            interactionParserService.save(tempInteractionList);
+            tempInteractionList.clear();
+        } catch (SQLException e){
+            logger.error("Exception thrown during DB save: ", e);
+            dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
+            //secondAttemptInteractionList.addAll(interactionList);
+        }
+
     }
 
     /**

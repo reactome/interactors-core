@@ -161,17 +161,75 @@ public class JDBCInteractionImpl implements InteractionDAO {
                 query = query.concat(limitQuery);
             }
 
-            System.out.println("Get Interactions Final query: " + query);
-
             for (String acc : accs) {
                 PreparedStatement pstm = conn.prepareStatement(query);
-                pstm.setString(1, acc);
-                pstm.setString(2, acc);
+                pstm.setString(1, acc.toUpperCase());
+                pstm.setString(2, acc.toUpperCase());
                 pstm.setLong(3, resourceId);
 
                 ResultSet rs = pstm.executeQuery();
                 while(rs.next()){
                     Interaction interaction = buildInteraction(acc, rs);
+
+                    interactions.add(interaction);
+                }
+
+            }
+
+        }catch (SQLException e){
+            logger.error("An error has occurred during interaction batch insert. Please check the following exception.");
+            throw new SQLException(e);
+
+        } finally {
+            //conn.close();
+        }
+
+        return interactions;
+    }
+
+    public List<Interaction> getByIntactId(String intactId, Long resourceId, Integer page, Integer pageSize) throws SQLException{
+        List<String> intactIdList = new ArrayList<>(1);
+        intactIdList.add(intactId);
+
+        return getByIntactId(intactIdList, resourceId, page, pageSize);
+    }
+
+    public List<Interaction> getByIntactId(List<String> intactIdList, Long resourceId, Integer page, Integer pageSize) throws SQLException{
+        Connection conn = database.getConnection();
+
+        List<Interaction> interactions = new ArrayList<>();
+
+        try {
+            String query = "SELECT   INTERACTION.ID AS 'INTERACTION_ID', " +
+                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', " +
+                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', " +
+                    "INTERACTION.AUTHOR_SCORE, " +
+                    "INTERACTION.MISCORE, " +
+                    "INTERACTION.INTERACTION_RESOURCE_ID " +
+                    "FROM     INTERACTION, INTERACTOR AS INTERACTORA, INTERACTOR AS INTERACTORB " +
+                    "WHERE    INTERACTORA.ID = INTERACTION.INTERACTOR_A " +
+                    "AND      INTERACTORB.ID = INTERACTION.INTERACTOR_B " +
+                    "AND      (INTERACTION.INTERACTOR_A = (select id from interactor where INTACT_ID = ?) OR INTERACTION.INTERACTOR_B = (select id from interactor where INTACT_ID = ?)) " +
+                    "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
+                    "ORDER BY INTERACTION.MISCORE DESC";
+
+            /** Both are greater than -1, paginated is enabled **/
+            if(page > -1 && pageSize > -1){
+                int limit = (pageSize * page) - pageSize;
+                String limitQuery = String.format(" LIMIT %d, %d", limit, pageSize);
+
+                query = query.concat(limitQuery);
+            }
+
+            for (String intactId : intactIdList) {
+                PreparedStatement pstm = conn.prepareStatement(query);
+                pstm.setString(1, intactId.toUpperCase());
+                pstm.setString(2, intactId.toUpperCase());
+                pstm.setLong(3, resourceId);
+
+                ResultSet rs = pstm.executeQuery();
+                while(rs.next()){
+                    Interaction interaction = buildInteraction(intactId, rs);
 
                     interactions.add(interaction);
                 }
@@ -207,14 +265,14 @@ public class JDBCInteractionImpl implements InteractionDAO {
                                 "SELECT   COUNT(*) AS count_, INTERACTORA.acc AS accession " +
                                 "FROM     INTERACTION, INTERACTOR AS INTERACTORA " +
                                 "WHERE    INTERACTORA.ID = INTERACTION.INTERACTOR_A " +
-                                "AND      INTERACTION.INTERACTOR_A IN (select id from interactor where ACC in (" + csvValues + ")) " +
+                                "AND      INTERACTION.INTERACTOR_A IN (select id from interactor where ACC in (" + csvValues.toUpperCase() + ")) " +
                                 "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
                                 "GROUP BY INTERACTORA.acc " +
                                 "UNION ALL " +
                                 "SELECT   COUNT(*) AS count_, INTERACTORB.acc AS accession " +
                                 "FROM     INTERACTION, INTERACTOR AS INTERACTORB " +
                                 "WHERE    INTERACTORB.ID = INTERACTION.INTERACTOR_B " +
-                                "AND      INTERACTION.INTERACTOR_B IN (select id from interactor where ACC in (" + csvValues + ")) " +
+                                "AND      INTERACTION.INTERACTOR_B IN (select id from interactor where ACC in (" + csvValues.toUpperCase() + ")) " +
                                 "AND      INTERACTION.INTERACTOR_A <> INTERACTION.INTERACTOR_B " +
                                 "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
                                 "GROUP BY INTERACTORB.acc " +
