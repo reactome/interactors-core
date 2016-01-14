@@ -1,5 +1,6 @@
 package org.reactome.server.tools.interactors.parser;
 
+import com.martiansoftware.jsap.*;
 import org.apache.commons.io.FileUtils;
 import org.reactome.server.tools.interactors.model.*;
 import org.reactome.server.tools.interactors.service.InteractionParserService;
@@ -26,8 +27,6 @@ public class IntactParser {
     /** This is the default intact file URL, a program argument can be specified in order to use a different URL **/
     private static String INTACT_FILE_URL = "ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact-micluster.txt";
 
-    private static String INTACT_DEFAULT_FILENAME = "intact-micluster.txt";
-
     private static String INTACT_SCORE_LABEL = "intact-miscore";
     private static String AUTHOR_SCORE_LABEL = "author score";
 
@@ -49,16 +48,12 @@ public class IntactParser {
     private Map<String, InteractorResource> interactorResourceMap = new HashMap<>();
 
     /**
+     * Parsing the fil
      *
      * @param file
      */
     public void parser(String file) {
         try {
-//            URL url = new URL(file);
-
-//            URLConnection connection = url.openConnection();
-//            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
             String inputLine;
             BufferedReader br = new BufferedReader(new FileReader(file));
 
@@ -73,7 +68,6 @@ public class IntactParser {
             int lines = 1;
 
             List<Interaction> interactionList = new ArrayList<>();
-            //List<Interaction> secondAttemptInteractionList = new ArrayList<>();
             while ((inputLine = br.readLine()) != null) {
                 String[] content = inputLine.split("\\t");
 
@@ -91,7 +85,6 @@ public class IntactParser {
                     }catch (SQLException e){
                         logger.error("Exception thrown during DB save: ", e);
                         dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
-                        //secondAttemptInteractionList.addAll(interactionList);
                     }
                 }
                 lines++;
@@ -106,7 +99,6 @@ public class IntactParser {
             } catch (SQLException e){
                 logger.error("Exception thrown during DB save: ", e);
                 dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
-                //secondAttemptInteractionList.addAll(interactionList);
             }
 
             br.close();
@@ -204,8 +196,8 @@ public class IntactParser {
         interaction.setInteractorA(interactorA);
         interaction.setInteractorB(interactorB);
 
-        //Long intactResourceId = interactionResourceMap.get("intact").getId();
-        //interaction.setInteractionResourceId(intactResourceId);
+        Long intactResourceId = interactionResourceMap.get("intact").getId();
+        interaction.setInteractionResourceId(intactResourceId);
 
         parseConfidenceValue(line[IntactParserIndex.CONFIDENCE_VALUE], interaction);
 
@@ -347,23 +339,41 @@ public class IntactParser {
      * This is a standalone process that will generate an interactors database and
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws JSAPException, IOException {
         long start = System.currentTimeMillis();
-
         logger.info("Start Parsing IntAct File");
-        // TODO: improve parse execution like -m URL -u <url> or -f <file_location>. -d download the file and run locally
-
-        /** URL **/
-        String file = INTACT_FILE_URL;
-        if (args.length > 0){
-            file = args[0];
-        }
-
-        /** LOCAL FILE **/
-        file = INTACT_DEFAULT_FILENAME;
 
         IntactParser intactParser = new IntactParser();
         intactParser.cacheResources();
+
+        SimpleJSAP jsap = new SimpleJSAP(
+                IntactParser.class.getName(),
+                "A tool for parsing Intact file and create a database",
+                new Parameter[]{
+                        new FlaggedOption("file", JSAP.STRING_PARSER, "/tmp/intact-micluster.txt", JSAP.NOT_REQUIRED, 'f', "file",
+                                "IntAct file to be parsed")
+                        , new FlaggedOption("url", JSAP.STRING_PARSER, INTACT_FILE_URL, JSAP.NOT_REQUIRED, 'u', "url",
+                        "IntAct file URL")
+                        , new QualifiedSwitch("download", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'd', "download",
+                        "Download IntAct File")
+                        , new FlaggedOption("destination", JSAP.STRING_PARSER, "/tmp", JSAP.NOT_REQUIRED, 't', "destination",
+                        "Folder to save the downloaded file")
+                }
+        );
+
+        JSAPResult config = jsap.parse(args);
+        if (jsap.messagePrinted()) System.exit(1);
+
+        String file = config.getString("file");
+        boolean download = config.getBoolean("download");
+
+        if(download){
+            String url = config.getString("url");
+            String downloadedFile = intactParser.downloadFile(url, config.getString("destination"));
+            logger.info("File has been download. Parse will be executed pointing to this file: " + downloadedFile);
+            file = downloadedFile;
+        }
+
         intactParser.parser(file);
 
         logger.info("Database has been populate properly.");
@@ -375,10 +385,13 @@ public class IntactParser {
      * @return the file path
      * @throws IOException
      */
-    public String downloadFile() throws IOException{
-        URL url = new URL(INTACT_FILE_URL);
+    public String downloadFile(String urlFtp, String directory) throws IOException{
+        URL url = new URL(urlFtp);
 
-        File intactFile = new File("/tmp/intact.txt");
+        File intactFile = new File(directory, "intact-micluster.txt");
+        if(intactFile.exists()){
+            intactFile.renameTo(new File(directory,"intact-micluster-"+new Date().toString()+".txt"));
+        }
         FileUtils.copyURLToFile(url, intactFile);
 
         return intactFile.getAbsolutePath();
