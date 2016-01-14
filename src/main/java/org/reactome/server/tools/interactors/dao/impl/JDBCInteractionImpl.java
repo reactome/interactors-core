@@ -141,8 +141,8 @@ public class JDBCInteractionImpl implements InteractionDAO {
 
         try {
             String query = "SELECT   INTERACTION.ID AS 'INTERACTION_ID', " +
-                                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', " +
-                                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', " +
+                                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA', " +
+                                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB', " +
                                     "INTERACTION.AUTHOR_SCORE, " +
                                     "INTERACTION.MISCORE, " +
                                     "INTERACTION.INTERACTION_RESOURCE_ID " +
@@ -169,7 +169,7 @@ public class JDBCInteractionImpl implements InteractionDAO {
 
                 ResultSet rs = pstm.executeQuery();
                 while(rs.next()){
-                    Interaction interaction = buildInteraction(acc, rs);
+                    Interaction interaction = buildInteractionByAccession(acc, rs);
 
                     interactions.add(interaction);
                 }
@@ -201,8 +201,8 @@ public class JDBCInteractionImpl implements InteractionDAO {
 
         try {
             String query = "SELECT   INTERACTION.ID AS 'INTERACTION_ID', " +
-                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', " +
-                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', " +
+                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA', " +
+                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB', " +
                     "INTERACTION.AUTHOR_SCORE, " +
                     "INTERACTION.MISCORE, " +
                     "INTERACTION.INTERACTION_RESOURCE_ID " +
@@ -229,7 +229,7 @@ public class JDBCInteractionImpl implements InteractionDAO {
 
                 ResultSet rs = pstm.executeQuery();
                 while(rs.next()){
-                    Interaction interaction = buildInteraction(intactId, rs);
+                    Interaction interaction = buildInteractionByIntactId(intactId, rs);
 
                     interactions.add(interaction);
                 }
@@ -299,7 +299,17 @@ public class JDBCInteractionImpl implements InteractionDAO {
         return interactionsCountMap;
     }
 
-    private Interaction buildInteraction(String acc, ResultSet rs) throws SQLException {
+    /**
+     * Helper method for creating Interaction object
+     * To reuse it make sure you are using the same alias in your query when projecting columns
+     * e.g  select INTERACTOR.ID AS 'ID_A', and so on.
+     *
+     * @param acc
+     * @param rs
+     * @return
+     * @throws SQLException
+     */
+    private Interaction buildInteractionByAccession(String acc, ResultSet rs) throws SQLException {
         Interaction interaction = new Interaction();
         interaction.setId(rs.getLong("INTERACTION_ID"));
 
@@ -308,12 +318,14 @@ public class JDBCInteractionImpl implements InteractionDAO {
         interactorA.setAcc(rs.getString("ACC_A"));
         interactorA.setAlias(rs.getString("ALIAS_A"));
         interactorA.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_A_ID"));
+        interactorA.setIntactId(rs.getString("INTACT_IDA"));
 
         Interactor interactorB = new Interactor();
         interactorB.setId(rs.getLong("ID_B"));
         interactorB.setAcc(rs.getString("ACC_B"));
         interactorB.setAlias(rs.getString("ALIAS_B"));
         interactorB.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_B_ID"));
+        interactorB.setIntactId(rs.getString("INTACT_IDB"));
 
         /**
          * If A interacts with B and B with A we are talking about the same interaction, so
@@ -335,4 +347,51 @@ public class JDBCInteractionImpl implements InteractionDAO {
         return interaction;
     }
 
+    /**
+     * Helper method for creating Interaction object
+     * To reuse it make sure you are using the same alias in your query when projecting columns
+     * e.g  select INTERACTOR.ID AS 'ID_A', and so on.
+     *
+     * @param intactId
+     * @param rs
+     * @return
+     * @throws SQLException
+     */
+    private Interaction buildInteractionByIntactId(String intactId, ResultSet rs) throws SQLException {
+        Interaction interaction = new Interaction();
+        interaction.setId(rs.getLong("INTERACTION_ID"));
+
+        Interactor interactorA = new Interactor();
+        interactorA.setId(rs.getLong("ID_A"));
+        interactorA.setAcc(rs.getString("ACC_A"));
+        interactorA.setAlias(rs.getString("ALIAS_A"));
+        interactorA.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_A_ID"));
+        interactorA.setIntactId(rs.getString("INTACT_IDA"));
+
+        Interactor interactorB = new Interactor();
+        interactorB.setId(rs.getLong("ID_B"));
+        interactorB.setAcc(rs.getString("ACC_B"));
+        interactorB.setAlias(rs.getString("ALIAS_B"));
+        interactorB.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_B_ID"));
+        interactorB.setIntactId(rs.getString("INTACT_IDB"));
+
+        /**
+         * If A interacts with B and B with A we are talking about the same interaction, so
+         * just to keep it easy to create the JSON - the interactor in the query will be always on side of A
+         * otherwise just set them as A.set(b) and B.set(a).
+         */
+        if(intactId.equals(interactorA.getIntactId())) {
+            interaction.setInteractorA(interactorA);
+            interaction.setInteractorB(interactorB);
+        }else {
+            interaction.setInteractorA(interactorB);
+            interaction.setInteractorB(interactorA);
+        }
+
+        interaction.setAuthorScore(rs.getDouble("AUTHOR_SCORE"));
+        interaction.setIntactScore(rs.getDouble("MISCORE"));
+        interaction.setInteractionResourceId(rs.getLong("INTERACTION_RESOURCE_ID"));
+
+        return interaction;
+    }
 }

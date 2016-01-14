@@ -17,4 +17,6 @@ public interface InteractorDAO extends BaseDAO<Interactor> {
     void searchByAccessions(Interactor interactorA, Interactor interactorB) throws SQLException;
 
     boolean exists(String acc) throws SQLException;
+
+    List<String> getAllAccessions() throws SQLException;
 }

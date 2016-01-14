@@ -223,4 +223,23 @@ public class JDBCInteractorImpl implements InteractorDAO {
         return ret;
     }
 
+    public List<String> getAllAccessions() throws SQLException {
+        List<String> ret = new ArrayList<>();
+
+        String query = "SELECT ACC FROM " + TABLE;
+
+        Connection conn = database.getConnection();
+
+        try {
+            PreparedStatement pstm = conn.prepareStatement(query);
+            ResultSet rs = pstm.executeQuery();
+            while (rs.next()) {
+                ret.add(rs.getString("ACC"));
+            }
+        } finally {
+            //conn.close();
+        }
+
+        return ret;
+    }
 }

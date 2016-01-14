@@ -103,4 +103,20 @@ public class Interactor {
                 ", alias='" + alias + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Interactor that = (Interactor) o;
+
+        return !(acc != null ? !acc.equals(that.acc) : that.acc != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return acc != null ? acc.hashCode() : 0;
+    }
 }

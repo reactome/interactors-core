@@ -42,6 +42,31 @@ public class InteractionService {
     }
 
     /**
+     * Get a list of interactions of a given accession and resource
+     *
+     * @param accs
+     * @param resource
+     * @return List of Interactons
+     * @throws InvalidInteractionResourceException
+     * @throws SQLException
+     */
+    public List<Interaction> getInteractionsList(List<String> accs, String resource) throws InvalidInteractionResourceException, SQLException {
+        InteractionResource interactionResource = interactionResourceDAO.getByName(resource);
+        if(interactionResource == null){
+            throw new InvalidInteractionResourceException();
+        }
+
+        List<Interaction> interactions = interactionDAO.getByAcc(accs, interactionResource.getId(), -1, -1);
+
+        // Set details
+        for (Interaction interaction : interactions) {
+            interaction.setInteractionDetailsList(interactionDetailsDAO.getByInteraction(interaction.getId()));
+        }
+
+        return interactions;
+    }
+
+    /**
      * Get all interactions of a given accession and resource
      * @param acc
      * @param resource
