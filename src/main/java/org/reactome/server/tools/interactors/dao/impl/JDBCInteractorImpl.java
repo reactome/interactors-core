@@ -21,7 +21,7 @@ public class JDBCInteractorImpl implements InteractorDAO {
     private SQLiteConnection database = SQLiteConnection.getInstance();
 
     private String TABLE = "INTERACTOR";
-    private String ALL_COLUMNS = "ACC, INTACT_ID, INTERACTOR_RESOURCE_ID, ALIAS";
+    private String ALL_COLUMNS = "ACC, INTACT_ID, INTERACTOR_RESOURCE_ID, ALIAS, TAXID";
     private String ALL_COLUMNS_SEL = "ID, CREATE_DATE, ".concat(ALL_COLUMNS);
 
     public JDBCInteractorImpl() {
@@ -33,13 +33,15 @@ public class JDBCInteractorImpl implements InteractorDAO {
 
         try {
             String insert = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
-                    + "VALUES(?, ?, ?, ?)";
+                    + "VALUES(?, ?, ?, ?, ?)";
 
             PreparedStatement pstm = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
             pstm.setString(1, interactor.getAcc());
             pstm.setString(2, interactor.getIntactId());
             pstm.setLong(3, interactor.getInteractorResourceId());
             pstm.setString(4, interactor.getAlias());
+            pstm.setInt(5, interactor.getTaxid());
+
 
             if(pstm.executeUpdate() > 0) {
                 try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
@@ -219,6 +221,7 @@ public class JDBCInteractorImpl implements InteractorDAO {
         ret.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_ID"));
         ret.setAlias(rs.getString("ALIAS"));
         //ret.setCreateDate(rs.getTimestamp("CREATE_DATE"));
+        ret.setTaxid(rs.getInt("TAXID"));
 
         return ret;
     }

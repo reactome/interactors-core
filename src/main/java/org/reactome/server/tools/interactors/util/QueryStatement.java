@@ -21,6 +21,7 @@ public class QueryStatement {
                 "INTERACTOR_RESOURCE_ID INTEGER NOT NULL, " +
                 "CREATE_DATE DEFAULT CURRENT_TIMESTAMP, " +
                 "ALIAS VARCHAR, " +
+                "TAXID INTEGER, " +
                 "FOREIGN KEY(INTERACTOR_RESOURCE_ID) REFERENCES  INTERACTOR_RESOURCE(ID) " +
             ")";
 

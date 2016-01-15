@@ -39,6 +39,11 @@ public class Interactor {
      */
     private String alias;
 
+    /**
+     * Taxonomy ID
+     */
+    private Integer taxid;
+
     public Long getId() {
         return id;
     }
@@ -118,5 +123,13 @@ public class Interactor {
     @Override
     public int hashCode() {
         return acc != null ? acc.hashCode() : 0;
+    }
+
+    public Integer getTaxid() {
+        return taxid;
+    }
+
+    public void setTaxid(Integer taxid) {
+        this.taxid = taxid;
     }
 }
