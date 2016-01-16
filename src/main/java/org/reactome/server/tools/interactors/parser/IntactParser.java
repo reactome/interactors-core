@@ -15,6 +15,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -31,6 +33,12 @@ public class IntactParser {
     private static String AUTHOR_SCORE_LABEL = "author score";
 
     private static String PSI_MI_LABEL = "psi-mi";
+
+    /** Regex that extracts the Taxonid from taxid:9606(human) **/
+    private Pattern pattern = Pattern.compile("([0-9]+)");
+
+    /** Parse file messages **/
+    private String outputFileMessages = "";
 
     /** Errors report lists **/
     private Set<String> parserErrorMessages = new HashSet<>();
@@ -110,7 +118,7 @@ public class IntactParser {
         } finally {
             if(parserErrorMessages.size() > 0) {
                 logger.info("There are [{}] error messages in the IntAct file.", parserErrorMessages.size());
-                writeOutputFile(parserErrorMessages, "parser-error-messages.txt");
+                writeOutputFile(parserErrorMessages, outputFileMessages);
             }
 
             if(dbErrorMessages.size() > 0 ) {
@@ -170,8 +178,11 @@ public class IntactParser {
         /** sample of Alt. ID(s) interactor A => uniprotkb:Q1231 **/
         parseAlternativeIds(line[IntactParserIndex.ALTERNATIVE_INTERACTOR_A], interactorA);
 
-        /** **/
+        /** gene/ewas name **/
         parseAliases(line[IntactParserIndex.ALIAS_INTERACTOR_A], interactorA);
+
+        /** taxid:9606(human) **/
+        parseTaxonomy(line[IntactParserIndex.TAXID_INTERACTOR_A], interactorA);
 
         /** sample of ID Interactor B => intact:EBI-7121510 **/
         String[] intactIdRawB = line[IntactParserIndex.ID_INTERACTOR_B].split(":");
@@ -183,10 +194,30 @@ public class IntactParser {
         /** **/
         parseAliases(line[IntactParserIndex.ALIAS_INTERACTOR_B], interactorB);
 
+        /** taxid:9606(human) **/
+        parseTaxonomy(line[IntactParserIndex.TAXID_INTERACTOR_B], interactorB);
+
         /** Create interaction **/
         Interaction interaction = prepareInteractions(line, interactorA, interactorB);
 
         return interaction;
+    }
+
+    private void parseTaxonomy(String value, Interactor interactor) {
+        if (!value.equals("-")){ // not null
+            /** Split at : taxid:9606 **/
+            String[] taxid = value.split(":");
+
+            Matcher m = pattern.matcher(taxid[1]);
+
+            if (m.find()) {
+                interactor.setTaxid(new Integer(m.group(1)));
+            }
+
+        }else {
+            interactor.setTaxid(0);
+            parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Does not have taxid.");
+        }
     }
 
 
@@ -333,6 +364,13 @@ public class IntactParser {
         return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.
     }
 
+    public String getOutputFileMessages() {
+        return outputFileMessages;
+    }
+
+    public void setOutputFileMessages(String outputFileMessages) {
+        this.outputFileMessages = outputFileMessages;
+    }
 
     /**
      * Call parse
@@ -358,6 +396,8 @@ public class IntactParser {
                         "Download IntAct File")
                         , new FlaggedOption("destination", JSAP.STRING_PARSER, "/tmp", JSAP.NOT_REQUIRED, 't', "destination",
                         "Folder to save the downloaded file")
+                        , new FlaggedOption("output", JSAP.STRING_PARSER, "/tmp/parser-messages.txt", JSAP.NOT_REQUIRED, 'o', "output",
+                        "Output parser file messages")
                 }
         );
 
@@ -366,6 +406,7 @@ public class IntactParser {
 
         String file = config.getString("file");
         boolean download = config.getBoolean("download");
+        String output = config.getString("output");
 
         if(download){
             String url = config.getString("url");
@@ -374,6 +415,7 @@ public class IntactParser {
             file = downloadedFile;
         }
 
+        intactParser.setOutputFileMessages(output);
         intactParser.parser(file);
 
         logger.info("Database has been populate properly.");

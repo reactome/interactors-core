@@ -91,8 +91,35 @@
 
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>local</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <sqlite.database>/Users/reactome/interactors/interactors.db</sqlite.database>
+            </properties>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>dev</value>
+                </property>
+            </activation>
+            <properties>
+                <sqlite.database>/to_be_defined/reactome/interactors/interactors.db</sqlite.database>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <finalName>${project.name}</finalName>
+        <filters>
+            <filter>src/main/resources/db.properties</filter>
+        </filters>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

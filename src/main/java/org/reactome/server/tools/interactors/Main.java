@@ -15,15 +15,9 @@ public class Main {
 
     final static Logger logger = LoggerFactory.getLogger(Main.class);
 
-    private int MAX_RESULTS = 10;
-
     public static void main(String[] args) {
-        Integer limit = 12;
-        Integer pageSize = 44;
-        String limitQuery = String.format(" LIMIT %d, %d", limit, pageSize);
-
-        System.out.println(limitQuery);
     }
+
 //    public static void main(String[] args) {
 //        List<String> reactomeProteins = new ArrayList<String>();
 ////        reactomeProteins.add("bbc3");

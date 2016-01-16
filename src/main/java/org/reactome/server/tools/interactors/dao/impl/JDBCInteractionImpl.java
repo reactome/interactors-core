@@ -141,8 +141,8 @@ public class JDBCInteractionImpl implements InteractionDAO {
 
         try {
             String query = "SELECT   INTERACTION.ID AS 'INTERACTION_ID', " +
-                                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA', " +
-                                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB', " +
+                                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA', INTERACTORA.TAXID AS 'TAX_IDA', " +
+                                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB', INTERACTORB.TAXID AS 'TAX_IDB', " +
                                     "INTERACTION.AUTHOR_SCORE, " +
                                     "INTERACTION.MISCORE, " +
                                     "INTERACTION.INTERACTION_RESOURCE_ID " +
@@ -201,8 +201,8 @@ public class JDBCInteractionImpl implements InteractionDAO {
 
         try {
             String query = "SELECT   INTERACTION.ID AS 'INTERACTION_ID', " +
-                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA', " +
-                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB', " +
+                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA',  INTERACTORA.TAXID AS 'TAX_IDA', " +
+                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB',  INTERACTORB.TAXID AS 'TAX_IDB', " +
                     "INTERACTION.AUTHOR_SCORE, " +
                     "INTERACTION.MISCORE, " +
                     "INTERACTION.INTERACTION_RESOURCE_ID " +
@@ -319,6 +319,7 @@ public class JDBCInteractionImpl implements InteractionDAO {
         interactorA.setAlias(rs.getString("ALIAS_A"));
         interactorA.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_A_ID"));
         interactorA.setIntactId(rs.getString("INTACT_IDA"));
+        interactorA.setTaxid(rs.getInt("TAX_IDA"));
 
         Interactor interactorB = new Interactor();
         interactorB.setId(rs.getLong("ID_B"));
@@ -326,6 +327,7 @@ public class JDBCInteractionImpl implements InteractionDAO {
         interactorB.setAlias(rs.getString("ALIAS_B"));
         interactorB.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_B_ID"));
         interactorB.setIntactId(rs.getString("INTACT_IDB"));
+        interactorB.setTaxid(rs.getInt("TAX_IDB"));
 
         /**
          * If A interacts with B and B with A we are talking about the same interaction, so
@@ -367,6 +369,7 @@ public class JDBCInteractionImpl implements InteractionDAO {
         interactorA.setAlias(rs.getString("ALIAS_A"));
         interactorA.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_A_ID"));
         interactorA.setIntactId(rs.getString("INTACT_IDA"));
+        interactorA.setTaxid(rs.getInt("TAX_IDA"));
 
         Interactor interactorB = new Interactor();
         interactorB.setId(rs.getLong("ID_B"));
@@ -374,6 +377,7 @@ public class JDBCInteractionImpl implements InteractionDAO {
         interactorB.setAlias(rs.getString("ALIAS_B"));
         interactorB.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_B_ID"));
         interactorB.setIntactId(rs.getString("INTACT_IDB"));
+        interactorB.setTaxid(rs.getInt("TAX_IDB"));
 
         /**
          * If A interacts with B and B with A we are talking about the same interaction, so
