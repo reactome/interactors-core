@@ -3,8 +3,6 @@ package org.reactome.server.tool.interactors.dao;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.reactome.server.tools.interactors.dao.DAOFactory;
-import org.reactome.server.tools.interactors.dao.InteractorDAO;
 
 
 /**
@@ -13,11 +11,11 @@ import org.reactome.server.tools.interactors.dao.InteractorDAO;
 
 public class TestPsicquic {
 
-    private InteractorDAO interactorDAO;
+//    private InteractorDAO interactorDAO;
 
     @Before
     public void setUp() {
-        interactorDAO = DAOFactory.createInteractorDAO();
+//        interactorDAO = DAOFactory.createInteractorDAO();
     }
 
 

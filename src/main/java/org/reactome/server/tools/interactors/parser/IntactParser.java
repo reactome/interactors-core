@@ -2,6 +2,7 @@ package org.reactome.server.tools.interactors.parser;
 
 import com.martiansoftware.jsap.*;
 import org.apache.commons.io.FileUtils;
+import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.*;
 import org.reactome.server.tools.interactors.service.InteractionParserService;
 import org.reactome.server.tools.interactors.service.InteractionResourceService;
@@ -10,9 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -37,9 +36,15 @@ public class IntactParser {
     private List<String> dbErrorMessages = new ArrayList<>();
 
     /** Services Declaration **/
-    private InteractionParserService interactionParserService = InteractionParserService.getInstance();
-    private InteractorResourceService interactorResourceService = InteractorResourceService.getInstance();
-    private InteractionResourceService interactionResourceService = InteractionResourceService.getInstance();
+    private InteractionParserService interactionParserService;
+    private InteractorResourceService interactorResourceService;
+    private InteractionResourceService interactionResourceService;
+
+    public IntactParser(InteractorsDatabase database) {
+        interactionParserService = new InteractionParserService(database);
+        interactorResourceService = new InteractorResourceService(database);
+        interactionResourceService = new InteractionResourceService(database);
+    }
 
     /**
      * Easy access to the Resources.
@@ -343,9 +348,6 @@ public class IntactParser {
         long start = System.currentTimeMillis();
         logger.info("Start Parsing IntAct File");
 
-        IntactParser intactParser = new IntactParser();
-        intactParser.cacheResources();
-
         SimpleJSAP jsap = new SimpleJSAP(
                 IntactParser.class.getName(),
                 "A tool for parsing Intact file and create a database",
@@ -360,6 +362,17 @@ public class IntactParser {
                         "Folder to save the downloaded file")
                 }
         );
+
+        //TODO: add as a required parameter
+        String database = "/Users/reactome/interactors/interactors.db";
+        InteractorsDatabase interactors = null;
+        try {
+            interactors = new InteractorsDatabase(database);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        IntactParser intactParser = new IntactParser(interactors);
+        intactParser.cacheResources();
 
         JSAPResult config = jsap.parse(args);
         if (jsap.messagePrinted()) System.exit(1);

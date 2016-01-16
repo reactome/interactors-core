@@ -1,7 +1,7 @@
 package org.reactome.server.tools.interactors.dao.impl;
 
 import org.reactome.server.tools.interactors.dao.InteractorDAO;
-import org.reactome.server.tools.interactors.database.SQLiteConnection;
+import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.Interactor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,29 +18,32 @@ public class JDBCInteractorImpl implements InteractorDAO {
 
     final Logger logger = LoggerFactory.getLogger(JDBCInteractorImpl.class);
 
-    private SQLiteConnection database = SQLiteConnection.getInstance();
+    private Connection connection;
 
     private String TABLE = "INTERACTOR";
     private String ALL_COLUMNS = "ACC, INTACT_ID, INTERACTOR_RESOURCE_ID, ALIAS, TAXID";
     private String ALL_COLUMNS_SEL = "ID, CREATE_DATE, ".concat(ALL_COLUMNS);
 
-    public JDBCInteractorImpl() {
-
+    public JDBCInteractorImpl(InteractorsDatabase database) {
+        this.connection = database.getConnection();
     }
 
     public Interactor create(Interactor interactor) throws SQLException {
-        Connection conn = database.getConnection();
-
         try {
             String insert = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
                     + "VALUES(?, ?, ?, ?, ?)";
 
-            PreparedStatement pstm = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement pstm = connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
             pstm.setString(1, interactor.getAcc());
             pstm.setString(2, interactor.getIntactId());
             pstm.setLong(3, interactor.getInteractorResourceId());
             pstm.setString(4, interactor.getAlias());
-            pstm.setInt(5, interactor.getTaxid());
+            Integer taxId = interactor.getTaxid();
+            if (taxId == null) {
+                logger.error("TaxId is null for " + interactor.toString());
+                taxId = -1;
+            }
+            pstm.setInt(5, taxId);
 
 
             if(pstm.executeUpdate() > 0) {
@@ -54,7 +57,7 @@ public class JDBCInteractorImpl implements InteractorDAO {
             }
 
         } finally {
-            //conn.close();
+            //connection.close();
         }
 
         return interactor;
@@ -72,10 +75,8 @@ public class JDBCInteractorImpl implements InteractorDAO {
                 " FROM " + TABLE +
                 " WHERE ID = ?";
 
-        Connection conn = database.getConnection();
-
         try {
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setString(1, id);
 
             ResultSet rs = pstm.executeQuery();
@@ -83,7 +84,7 @@ public class JDBCInteractorImpl implements InteractorDAO {
                 ret = buildInteractor(rs);
             }
         } finally {
-            //conn.close();
+            //connection.close();
         }
 
         return ret;
@@ -96,10 +97,8 @@ public class JDBCInteractorImpl implements InteractorDAO {
                 " FROM " + TABLE +
                 " WHERE ACC = ?";
 
-        Connection conn = database.getConnection();
-
         try {
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setString(1, acc);
 
             ResultSet rs = pstm.executeQuery();
@@ -107,7 +106,7 @@ public class JDBCInteractorImpl implements InteractorDAO {
                 ret = buildInteractor(rs);
             }
         } finally {
-            //conn.close();
+            //connection.close();
         }
 
         return ret;
@@ -126,10 +125,8 @@ public class JDBCInteractorImpl implements InteractorDAO {
                         " FROM " + TABLE +
                         " WHERE ACC IN (?, ?)";
 
-        Connection conn = database.getConnection();
-
         try {
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setString(1, interactorA.getAcc());
             pstm.setString(2, interactorB.getAcc());
 
@@ -160,7 +157,7 @@ public class JDBCInteractorImpl implements InteractorDAO {
             }
 
         } finally {
-            //conn.close();
+            //connection.close();
         }
 
     }
@@ -171,12 +168,10 @@ public class JDBCInteractorImpl implements InteractorDAO {
     }
 
     public boolean delete(String id) throws SQLException {
-        Connection conn = database.getConnection();
-
         try {
             String query = "DELETE FROM " + TABLE + " WHERE ID = ?";
 
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setString(1, id);
 
             if (pstm.executeUpdate() > 0) {
@@ -184,7 +179,7 @@ public class JDBCInteractorImpl implements InteractorDAO {
             }
 
         } finally {
-            conn.close();
+            connection.close();
         }
 
         return false;
@@ -196,10 +191,8 @@ public class JDBCInteractorImpl implements InteractorDAO {
         String query = "SELECT " + ALL_COLUMNS_SEL +
                 " FROM " + TABLE;
 
-        Connection conn = database.getConnection();
-
         try {
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
             ResultSet rs = pstm.executeQuery();
             while (rs.next()) {
                 Interactor interactor = buildInteractor(rs);
@@ -207,7 +200,7 @@ public class JDBCInteractorImpl implements InteractorDAO {
             }
 
         } finally {
-            //conn.close();
+            //connection.close();
         }
 
         return ret;
@@ -231,16 +224,14 @@ public class JDBCInteractorImpl implements InteractorDAO {
 
         String query = "SELECT ACC FROM " + TABLE;
 
-        Connection conn = database.getConnection();
-
         try {
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
             ResultSet rs = pstm.executeQuery();
             while (rs.next()) {
                 ret.add(rs.getString("ACC"));
             }
         } finally {
-            //conn.close();
+            //connection.close();
         }
 
         return ret;

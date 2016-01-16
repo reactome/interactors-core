@@ -1,14 +1,14 @@
 package org.reactome.server.tools.interactors.service;
 
-import org.reactome.server.tools.interactors.dao.DAOFactory;
-import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.dao.InteractionResourceDAO;
+import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionResourceImpl;
 import org.reactome.server.tools.interactors.dao.impl.JDBCInteractorImpl;
+import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.InteractionResource;
-import org.reactome.server.tools.interactors.model.InteractorResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -23,20 +23,10 @@ public class InteractionResourceService {
 
     final Logger logger = LoggerFactory.getLogger(JDBCInteractorImpl.class);
 
-    private static InteractionResourceService interactionResourceService = null;
+    public InteractionResourceDAO interactionResourceDAO;
 
-    public InteractionResourceDAO interactionResourceDAO = DAOFactory.createInterationResourceDAO();
-
-    public static InteractionResourceService getInstance() {
-        if (interactionResourceService == null) {
-            interactionResourceService = new InteractionResourceService();
-        }
-
-        return interactionResourceService;
-    }
-
-    private InteractionResourceService(){
-
+    public InteractionResourceService(InteractorsDatabase database){
+        interactionResourceDAO = new JDBCInteractionResourceImpl(database);
     }
 
     /**

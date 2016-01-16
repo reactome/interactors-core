@@ -2,16 +2,14 @@ package org.reactome.server.tool.interactors.dao;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.reactome.server.tools.interactors.dao.DAOFactory;
 import org.reactome.server.tools.interactors.dao.InteractionDAO;
-import org.reactome.server.tools.interactors.dao.InteractorDAO;
+import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionImpl;
+import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.Interaction;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -20,12 +18,19 @@ import java.util.UUID;
 public class TestInteractionImpl {
 
     private InteractionDAO interactionDAO;
-    private InteractorDAO interactorDAO;
-    private String interactionID;
+//    private InteractorDAO interactorDAO;
+//    private String interactionID;
 
     @Before
     public void setUp() {
-        interactionDAO = DAOFactory.createInterationDAO();
+        String file = "/Users/reactome/interactors/interactors.db";
+        InteractorsDatabase interactors = null;
+        try {
+            interactors = new InteractorsDatabase(file);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        interactionDAO = new JDBCInteractionImpl(interactors);
     }
 
     @Test

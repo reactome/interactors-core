@@ -1,13 +1,11 @@
 package org.reactome.server.tools.interactors.dao.impl;
 
 import org.reactome.server.tools.interactors.dao.InteractionDetailsDAO;
-import org.reactome.server.tools.interactors.database.SQLiteConnection;
-import org.reactome.server.tools.interactors.model.Interaction;
+import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.InteractionDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.transform.Result;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,20 +21,22 @@ public class JDBCInteractionDetailsImpl implements InteractionDetailsDAO {
 
     final Logger logger = LoggerFactory.getLogger(JDBCInteractionDetailsImpl.class);
 
-    private SQLiteConnection database = SQLiteConnection.getInstance();
+    private Connection connection;
 
     private final String TABLE = "INTERACTION_DETAILS";
     private final String ALL_COLUMNS = "INTERACTION_ID, INTERACTION_AC";
     private final String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
 
-    public InteractionDetails create(InteractionDetails interactionDetails) throws SQLException {
-        Connection conn = database.getConnection();
+    public JDBCInteractionDetailsImpl(InteractorsDatabase database) {
+        this.connection = database.getConnection();
+    }
 
+    public InteractionDetails create(InteractionDetails interactionDetails) throws SQLException {
         try {
             String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
                     + "VALUES(?, ?)";
 
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setLong(1, interactionDetails.getInteractionId());
             pstm.setString(2, interactionDetails.getInteractionAc());
 
@@ -65,14 +65,13 @@ public class JDBCInteractionDetailsImpl implements InteractionDetailsDAO {
      * @throws SQLException
      */
     public boolean create(List<InteractionDetails> interactionDetails) throws SQLException {
-        Connection conn = database.getConnection();
-        conn.setAutoCommit(false);
+        connection.setAutoCommit(false);
 
         try {
             String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
                     + "VALUES(?, ?)";
 
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
 
             for (InteractionDetails interactionDetail : interactionDetails) {
                 pstm.setLong(1, interactionDetail.getInteractionId());
@@ -92,12 +91,12 @@ public class JDBCInteractionDetailsImpl implements InteractionDetailsDAO {
 
             pstm.executeBatch();
 
-            conn.commit();
+            connection.commit();
         } catch(SQLException s){
             logger.error("");
-            conn.rollback();
+            connection.rollback();
         } finally {
-            conn.setAutoCommit(true);
+            connection.setAutoCommit(true);
         }
 
         return true;
@@ -121,15 +120,13 @@ public class JDBCInteractionDetailsImpl implements InteractionDetailsDAO {
     }
 
     public List<InteractionDetails> getByInteraction(Long interactionId) throws SQLException {
-        Connection conn = database.getConnection();
-
         List<InteractionDetails> interactionsDetails = new ArrayList<>();
 
         try {
             // TODO: IMPROVE HERE
             String query = "SELECT * FROM INTERACTION_DETAILS WHERE INTERACTION_ID = ?";
 
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setLong(1, interactionId);
 
             ResultSet rs = pstm.executeQuery();
