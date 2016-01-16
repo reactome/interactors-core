@@ -7,7 +7,7 @@
     <groupId>org.reactome.server.tools</groupId>
     <artifactId>interactor-core</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.4-SNAPSHOT</version>
     <name>Reactome Interactors Core</name>
 
     <developers>
@@ -89,30 +89,6 @@
         </dependency>
 
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>local</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <sqlite.database>/Users/reactome/interactors/interactors.db</sqlite.database>
-            </properties>
-        </profile>
-        <profile>
-            <id>dev</id>
-            <activation>
-                <property>
-                    <name>env</name>
-                    <value>dev</value>
-                </property>
-            </activation>
-            <properties>
-                <sqlite.database>/to_be_defined/reactome/interactors/interactors.db</sqlite.database>
-            </properties>
-        </profile>
-    </profiles>
 
     <build>
         <finalName>${project.name}</finalName>
