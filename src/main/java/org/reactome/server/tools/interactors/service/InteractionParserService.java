@@ -1,16 +1,19 @@
 package org.reactome.server.tools.interactors.service;
 
-import org.reactome.server.tools.interactors.dao.DAOFactory;
 import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.dao.InteractionDetailsDAO;
 import org.reactome.server.tools.interactors.dao.InteractorDAO;
+import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionDetailsImpl;
+import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionImpl;
 import org.reactome.server.tools.interactors.dao.impl.JDBCInteractorImpl;
+import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.InteractionDetails;
 import org.reactome.server.tools.interactors.model.Interactor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,23 +29,15 @@ public class InteractionParserService {
 
     final Logger logger = LoggerFactory.getLogger(JDBCInteractorImpl.class);
 
-    private static InteractionParserService interactionParserService = null;
+    private InteractionDAO interactionDAO;
+    private InteractorDAO interactorDAO;
+    private InteractionDetailsDAO interactionDetailsDAO;
 
-    public static InteractionParserService getInstance() {
-        if (interactionParserService == null) {
-            interactionParserService = new InteractionParserService();
-        }
-
-        return interactionParserService;
+    public InteractionParserService(InteractorsDatabase database) {
+        interactionDAO = new JDBCInteractionImpl(database);
+        interactorDAO = new JDBCInteractorImpl(database);
+        interactionDetailsDAO = new JDBCInteractionDetailsImpl(database);
     }
-
-    private InteractionParserService(){
-
-    }
-
-    public InteractionDAO interactionDAO = DAOFactory.createInterationDAO();
-    public InteractorDAO interactorDAO = DAOFactory.createInteractorDAO();
-    public InteractionDetailsDAO interactionDetailsDAO = DAOFactory.createInterationDetailsDAO();
 
     /** Creating a pre-sized list of interactions. Persist a batch of 1000 interactions **/
     public List<Interaction> interactions = new ArrayList<>(1000);

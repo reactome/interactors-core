@@ -1,13 +1,13 @@
 package org.reactome.server.tools.interactors.service;
 
-import org.reactome.server.tools.interactors.dao.*;
-import org.reactome.server.tools.interactors.exception.InvalidInteractionResourceException;
-import org.reactome.server.tools.interactors.model.Interaction;
-import org.reactome.server.tools.interactors.model.InteractionResource;
+import org.reactome.server.tools.interactors.dao.InteractorDAO;
+import org.reactome.server.tools.interactors.dao.impl.JDBCInteractorImpl;
+import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.Interactor;
 
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
 
 
 /**
@@ -18,20 +18,10 @@ public class InteractorService {
 
     //final Logger logger = LoggerFactory.getLogger(InteractionService.class);
 
-    private static InteractorService interactorService = null;
+    private InteractorDAO interactorDAO;
 
-    private InteractorDAO interactorDAO = DAOFactory.createInteractorDAO();
-
-    public static InteractorService getInstance() {
-        if (interactorService == null) {
-            interactorService = new InteractorService();
-        }
-
-        return interactorService;
-    }
-
-    private InteractorService(){
-
+    public InteractorService(InteractorsDatabase database){
+        this.interactorDAO = new JDBCInteractorImpl(database);
     }
 
     public List<Interactor> getAll() throws SQLException {

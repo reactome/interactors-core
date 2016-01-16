@@ -1,7 +1,7 @@
 package org.reactome.server.tools.interactors.dao.impl;
 
 import org.reactome.server.tools.interactors.dao.InteractionResourceDAO;
-import org.reactome.server.tools.interactors.database.SQLiteConnection;
+import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.InteractionResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +21,15 @@ public class JDBCInteractionResourceImpl implements InteractionResourceDAO {
 
     final Logger logger = LoggerFactory.getLogger(JDBCInteractorImpl.class);
 
-    private SQLiteConnection database = SQLiteConnection.getInstance();
+    private Connection connection;
 
     private final String TABLE = "INTERACTION_RESOURCE";
     private final String ALL_COLUMNS = "NAME, URL";
     private final String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
+
+    public JDBCInteractionResourceImpl(InteractorsDatabase database) {
+        this.connection = database.getConnection();
+    }
 
     public InteractionResource create(InteractionResource interactionResource) throws SQLException {
         return null;
@@ -47,10 +51,8 @@ public class JDBCInteractionResourceImpl implements InteractionResourceDAO {
         String query = "SELECT " + ALL_COLUMNS_SEL +
                         " FROM " + TABLE;
 
-        Connection conn = database.getConnection();
-
         try {
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
             ResultSet rs = pstm.executeQuery();
             while (rs.next()) {
                 InteractionResource interactionResource = buildInteractionResource(rs);
@@ -58,7 +60,7 @@ public class JDBCInteractionResourceImpl implements InteractionResourceDAO {
             }
 
         } finally {
-            //conn.close();
+            //connection.close();
         }
 
         return ret;
@@ -74,10 +76,8 @@ public class JDBCInteractionResourceImpl implements InteractionResourceDAO {
                         " FROM " + TABLE +
                         " WHERE LOWER(name) = ?";
 
-        Connection conn = database.getConnection();
-
         try {
-            PreparedStatement pstm = conn.prepareStatement(query);
+            PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setString(1,name.toLowerCase());
 
             ResultSet rs = pstm.executeQuery();
@@ -86,7 +86,7 @@ public class JDBCInteractionResourceImpl implements InteractionResourceDAO {
             }
 
         } finally {
-            //conn.close();
+            //connection.close();
         }
 
         return interactionResource;

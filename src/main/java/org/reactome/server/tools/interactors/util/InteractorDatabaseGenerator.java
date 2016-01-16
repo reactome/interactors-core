@@ -1,10 +1,12 @@
 package org.reactome.server.tools.interactors.util;
 
-import org.reactome.server.tools.interactors.database.SQLiteConnection;
+import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -13,13 +15,10 @@ public class InteractorDatabaseGenerator {
 
     static final Logger logger = LoggerFactory.getLogger(InteractorDatabaseGenerator.class);
 
-    private static void generateNewDatabase() throws ClassNotFoundException {
+    private static void generateNewDatabase(Connection connection) throws ClassNotFoundException {
         logger.info("Creating interactors database.");
-        Connection connection = null;
 
         try {
-            connection = SQLiteConnection.getInstance().getConnection();
-
             Statement statement = connection.createStatement();
 
             /** Create our tables **/
@@ -71,9 +70,14 @@ public class InteractorDatabaseGenerator {
     }
 
     public static void main(String[] args) throws ClassNotFoundException {
-
         // we can always start from a temp db and rename later on to a final...
-        generateNewDatabase();
+        try {
+            String file = "/Users/reactome/interactors/interactors.db";
+            InteractorsDatabase interactors = new InteractorsDatabase(file);
+            generateNewDatabase(interactors.getConnection());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
 
