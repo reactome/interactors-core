@@ -3,9 +3,9 @@ package org.reactome.server.tools.interactors.service;
 import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.dao.InteractionDetailsDAO;
 import org.reactome.server.tools.interactors.dao.InteractorDAO;
-import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionDetailsImpl;
-import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionImpl;
-import org.reactome.server.tools.interactors.dao.impl.JDBCInteractorImpl;
+import org.reactome.server.tools.interactors.dao.intact.StaticInteractionDetails;
+import org.reactome.server.tools.interactors.dao.intact.StaticInteraction;
+import org.reactome.server.tools.interactors.dao.intact.StaticInteractor;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.InteractionDetails;
@@ -13,7 +13,6 @@ import org.reactome.server.tools.interactors.model.Interactor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,16 +26,16 @@ import java.util.List;
  */
 public class InteractionParserService {
 
-    final Logger logger = LoggerFactory.getLogger(JDBCInteractorImpl.class);
+    final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
 
     private InteractionDAO interactionDAO;
     private InteractorDAO interactorDAO;
     private InteractionDetailsDAO interactionDetailsDAO;
 
     public InteractionParserService(InteractorsDatabase database) {
-        interactionDAO = new JDBCInteractionImpl(database);
-        interactorDAO = new JDBCInteractorImpl(database);
-        interactionDetailsDAO = new JDBCInteractionDetailsImpl(database);
+        interactionDAO = new StaticInteraction(database);
+        interactorDAO = new StaticInteractor(database);
+        interactionDetailsDAO = new StaticInteractionDetails(database);
     }
 
     /** Creating a pre-sized list of interactions. Persist a batch of 1000 interactions **/

@@ -1,11 +1,10 @@
 package org.reactome.server.tools.interactors.service;
 
 import org.reactome.server.tools.interactors.dao.InteractorDAO;
-import org.reactome.server.tools.interactors.dao.impl.JDBCInteractorImpl;
+import org.reactome.server.tools.interactors.dao.intact.StaticInteractor;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.Interactor;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class InteractorService {
     private InteractorDAO interactorDAO;
 
     public InteractorService(InteractorsDatabase database){
-        this.interactorDAO = new JDBCInteractorImpl(database);
+        this.interactorDAO = new StaticInteractor(database);
     }
 
     public List<Interactor> getAll() throws SQLException {

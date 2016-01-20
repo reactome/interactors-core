@@ -1,4 +1,4 @@
-package org.reactome.server.tools.interactors.parser;
+package org.reactome.server.tools.interactors;
 
 import com.martiansoftware.jsap.*;
 import org.apache.commons.io.FileUtils;
@@ -22,6 +22,31 @@ import java.util.regex.Pattern;
  */
 
 public class IntactParser {
+
+    enum ParserIndex {
+
+        ID_INTERACTOR_A(0),
+        ID_INTERACTOR_B(1),
+        ALTERNATIVE_INTERACTOR_A(2),
+        ALTERNATIVE_INTERACTOR_B(3),
+        ALIAS_INTERACTOR_A(4),
+        ALIAS_INTERACTOR_B(5),
+        INTERACTION_DETECTION_METHOD(6),
+        PUBLICATION_1ST_AUTHOR(7),
+        PUBLICATION_IDENTIFIER(8),
+        TAXID_INTERACTOR_A(9),
+        TAXID_INTERACTOR_B(10),
+        INTERACTION_TYPE(11),
+        SOURCE_DATABASE(12),
+        INTERACTION_IDENTIFIER(13),
+        CONFIDENCE_VALUE(14);
+
+        final int value;
+
+        ParserIndex(int value) {
+            this.value = value;
+        }
+    }
 
     static final Logger logger = LoggerFactory.getLogger(IntactParser.class);
 
@@ -177,30 +202,30 @@ public class IntactParser {
          * auto-catalysis. Ex: uniprotkb:P12346
          */
         /** sample of ID Interactor A => intact:EBI-7121510 **/
-        String[] intactIdRawA = line[IntactParserIndex.ID_INTERACTOR_A].split(":");
+        String[] intactIdRawA = line[ParserIndex.ID_INTERACTOR_A.value].split(":");
         interactorA.setIntactId(intactIdRawA[1]);
 
         /** sample of Alt. ID(s) interactor A => uniprotkb:Q1231 **/
-        parseAlternativeIds(line[IntactParserIndex.ALTERNATIVE_INTERACTOR_A], interactorA);
+        parseAlternativeIds(line[ParserIndex.ALTERNATIVE_INTERACTOR_A.value], interactorA);
 
         /** gene/ewas name **/
-        parseAliases(line[IntactParserIndex.ALIAS_INTERACTOR_A], interactorA);
+        parseAliases(line[ParserIndex.ALIAS_INTERACTOR_A.value], interactorA);
 
         /** taxid:9606(human) **/
-        parseTaxonomy(line[IntactParserIndex.TAXID_INTERACTOR_A], interactorA);
+        parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_A.value], interactorA);
 
         /** sample of ID Interactor B => intact:EBI-7121510 **/
-        String[] intactIdRawB = line[IntactParserIndex.ID_INTERACTOR_B].split(":");
+        String[] intactIdRawB = line[ParserIndex.ID_INTERACTOR_B.value].split(":");
         interactorB.setIntactId(intactIdRawB[1]);
 
         /** sample of Alt. ID(s) interactor B =>  uniprotkb:Q15301 **/
-        parseAlternativeIds(line[IntactParserIndex.ALTERNATIVE_INTERACTOR_B], interactorB);
+        parseAlternativeIds(line[ParserIndex.ALTERNATIVE_INTERACTOR_B.value], interactorB);
 
         /** **/
-        parseAliases(line[IntactParserIndex.ALIAS_INTERACTOR_B], interactorB);
+        parseAliases(line[ParserIndex.ALIAS_INTERACTOR_B.value], interactorB);
 
         /** taxid:9606(human) **/
-        parseTaxonomy(line[IntactParserIndex.TAXID_INTERACTOR_B], interactorB);
+        parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_B.value], interactorB);
 
         /** Create interaction **/
         Interaction interaction = prepareInteractions(line, interactorA, interactorB);
@@ -235,10 +260,10 @@ public class IntactParser {
         Long intactResourceId = interactionResourceMap.get("intact").getId();
         interaction.setInteractionResourceId(intactResourceId);
 
-        parseConfidenceValue(line[IntactParserIndex.CONFIDENCE_VALUE], interaction);
+        parseConfidenceValue(line[ParserIndex.CONFIDENCE_VALUE.value], interaction);
 
         /** Get interaction ID column **/
-        String allInteractionIds = line[IntactParserIndex.INTERACTION_IDENTIFIER];
+        String allInteractionIds = line[ParserIndex.INTERACTION_IDENTIFIER.value];
 
         String[] interactionIds = allInteractionIds.split("\\|");
         for (String interactionIdCompound : interactionIds) {

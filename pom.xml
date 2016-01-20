@@ -27,33 +27,59 @@
             <version>2.4</version>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.hupo.psi.mi.psicquic</groupId>-->
-            <!--<artifactId>psicquic-client</artifactId>-->
-            <!--<version>1.5.3</version>-->
-            <!--<exclusions>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.slf4j</groupId>-->
-                    <!--<artifactId>slf4j-log4j12</artifactId>-->
-                <!--</exclusion>-->
-                <!--<exclusion>-->
-                    <!--<groupId>javax.servlet</groupId>-->
-                    <!--<artifactId>servlet-api</artifactId>-->
-                <!--</exclusion>-->
-            <!--</exclusions>-->
-        <!--</dependency>-->
+        <!-- PSICQUIC -->
+        <dependency>
+            <groupId>org.hupo.psi.mi.psicquic</groupId>
+            <artifactId>psicquic-client</artifactId>
+            <version>1.5.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-servlet_2.5_spec</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.hupo.psi.mi.psicquic</groupId>-->
-            <!--<artifactId>psicquic-registry-client</artifactId>-->
-            <!--<version>1.1.0</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.hupo.psi.mi.psicquic</groupId>
+            <artifactId>psicquic-registry-client</artifactId>
+            <version>1.1.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
 
-        <!--<dependency>-->
-            <!--<groupId>psidev.psi.mi</groupId>-->
-            <!--<artifactId>psimitab</artifactId>-->
-            <!--<version>1.8.5</version>-->
-        <!--</dependency>-->
+                <!--<exclusion>-->
+                <!--<groupId>javax.servlet</groupId>-->
+                <!--<artifactId>servlet-api</artifactId>-->
+                <!--</exclusion>-->
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>psidev.psi.mi</groupId>
+            <artifactId>psimitab</artifactId>
+            <version>1.8.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <!--<exclusion>-->
+                <!--<groupId>javax.servlet</groupId>-->
+                <!--<artifactId>servlet-api</artifactId>-->
+                <!--</exclusion>-->
+            </exclusions>
+        </dependency>
 
         <!-- JSAP command line parameters parser -->
         <dependency>
@@ -99,10 +125,6 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-                <!--<includes>-->
-                <!--<include>**/props/*.properties</include>-->
-                <!--<include>**/webconfig/*.json</include>  &lt;!&ndash; currently needs to be filtered to provide the deployment path of the webapp &ndash;&gt;-->
-                <!--</includes>-->
             </resource>
         </resources>
         <plugins>

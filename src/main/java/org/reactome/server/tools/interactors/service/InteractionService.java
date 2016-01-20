@@ -3,15 +3,14 @@ package org.reactome.server.tools.interactors.service;
 import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.dao.InteractionDetailsDAO;
 import org.reactome.server.tools.interactors.dao.InteractionResourceDAO;
-import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionDetailsImpl;
-import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionImpl;
-import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionResourceImpl;
+import org.reactome.server.tools.interactors.dao.intact.StaticInteractionDetails;
+import org.reactome.server.tools.interactors.dao.intact.StaticInteraction;
+import org.reactome.server.tools.interactors.dao.intact.StaticInteractionResource;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.exception.InvalidInteractionResourceException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.InteractionResource;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -29,9 +28,9 @@ public class InteractionService {
     private InteractionResourceDAO interactionResourceDAO;
 
     private InteractionService(InteractorsDatabase database){
-        this.interactionDAO = new JDBCInteractionImpl(database);
-        this.interactionDetailsDAO = new JDBCInteractionDetailsImpl(database);
-        this.interactionResourceDAO = new JDBCInteractionResourceImpl(database);
+        this.interactionDAO = new StaticInteraction(database);
+        this.interactionDetailsDAO = new StaticInteractionDetails(database);
+        this.interactionResourceDAO = new StaticInteractionResource(database);
     }
 
     /**

@@ -3,7 +3,7 @@ package org.reactome.server.tool.interactors.dao;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactome.server.tools.interactors.dao.InteractorDAO;
-import org.reactome.server.tools.interactors.dao.impl.JDBCInteractorImpl;
+import org.reactome.server.tools.interactors.dao.intact.StaticInteractor;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 
 import java.sql.SQLException;
@@ -25,7 +25,7 @@ public class TestInteractorImpl {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        interactorDAO = new JDBCInteractorImpl(interactors);
+        interactorDAO = new StaticInteractor(interactors);
     }
 
     @Test

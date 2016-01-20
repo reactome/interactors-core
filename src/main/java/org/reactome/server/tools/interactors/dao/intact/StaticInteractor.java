@@ -1,4 +1,4 @@
-package org.reactome.server.tools.interactors.dao.impl;
+package org.reactome.server.tools.interactors.dao.intact;
 
 import org.reactome.server.tools.interactors.dao.InteractorDAO;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
@@ -14,9 +14,9 @@ import java.util.List;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
-public class JDBCInteractorImpl implements InteractorDAO {
+public class StaticInteractor implements InteractorDAO {
 
-    final Logger logger = LoggerFactory.getLogger(JDBCInteractorImpl.class);
+    final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
 
     private Connection connection;
 
@@ -24,7 +24,7 @@ public class JDBCInteractorImpl implements InteractorDAO {
     private String ALL_COLUMNS = "ACC, INTACT_ID, INTERACTOR_RESOURCE_ID, ALIAS, TAXID";
     private String ALL_COLUMNS_SEL = "ID, CREATE_DATE, ".concat(ALL_COLUMNS);
 
-    public JDBCInteractorImpl(InteractorsDatabase database) {
+    public StaticInteractor(InteractorsDatabase database) {
         this.connection = database.getConnection();
     }
 

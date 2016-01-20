@@ -1,4 +1,4 @@
-package org.reactome.server.tools.interactors.dao.impl;
+package org.reactome.server.tools.interactors.dao.intact;
 
 import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
@@ -17,9 +17,9 @@ import java.util.*;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
-public class JDBCInteractionImpl implements InteractionDAO {
+public class StaticInteraction implements InteractionDAO {
 
-    final Logger logger = LoggerFactory.getLogger(JDBCInteractorImpl.class);
+    final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
 
     private Connection connection;
 
@@ -27,7 +27,7 @@ public class JDBCInteractionImpl implements InteractionDAO {
     private final String ALL_COLUMNS = "INTERACTOR_A, INTERACTOR_B, AUTHOR_SCORE, MISCORE, INTERACTION_RESOURCE_ID";
     private final String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
 
-    public JDBCInteractionImpl(InteractorsDatabase database) {
+    public StaticInteraction(InteractorsDatabase database) {
         this.connection = database.getConnection();
     }
 

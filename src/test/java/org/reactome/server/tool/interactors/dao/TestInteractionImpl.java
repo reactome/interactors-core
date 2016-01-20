@@ -3,7 +3,7 @@ package org.reactome.server.tool.interactors.dao;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactome.server.tools.interactors.dao.InteractionDAO;
-import org.reactome.server.tools.interactors.dao.impl.JDBCInteractionImpl;
+import org.reactome.server.tools.interactors.dao.intact.StaticInteraction;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.Interaction;
 
@@ -30,7 +30,7 @@ public class TestInteractionImpl {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        interactionDAO = new JDBCInteractionImpl(interactors);
+        interactionDAO = new StaticInteraction(interactors);
     }
 
     @Test
