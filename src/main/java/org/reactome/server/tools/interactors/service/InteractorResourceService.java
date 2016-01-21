@@ -1,12 +1,9 @@
 package org.reactome.server.tools.interactors.service;
 
 import org.reactome.server.tools.interactors.dao.InteractorResourceDAO;
-import org.reactome.server.tools.interactors.dao.intact.StaticInteractor;
 import org.reactome.server.tools.interactors.dao.intact.StaticInteractorResource;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.InteractorResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -19,8 +16,6 @@ import java.util.Map;
  */
 
 public class InteractorResourceService {
-
-    final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
 
     private InteractorResourceDAO interactorResourceDao;
 

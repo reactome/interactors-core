@@ -52,16 +52,11 @@ public class StaticInteractorResource implements InteractorResourceDAO {
         String query = "SELECT " + ALL_COLUMNS_SEL +
                         " FROM " + TABLE;
 
-        try {
-            PreparedStatement pstm = connection.prepareStatement(query);
-            ResultSet rs = pstm.executeQuery();
-            while (rs.next()) {
-                InteractorResource interactorResource = buildInteractorResource(rs);
-                ret.add(interactorResource);
-            }
-
-        } finally {
-            //connection.close();
+        PreparedStatement pstm = connection.prepareStatement(query);
+        ResultSet rs = pstm.executeQuery();
+        while (rs.next()) {
+            InteractorResource interactorResource = buildInteractorResource(rs);
+            ret.add(interactorResource);
         }
 
         return ret;

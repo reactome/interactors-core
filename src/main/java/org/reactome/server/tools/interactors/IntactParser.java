@@ -7,6 +7,7 @@ import org.reactome.server.tools.interactors.model.*;
 import org.reactome.server.tools.interactors.service.InteractionParserService;
 import org.reactome.server.tools.interactors.service.InteractionResourceService;
 import org.reactome.server.tools.interactors.service.InteractorResourceService;
+import org.reactome.server.tools.interactors.util.Toolbox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,13 +32,13 @@ public class IntactParser {
         ALTERNATIVE_INTERACTOR_B(3),
         ALIAS_INTERACTOR_A(4),
         ALIAS_INTERACTOR_B(5),
-        INTERACTION_DETECTION_METHOD(6),
-        PUBLICATION_1ST_AUTHOR(7),
-        PUBLICATION_IDENTIFIER(8),
+        //INTERACTION_DETECTION_METHOD(6),
+        //PUBLICATION_1ST_AUTHOR(7),
+        //PUBLICATION_IDENTIFIER(8),
         TAXID_INTERACTOR_A(9),
         TAXID_INTERACTOR_B(10),
-        INTERACTION_TYPE(11),
-        SOURCE_DATABASE(12),
+        //INTERACTION_TYPE(11),
+        //SOURCE_DATABASE(12),
         INTERACTION_IDENTIFIER(13),
         CONFIDENCE_VALUE(14);
 
@@ -51,12 +52,12 @@ public class IntactParser {
     static final Logger logger = LoggerFactory.getLogger(IntactParser.class);
 
     /** This is the default intact file URL, a program argument can be specified in order to use a different URL **/
-    private static String INTACT_FILE_URL = "ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact-micluster.txt";
+    private static final String INTACT_FILE_URL = "ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact-micluster.txt";
 
-    private static String INTACT_SCORE_LABEL = "intact-miscore";
-    private static String AUTHOR_SCORE_LABEL = "author score";
+    private static final String INTACT_SCORE_LABEL = "intact-miscore";
+    private static final String AUTHOR_SCORE_LABEL = "author score";
 
-    private static String PSI_MI_LABEL = "psi-mi";
+    private static final String PSI_MI_LABEL = "psi-mi";
 
     /** Regex that extracts the Taxonid from taxid:9606(human) **/
     private Pattern pattern = Pattern.compile("([0-9]+)");
@@ -86,9 +87,8 @@ public class IntactParser {
     private Map<String, InteractorResource> interactorResourceMap = new HashMap<>();
 
     /**
-     * Parsing the fil
+     * Parsing the file
      *
-     * @param file
      */
     public void parser(String file) {
         try {
@@ -184,8 +184,6 @@ public class IntactParser {
     /**
      * A given interactorA and interactorB can have a list of different InteractionID.
      *
-     * @param line
-     * @return
      */
     public Interaction interactionFromFile(String[] line){
 
@@ -228,9 +226,8 @@ public class IntactParser {
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_B.value], interactorB);
 
         /** Create interaction **/
-        Interaction interaction = prepareInteractions(line, interactorA, interactorB);
+        return prepareInteractions(line, interactorA, interactorB);
 
-        return interaction;
     }
 
     private void parseTaxonomy(String value, Interactor interactor) {
@@ -285,8 +282,6 @@ public class IntactParser {
      * Alternative ID is the accession value.
      * Based on the alternative id - retrieves the interactor resource
      *
-     * @param value
-     * @param interactor
      */
     private void parseAlternativeIds(String value, Interactor interactor) {
         if (!value.equals("-")){ // not null
@@ -311,8 +306,6 @@ public class IntactParser {
     /**
      * Parsing the Aliases A and B for the identifiers. Separated by "|".
      *
-     * @param value
-     * @param interactor
      */
     private void parseAliases(String value, Interactor interactor) {
         if (!value.equals("-")){ // not null
@@ -350,8 +343,6 @@ public class IntactParser {
 
     /**
      *
-     * @param value
-     * @param interaction
      */
     private void parseConfidenceValue(String value, Interaction interaction) {
         if (!value.equals("-")){ // not null
@@ -359,14 +350,14 @@ public class IntactParser {
             for (String alternativeIds : alternativeIdsRaw) {
                 String[] alternativeId = alternativeIds.split(":");
                 if(alternativeId[0].equalsIgnoreCase(AUTHOR_SCORE_LABEL)){
-                    if(isNumeric(alternativeId[1])){
+                    if(Toolbox.isNumeric(alternativeId[1])){
                         interaction.setAuthorScore(new Double(alternativeId[1]));
                     }else {
                         parserErrorMessages.add("Interactor A [" + interaction.getInteractorA().getIntactId() + "] - Interactor B [" + interaction.getInteractorB().getIntactId() + "] - The author score is not a number [" + alternativeId[1] + "]");
                     }
                 }
                 if(alternativeId[0].equalsIgnoreCase(INTACT_SCORE_LABEL)){
-                    if(isNumeric(alternativeId[1])){
+                    if(Toolbox.isNumeric(alternativeId[1])){
                         interaction.setIntactScore(new Double(alternativeId[1]));
                     }else {
                         parserErrorMessages.add("Interactor A [" + interaction.getInteractorA().getIntactId() + "] - Interactor B [" + interaction.getInteractorB().getIntactId() + "] - The intact-miscore is not a number [" + alternativeId[1] + "]");
@@ -376,28 +367,6 @@ public class IntactParser {
         }
     }
 
-    /**
-     * Instead of calling the Double.valueOf(...) in a try-catch statement and many of the checks to fail due to
-     * not being a number then performance of this mechanism will not be great, since you're relying upon
-     * exceptions being thrown for each failure, which is a fairly expensive operation.
-     * <p>
-     * An alternative approach may be to use a regular expression to check for validity of being a number:
-     *
-     * @param str
-     * @return true if is Number
-     */
-    public boolean isNumeric(String str) {
-        if (str == null) {
-            return false;
-        }
-
-        return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.
-    }
-
-    public String getOutputFileMessages() {
-        return outputFileMessages;
-    }
-
     public void setOutputFileMessages(String outputFileMessages) {
         this.outputFileMessages = outputFileMessages;
     }
@@ -405,7 +374,6 @@ public class IntactParser {
     /**
      * Call parse
      * This is a standalone process that will generate an interactors database and
-     * @param args
      */
     public static void main(String[] args) throws JSAPException, IOException {
         long start = System.currentTimeMillis();

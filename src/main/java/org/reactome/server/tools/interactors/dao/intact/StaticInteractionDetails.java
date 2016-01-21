@@ -32,26 +32,21 @@ public class StaticInteractionDetails implements InteractionDetailsDAO {
     }
 
     public InteractionDetails create(InteractionDetails interactionDetails) throws SQLException {
-        try {
-            String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
-                    + "VALUES(?, ?)";
+        String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
+                + "VALUES(?, ?)";
 
-            PreparedStatement pstm = connection.prepareStatement(query);
-            pstm.setLong(1, interactionDetails.getInteractionId());
-            pstm.setString(2, interactionDetails.getInteractionAc());
+        PreparedStatement pstm = connection.prepareStatement(query);
+        pstm.setLong(1, interactionDetails.getInteractionId());
+        pstm.setString(2, interactionDetails.getInteractionAc());
 
-            if(pstm.executeUpdate() > 0) {
-                try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        interactionDetails.setId(generatedKeys.getLong(1));
-                    } else {
-                        throw new SQLException("Creating InteractorDetails failed, no ID obtained.");
-                    }
+        if(pstm.executeUpdate() > 0) {
+            try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    interactionDetails.setId(generatedKeys.getLong(1));
+                } else {
+                    throw new SQLException("Creating InteractorDetails failed, no ID obtained.");
                 }
             }
-
-        } finally {
-            //conn.close();
         }
 
         return interactionDetails;

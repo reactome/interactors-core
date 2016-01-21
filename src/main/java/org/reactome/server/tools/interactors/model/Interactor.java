@@ -1,7 +1,5 @@
 package org.reactome.server.tools.interactors.model;
 
-import java.sql.Timestamp;
-
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
@@ -21,12 +19,7 @@ public class Interactor {
     /**
      * Intact
      */
-    private Long interactorResourceId = new Long(0);
-
-    /**
-     * Timestamp
-     */
-    private Timestamp createDate;
+    private Long interactorResourceId = 0L;
 
     /**
      * Alternative ID for ID. In general they are UniprotID or RefSeq
@@ -81,14 +74,6 @@ public class Interactor {
         this.interactorResourceId = interactorResourceId;
     }
 
-    public Timestamp getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Timestamp createDate) {
-        this.createDate = createDate;
-    }
-
     public String getAlias() {
         return alias;
     }
@@ -103,7 +88,6 @@ public class Interactor {
                 "id=" + id +
                 ", intactId='" + intactId + '\'' +
                 ", interactorResourceId=" + interactorResourceId +
-                ", createDate=" + createDate +
                 ", acc='" + acc + '\'' +
                 ", alias='" + alias + '\'' +
                 '}';

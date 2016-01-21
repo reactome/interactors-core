@@ -5,6 +5,7 @@ import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
 import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistryClient;
 import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
 import org.reactome.server.tools.interactors.dao.PsicquicDAO;
+import org.reactome.server.tools.interactors.dao.psicquic.InteractionClusterImpl;
 import org.reactome.server.tools.interactors.dao.psicquic.InteractionImpl;
 import org.reactome.server.tools.interactors.model.*;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class PsicquicService {
     PsicquicDAO psicquicDAO;
 
     public PsicquicService(){
-       psicquicDAO  = new InteractionImpl();
+       psicquicDAO  = new InteractionClusterImpl();
     }
 
     public List<Interaction> getInteractions(String resource, String acc){
@@ -45,6 +46,7 @@ public class PsicquicService {
                 p.setName(service.getName());
                 p.setRestURL(service.getRestUrl());
                 p.setSoapURL(service.getSoapUrl());
+
                 registries.add(p);
             }
 
@@ -52,6 +54,7 @@ public class PsicquicService {
         } catch (PsicquicRegistryClientException e) {
             e.printStackTrace();
         }
+
         return  registries;
 
     }

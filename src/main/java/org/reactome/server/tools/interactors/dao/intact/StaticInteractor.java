@@ -29,35 +29,31 @@ public class StaticInteractor implements InteractorDAO {
     }
 
     public Interactor create(Interactor interactor) throws SQLException {
-        try {
-            String insert = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
-                    + "VALUES(?, ?, ?, ?, ?)";
 
-            PreparedStatement pstm = connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
-            pstm.setString(1, interactor.getAcc());
-            pstm.setString(2, interactor.getIntactId());
-            pstm.setLong(3, interactor.getInteractorResourceId());
-            pstm.setString(4, interactor.getAlias());
-            Integer taxId = interactor.getTaxid();
-            if (taxId == null) {
-                logger.error("TaxId is null for " + interactor.toString());
-                taxId = -1;
-            }
-            pstm.setInt(5, taxId);
+        String insert = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
+                + "VALUES(?, ?, ?, ?, ?)";
+
+        PreparedStatement pstm = connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
+        pstm.setString(1, interactor.getAcc());
+        pstm.setString(2, interactor.getIntactId());
+        pstm.setLong(3, interactor.getInteractorResourceId());
+        pstm.setString(4, interactor.getAlias());
+        Integer taxId = interactor.getTaxid();
+        if (taxId == null) {
+            logger.error("TaxId is null for " + interactor.toString());
+            taxId = -1;
+        }
+        pstm.setInt(5, taxId);
 
 
-            if(pstm.executeUpdate() > 0) {
-                try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        interactor.setId(generatedKeys.getLong(1));
-                    } else {
-                        throw new SQLException("Creating Interactor failed, no ID obtained.");
-                    }
+        if(pstm.executeUpdate() > 0) {
+            try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    interactor.setId(generatedKeys.getLong(1));
+                } else {
+                    throw new SQLException("Creating Interactor failed, no ID obtained.");
                 }
             }
-
-        } finally {
-            //connection.close();
         }
 
         return interactor;
@@ -75,16 +71,12 @@ public class StaticInteractor implements InteractorDAO {
                 " FROM " + TABLE +
                 " WHERE ID = ?";
 
-        try {
-            PreparedStatement pstm = connection.prepareStatement(query);
-            pstm.setString(1, id);
+        PreparedStatement pstm = connection.prepareStatement(query);
+        pstm.setString(1, id);
 
-            ResultSet rs = pstm.executeQuery();
-            if (rs.next()) {
-                ret = buildInteractor(rs);
-            }
-        } finally {
-            //connection.close();
+        ResultSet rs = pstm.executeQuery();
+        if (rs.next()) {
+            ret = buildInteractor(rs);
         }
 
         return ret;
@@ -97,16 +89,12 @@ public class StaticInteractor implements InteractorDAO {
                 " FROM " + TABLE +
                 " WHERE ACC = ?";
 
-        try {
-            PreparedStatement pstm = connection.prepareStatement(query);
-            pstm.setString(1, acc);
+        PreparedStatement pstm = connection.prepareStatement(query);
+        pstm.setString(1, acc);
 
-            ResultSet rs = pstm.executeQuery();
-            if (rs.next()) {
-                ret = buildInteractor(rs);
-            }
-        } finally {
-            //connection.close();
+        ResultSet rs = pstm.executeQuery();
+        if (rs.next()) {
+            ret = buildInteractor(rs);
         }
 
         return ret;
@@ -125,46 +113,34 @@ public class StaticInteractor implements InteractorDAO {
                         " FROM " + TABLE +
                         " WHERE ACC IN (?, ?)";
 
-        try {
-            PreparedStatement pstm = connection.prepareStatement(query);
-            pstm.setString(1, interactorA.getAcc());
-            pstm.setString(2, interactorB.getAcc());
+        PreparedStatement pstm = connection.prepareStatement(query);
+        pstm.setString(1, interactorA.getAcc());
+        pstm.setString(2, interactorB.getAcc());
 
-            ResultSet rs = pstm.executeQuery();
-            while (rs.next()) {
-                /**
-                 * Can't predict the query result order in the IN-clause, it means, can't figure out
-                 * which is A or B, so the if clause is checking that and setting the object by reference.
-                 * If interactor ID remains null, then it does not exist in the database.
-                 */
-                Interactor tempInteractor = buildInteractor(rs);
+        ResultSet rs = pstm.executeQuery();
+        while (rs.next()) {
+            /**
+             * Can't predict the query result order in the IN-clause, it means, can't figure out
+             * which is A or B, so the if clause is checking that and setting the object by reference.
+             * If interactor ID remains null, then it does not exist in the database.
+             */
+            Interactor tempInteractor = buildInteractor(rs);
 
-                if(interactorA.getAcc().equals(interactorB.getAcc())){
+            if(interactorA.getAcc().equals(interactorB.getAcc())){
+                interactorA.setId(tempInteractor.getId());
+                interactorB.setId(tempInteractor.getId());
+            }else {
+                // is A
+                if (tempInteractor.getAcc().equals(interactorA.getAcc())) {
                     interactorA.setId(tempInteractor.getId());
-                    interactorB.setId(tempInteractor.getId());
-                }else {
-                    // is A
-                    if (tempInteractor.getAcc().equals(interactorA.getAcc())) {
-                        interactorA.setId(tempInteractor.getId());
-                    }
-
-                    // is B
-                    if (tempInteractor.getAcc().equals(interactorB.getAcc())) {
-                        interactorB.setId(tempInteractor.getId());
-                    }
                 }
 
+                // is B
+                if (tempInteractor.getAcc().equals(interactorB.getAcc())) {
+                    interactorB.setId(tempInteractor.getId());
+                }
             }
-
-        } finally {
-            //connection.close();
         }
-
-    }
-
-    public boolean exists(String acc) throws SQLException {
-        Interactor i = getByAccession(acc);
-        return (i != null);
     }
 
     public boolean delete(String id) throws SQLException {
@@ -186,21 +162,16 @@ public class StaticInteractor implements InteractorDAO {
     }
 
     public List<Interactor> getAll() throws SQLException {
-        List<Interactor> ret = new ArrayList<Interactor>();
+        List<Interactor> ret = new ArrayList<>();
 
         String query = "SELECT " + ALL_COLUMNS_SEL +
                 " FROM " + TABLE;
 
-        try {
-            PreparedStatement pstm = connection.prepareStatement(query);
-            ResultSet rs = pstm.executeQuery();
-            while (rs.next()) {
-                Interactor interactor = buildInteractor(rs);
-                ret.add(interactor);
-            }
-
-        } finally {
-            //connection.close();
+        PreparedStatement pstm = connection.prepareStatement(query);
+        ResultSet rs = pstm.executeQuery();
+        while (rs.next()) {
+            Interactor interactor = buildInteractor(rs);
+            ret.add(interactor);
         }
 
         return ret;
@@ -224,14 +195,10 @@ public class StaticInteractor implements InteractorDAO {
 
         String query = "SELECT ACC FROM " + TABLE;
 
-        try {
-            PreparedStatement pstm = connection.prepareStatement(query);
-            ResultSet rs = pstm.executeQuery();
-            while (rs.next()) {
-                ret.add(rs.getString("ACC"));
-            }
-        } finally {
-            //connection.close();
+        PreparedStatement pstm = connection.prepareStatement(query);
+        ResultSet rs = pstm.executeQuery();
+        while (rs.next()) {
+            ret.add(rs.getString("ACC"));
         }
 
         return ret;

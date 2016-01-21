@@ -1,12 +1,13 @@
 package org.reactome.server.tools.interactors.model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-public class Interaction {
+public class Interaction implements Comparable<Interaction> {
 
     /**
      * Internal autoincrement identifier
@@ -17,7 +18,7 @@ public class Interaction {
     private Interactor interactorB;
 
     private double authorScore;
-    private double intactScore;
+    private Double intactScore;
 
     private Long interactionResourceId;
 
@@ -70,11 +71,11 @@ public class Interaction {
         this.authorScore = authorScore;
     }
 
-    public double getIntactScore() {
+    public Double getIntactScore() {
         return intactScore;
     }
 
-    public void setIntactScore(double intactScore) {
+    public void setIntactScore(Double intactScore) {
         this.intactScore = intactScore;
     }
 
@@ -94,5 +95,10 @@ public class Interaction {
                 ", interactorB=" + interactorB +
                 ", interactionDetailsList=" + interactionDetailsList +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Interaction o) {
+        return this.intactScore.compareTo(o.intactScore);
     }
 }

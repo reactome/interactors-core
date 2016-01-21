@@ -6,7 +6,6 @@ import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
 import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistryClient;
 import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
 import org.hupo.psi.mi.psicquic.wsclient.PsicquicClientException;
-import org.hupo.psi.mi.psicquic.wsclient.QueryOperand;
 import org.hupo.psi.mi.psicquic.wsclient.UniversalPsicquicClient;
 import org.hupo.psi.mi.psicquic.wsclient.result.MitabSearchResult;
 import org.junit.Before;
@@ -102,8 +101,6 @@ public class TestPsicquic {
      * Second: psi-mi
      * Third: The first instance
      *
-     * @param confidenceValues
-     * @return
      */
     private String getConfidenceValue(List confidenceValues) {
         String intactScore = "";
@@ -139,8 +136,6 @@ public class TestPsicquic {
      * Second: psi-mi
      * Third: The first instance
      *
-     * @param aliases
-     * @return
      */
     private String getAlias(List<Alias> aliases) {
         String uniprotAlias = "";

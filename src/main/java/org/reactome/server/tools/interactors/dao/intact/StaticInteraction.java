@@ -32,28 +32,24 @@ public class StaticInteraction implements InteractionDAO {
     }
 
     public Interaction create(Interaction interaction) throws SQLException {
-        try {
-            String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
-                    + "VALUES(?, ?, ?, ?, ?)";
+        String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
+                + "VALUES(?, ?, ?, ?, ?)";
 
-            PreparedStatement pstm = connection.prepareStatement(query);
-            pstm.setLong(1, interaction.getInteractorA().getId());
-            pstm.setLong(2, interaction.getInteractorB().getId());
-            pstm.setDouble(3, interaction.getAuthorScore());
-            pstm.setDouble(4, interaction.getIntactScore());
-            pstm.setLong(5, interaction.getInteractionResourceId());
+        PreparedStatement pstm = connection.prepareStatement(query);
+        pstm.setLong(1, interaction.getInteractorA().getId());
+        pstm.setLong(2, interaction.getInteractorB().getId());
+        pstm.setDouble(3, interaction.getAuthorScore());
+        pstm.setDouble(4, interaction.getIntactScore());
+        pstm.setLong(5, interaction.getInteractionResourceId());
 
-            if (pstm.executeUpdate() > 0) {
-                try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        interaction.setId(generatedKeys.getLong(1));
-                    } else {
-                        throw new SQLException("Creating Interaction failed, no ID obtained.");
-                    }
+        if (pstm.executeUpdate() > 0) {
+            try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    interaction.setId(generatedKeys.getLong(1));
+                } else {
+                    throw new SQLException("Creating Interaction failed, no ID obtained.");
                 }
             }
-        } finally {
-            //conn.close();
         }
 
         return interaction;
@@ -181,8 +177,6 @@ public class StaticInteraction implements InteractionDAO {
             logger.error("An error has occurred during interaction batch insert. Please check the following exception.");
             throw new SQLException(e);
 
-        } finally {
-            //conn.close();
         }
 
         return interactions;
@@ -239,8 +233,6 @@ public class StaticInteraction implements InteractionDAO {
             logger.error("An error has occurred during interaction batch insert. Please check the following exception.");
             throw new SQLException(e);
 
-        } finally {
-            //conn.close();
         }
 
         return interactions;
@@ -289,8 +281,6 @@ public class StaticInteraction implements InteractionDAO {
             logger.error("An error has occurred during interaction batch insert. Please check the following exception.");
             throw new SQLException(e);
 
-        } finally {
-            //conn.close();
         }
 
         return interactionsCountMap;
@@ -301,9 +291,6 @@ public class StaticInteraction implements InteractionDAO {
      * To reuse it make sure you are using the same alias in your query when projecting columns
      * e.g  select INTERACTOR.ID AS 'ID_A', and so on.
      *
-     * @param acc
-     * @param rs
-     * @return
      * @throws SQLException
      */
     private Interaction buildInteractionByAccession(String acc, ResultSet rs) throws SQLException {
@@ -351,9 +338,6 @@ public class StaticInteraction implements InteractionDAO {
      * To reuse it make sure you are using the same alias in your query when projecting columns
      * e.g  select INTERACTOR.ID AS 'ID_A', and so on.
      *
-     * @param intactId
-     * @param rs
-     * @return
      * @throws SQLException
      */
     private Interaction buildInteractionByIntactId(String intactId, ResultSet rs) throws SQLException {

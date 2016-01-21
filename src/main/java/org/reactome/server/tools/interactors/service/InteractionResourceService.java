@@ -2,11 +2,8 @@ package org.reactome.server.tools.interactors.service;
 
 import org.reactome.server.tools.interactors.dao.InteractionResourceDAO;
 import org.reactome.server.tools.interactors.dao.intact.StaticInteractionResource;
-import org.reactome.server.tools.interactors.dao.intact.StaticInteractor;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.InteractionResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -20,8 +17,6 @@ import java.util.Map;
 
 public class InteractionResourceService {
 
-    final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
-
     public InteractionResourceDAO interactionResourceDAO;
 
     public InteractionResourceService(InteractorsDatabase database){
@@ -30,7 +25,6 @@ public class InteractionResourceService {
 
     /**
      * Retrieves a list of all interaction Resources
-     * @return
      * @throws SQLException
      */
     public List<InteractionResource> getAll() throws SQLException {

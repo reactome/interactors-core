@@ -10,16 +10,4 @@ public class InvalidInteractionResourceException extends Exception {
         super();
     }
 
-    public InvalidInteractionResourceException(String message) {
-        super(message);
-    }
-
-    public InvalidInteractionResourceException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidInteractionResourceException(Throwable cause) {
-        super(cause);
-    }
-
 }

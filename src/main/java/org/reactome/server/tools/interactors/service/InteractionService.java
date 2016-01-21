@@ -21,8 +21,6 @@ import java.util.*;
 
 public class InteractionService {
 
-    //final Logger logger = LoggerFactory.getLogger(InteractionService.class);
-
     private InteractionDAO interactionDAO;
     private InteractionDetailsDAO interactionDetailsDAO;
     private InteractionResourceDAO interactionResourceDAO;
@@ -36,8 +34,6 @@ public class InteractionService {
     /**
      * Get a list of interactions of a given accession and resource
      *
-     * @param accs
-     * @param resource
      * @return List of Interactons
      * @throws InvalidInteractionResourceException
      * @throws SQLException
@@ -60,8 +56,6 @@ public class InteractionService {
 
     /**
      * Get all interactions of a given accession and resource
-     * @param acc
-     * @param resource
      * @return Map of accession as key and its interactions
      * @throws InvalidInteractionResourceException
      * @throws SQLException
@@ -76,8 +70,6 @@ public class InteractionService {
     /**
      * Get all interactions of a given accession and resource
      *
-     * @param accs
-     * @param resource
      * @return Map of accession as key and its interactions
      * @throws InvalidInteractionResourceException
      * @throws SQLException
@@ -88,10 +80,6 @@ public class InteractionService {
 
     /**
      * Get paginated interactions of a given accession and resource
-     * @param acc
-     * @param resource
-     * @param page
-     * @param pageSize
      * @return Map of accession as key and its interactions
      * @throws InvalidInteractionResourceException
      * @throws SQLException
@@ -105,8 +93,6 @@ public class InteractionService {
 
     /**
      * Get interactions of a given list of accession and resource
-     * @param accs
-     * @param resource
      * @return Map of accession as key and its interactions
      * @throws InvalidInteractionResourceException
      * @throws SQLException
@@ -138,8 +124,6 @@ public class InteractionService {
 
     /**
      * Count interaction by accession
-     * @param acc
-     * @param resource
      * @return Map of accession and count
      * @throws InvalidInteractionResourceException
      * @throws SQLException
@@ -153,8 +137,6 @@ public class InteractionService {
 
     /**
      * Count interaction by accession list
-     * @param accs
-     * @param resource
      * @return Map of accession and count
      * @throws InvalidInteractionResourceException
      * @throws SQLException
@@ -172,8 +154,6 @@ public class InteractionService {
 
     /**
      * Get all interactions of Intact Identifier and resource
-     * @param intactId
-     * @param resource
      * @return Map of accession as key and its interactions
      * @throws InvalidInteractionResourceException
      * @throws SQLException
@@ -188,8 +168,6 @@ public class InteractionService {
     /**
      * Get all interactions of Intact Identifier and resource
      *
-     * @param intactIdList
-     * @param resource
      * @return Map of accession as key and its interactions
      * @throws InvalidInteractionResourceException
      * @throws SQLException
@@ -200,10 +178,6 @@ public class InteractionService {
 
     /**
      * Get paginated interactions of Intact Identifier and resource
-     * @param intactId
-     * @param resource
-     * @param page
-     * @param pageSize
      * @return Map of accession as key and its interactions
      * @throws InvalidInteractionResourceException
      * @throws SQLException
@@ -217,8 +191,6 @@ public class InteractionService {
 
     /**
      * Get interactions of a given list of Intact Identifier and resource
-     * @param intactIdList
-     * @param resource
      * @return Map of Intact Identifier as key and its interactions
      * @throws InvalidInteractionResourceException
      * @throws SQLException

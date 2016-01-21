@@ -51,7 +51,6 @@ public class InteractionParserService {
      * 3-Create InteractionDetails in a batch inserter.
      *    (One interaction can have multiple InteractionID - interaction details holds this)
      *
-     * @param interactionList
      * @throws SQLException
      */
     public void save(List<Interaction> interactionList) throws SQLException {

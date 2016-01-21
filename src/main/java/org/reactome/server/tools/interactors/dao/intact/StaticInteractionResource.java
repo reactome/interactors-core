@@ -51,16 +51,11 @@ public class StaticInteractionResource implements InteractionResourceDAO {
         String query = "SELECT " + ALL_COLUMNS_SEL +
                         " FROM " + TABLE;
 
-        try {
-            PreparedStatement pstm = connection.prepareStatement(query);
-            ResultSet rs = pstm.executeQuery();
-            while (rs.next()) {
-                InteractionResource interactionResource = buildInteractionResource(rs);
-                ret.add(interactionResource);
-            }
-
-        } finally {
-            //connection.close();
+        PreparedStatement pstm = connection.prepareStatement(query);
+        ResultSet rs = pstm.executeQuery();
+        while (rs.next()) {
+            InteractionResource interactionResource = buildInteractionResource(rs);
+            ret.add(interactionResource);
         }
 
         return ret;
@@ -76,21 +71,17 @@ public class StaticInteractionResource implements InteractionResourceDAO {
                         " FROM " + TABLE +
                         " WHERE LOWER(name) = ?";
 
-        try {
-            PreparedStatement pstm = connection.prepareStatement(query);
-            pstm.setString(1,name.toLowerCase());
+        PreparedStatement pstm = connection.prepareStatement(query);
+        pstm.setString(1,name.toLowerCase());
 
-            ResultSet rs = pstm.executeQuery();
-            if (rs.next()) {
-                interactionResource = buildInteractionResource(rs);
-            }
-
-        } finally {
-            //connection.close();
+        ResultSet rs = pstm.executeQuery();
+        if (rs.next()) {
+            interactionResource = buildInteractionResource(rs);
         }
 
         return interactionResource;
     }
+    
     public boolean delete(String id) throws SQLException {
         return false;
     }
