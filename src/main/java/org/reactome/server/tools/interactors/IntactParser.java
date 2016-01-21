@@ -254,7 +254,7 @@ public class IntactParser {
         interaction.setInteractorA(interactorA);
         interaction.setInteractorB(interactorB);
 
-        Long intactResourceId = interactionResourceMap.get("intact").getId();
+        Long intactResourceId = interactionResourceMap.get("static").getId();
         interaction.setInteractionResourceId(intactResourceId);
 
         parseConfidenceValue(line[ParserIndex.CONFIDENCE_VALUE.value], interaction);

@@ -49,7 +49,7 @@ public class QueryStatement {
     public static String INSERT_INTERACTOR_RESOURCE_UNIPROT = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('UniProtKB','http://www.uniprot.org/uniprot/##ID##')";
     public static String INSERT_INTERACTOR_RESOURCE_CHEBI = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('ChEBI','https://www.ebi.ac.uk/chebi/searchId.do?chebiId=##ID##')";
 
-    public static String INSERT_INTERACTION_RESOURCE_INTACT = "INSERT OR REPLACE INTO INTERACTION_RESOURCE (NAME, URL) VALUES ('IntAct','http://www.ebi.ac.uk/intact/interaction/##ID##')";
+    public static String INSERT_INTERACTION_RESOURCE_STATIC = "INSERT OR REPLACE INTO INTERACTION_RESOURCE (NAME, URL) VALUES ('static','http://www.ebi.ac.uk/intact/interaction/##ID##')";
 
     /** CREATE INDEX STATEMENTS **/
     public static String CREATE_INTERACTOR_ACC_INDEX = "CREATE INDEX INTERACTOR_ACC_IDX ON INTERACTOR (ACC)";

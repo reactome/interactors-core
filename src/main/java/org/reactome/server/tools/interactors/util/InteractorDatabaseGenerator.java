@@ -46,7 +46,7 @@ public class InteractorDatabaseGenerator {
 
             /** Pre-populate tables **/
             logger.info("Populate table interaction resource");
-            statement.executeUpdate(QueryStatement.INSERT_INTERACTION_RESOURCE_INTACT);
+            statement.executeUpdate(QueryStatement.INSERT_INTERACTION_RESOURCE_STATIC);
 
             logger.info("Populate table interactor resource");
             statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_UNDEFINED);
