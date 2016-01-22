@@ -393,11 +393,15 @@ public class IntactParser {
                         "Folder to save the downloaded file")
                         , new FlaggedOption("output", JSAP.STRING_PARSER, "/tmp/parser-messages.txt", JSAP.NOT_REQUIRED, 'o', "output",
                         "Output parser file messages")
+                        , new FlaggedOption("interactors-database-path", JSAP.STRING_PARSER, null, JSAP.REQUIRED, 'g', "interactors-database-path",
+                        "Interactor Database Path")
                 }
         );
 
-        //TODO: add as a required parameter
-        String database = "/Users/reactome/interactors/interactors.db";
+        JSAPResult config = jsap.parse(args);
+        if (jsap.messagePrinted()) System.exit(1);
+
+        String database = config.getString("interactors-database-path");
         InteractorsDatabase interactors = null;
         try {
             interactors = new InteractorsDatabase(database);
@@ -406,9 +410,6 @@ public class IntactParser {
         }
         IntactParser intactParser = new IntactParser(interactors);
         intactParser.cacheResources();
-
-        JSAPResult config = jsap.parse(args);
-        if (jsap.messagePrinted()) System.exit(1);
 
         String file = config.getString("file");
         boolean download = config.getBoolean("download");

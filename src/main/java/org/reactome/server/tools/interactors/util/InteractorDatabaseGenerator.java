@@ -1,5 +1,6 @@
 package org.reactome.server.tools.interactors.util;
 
+import com.martiansoftware.jsap.*;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,15 +70,31 @@ public class InteractorDatabaseGenerator {
         }
     }
 
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) throws JSAPException, ClassNotFoundException {
         // we can always start from a temp db and rename later on to a final...
+
+        SimpleJSAP jsap = new SimpleJSAP(
+                InteractorDatabaseGenerator.class.getName(),
+                "A tool for creating Interactors Database, table generation and initial data.",
+                new Parameter[]{
+                        new FlaggedOption("interactors-database-path", JSAP.STRING_PARSER, null, JSAP.REQUIRED, 'g', "interactors-database-path",
+                        "Interactor Database Path")
+                }
+        );
+
+        JSAPResult config = jsap.parse(args);
+        if (jsap.messagePrinted()) System.exit(1);
+
+        String database = config.getString("interactors-database-path");
+        InteractorsDatabase interactors;
         try {
-            String file = "/Users/reactome/interactors/interactors.db";
-            InteractorsDatabase interactors = new InteractorsDatabase(file);
+            interactors = new InteractorsDatabase(database);
             generateNewDatabase(interactors.getConnection());
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
     }
 }
 

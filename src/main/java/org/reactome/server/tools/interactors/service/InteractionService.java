@@ -25,7 +25,7 @@ public class InteractionService {
     private InteractionDetailsDAO interactionDetailsDAO;
     private InteractionResourceDAO interactionResourceDAO;
 
-    private InteractionService(InteractorsDatabase database){
+    public InteractionService(InteractorsDatabase database){
         this.interactionDAO = new StaticInteraction(database);
         this.interactionDetailsDAO = new StaticInteractionDetails(database);
         this.interactionResourceDAO = new StaticInteractionResource(database);

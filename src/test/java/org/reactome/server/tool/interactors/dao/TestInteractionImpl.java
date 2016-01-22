@@ -26,7 +26,7 @@ public class TestInteractionImpl {
 
     @Before
     public void setUp() {
-        String file = "/Users/reactome/interactors/interactors3.db";
+        String file = "/Users/reactome/interactors/interactors.db";
         InteractorsDatabase interactors = null;
         try {
             interactors = new InteractorsDatabase(file);
