@@ -1,14 +1,14 @@
 package org.reactome.server.tools.interactors.service;
 
-import org.hupo.psi.mi.psicquic.registry.ServiceType;
-import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
-import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistryClient;
-import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
 import org.reactome.server.tools.interactors.dao.PsicquicDAO;
 import org.reactome.server.tools.interactors.dao.psicquic.InteractionClusterImpl;
-import org.reactome.server.tools.interactors.model.*;
+import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
+import org.reactome.server.tools.interactors.model.Interaction;
+import org.reactome.server.tools.interactors.model.PsicquicResource;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -16,45 +16,22 @@ import java.util.*;
 
 public class PsicquicService {
 
-    PsicquicDAO psicquicDAO;
+    private PsicquicDAO psicquicDAO;
 
     public PsicquicService(){
        psicquicDAO  = new InteractionClusterImpl();
     }
 
-    public List<Interaction> getInteractions(String resource, String acc){
-        return psicquicDAO.getInteraction(resource, acc);
-    }
-
-    public Map<String, List<Interaction>> getInteractions(String resource, Collection<String> accs){
+    public Map<String, List<Interaction>> getInteractions(String resource, Collection<String> accs) throws PsicquicInteractionClusterException {
         return psicquicDAO.getInteraction(resource, accs);
     }
 
-    public List<PsicquicResource> getResources(){
-        PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
+    public List<PsicquicResource> getResources() throws PsicquicInteractionClusterException {
+        return psicquicDAO.getResources();
+    }
 
-        List<PsicquicResource> resourceList = new ArrayList<>();
-
-        try {
-            List<ServiceType> services = registryClient.listServices();
-            for (ServiceType service : services) {
-                PsicquicResource p = new PsicquicResource();
-                p.setActive(service.isActive());
-                p.setName(service.getName());
-                p.setRestURL(service.getRestUrl());
-                p.setSoapURL(service.getSoapUrl());
-
-                resourceList.add(p);
-            }
-
-
-        } catch (PsicquicRegistryClientException e) {
-            e.printStackTrace();
-        }
-
-        Collections.sort(resourceList);
-        return  resourceList;
-
+    public Map<String, Integer> countInteraction(String resource, Collection<String> accs) throws PsicquicInteractionClusterException {
+        return psicquicDAO.countInteraction(resource, accs);
     }
 
 }

@@ -5,8 +5,10 @@ import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
 import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistryClient;
 import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
 import org.reactome.server.tools.interactors.dao.PsicquicDAO;
+import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.Interactor;
+import org.reactome.server.tools.interactors.model.PsicquicResource;
 import org.reactome.server.tools.interactors.model.psicquic.GenericClient;
 import org.reactome.server.tools.interactors.model.psicquic.PsicquicClient;
 import psidev.psi.mi.tab.PsimiTabException;
@@ -27,77 +29,143 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
     private static final Double MINIMUM_VALID_SCORE = 0.45;
 
-    private final String QUERY_METHOD = "interactor";
+    public Map<String, List<Interaction>> getInteraction(String resource, Collection<String> accs) throws PsicquicInteractionClusterException {
+        Map<String, List<Interaction>> ret = new HashMap<>();
 
-    @Override
-    public List<Interaction> getInteraction(String resource, String acc) {
+        for (String acc : accs) {
+            List<Interaction> interactions = new ArrayList<>();
 
-        return null;
+            InteractionClusterScore interactionClusterScore = getInteractionClusterScore(resource, acc);
+
+            /* Retrieve results */
+            Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
+
+            for (Integer key : interactionMapping.keySet()) {
+                EncoreInteraction encoreInteraction = interactionMapping.get(key);
+
+                PsicquicClient psicquicClient = new GenericClient(resource);
+
+                Interaction interaction = psicquicClient.getInteraction(encoreInteraction);
+
+                /** make sure the acc in the search is always on link A **/
+                if (!acc.equals(interaction.getInteractorA().getAcc())) {
+                    Interactor tempA = interaction.getInteractorA();
+
+                    interaction.setInteractorA(interaction.getInteractorB());
+                    interaction.setInteractorB(tempA);
+                }
+
+                if(interaction.getIntactScore() >= MINIMUM_VALID_SCORE) {
+                    interactions.add(interaction);
+                }
+            }
+
+            Collections.sort(interactions);
+            Collections.reverse(interactions);
+
+            ret.put(acc, interactions);
+
+        }
+
+        return ret;
+
     }
 
-    @Override
-    public Map<String, List<Interaction>> getInteraction(String resource, Collection<String> accs) {
-        Map<String, List<Interaction>> ret = new HashMap<>();
+    public Map<String, Integer> countInteraction(String resource, Collection<String> accs) throws PsicquicInteractionClusterException {
+        Map<String, Integer> ret = new HashMap<>();
+
+        for (String acc : accs) {
+
+            /** Run cluster using list of binary interactions as input **/
+            InteractionClusterScore interactionClusterScore = getInteractionClusterScore(resource, acc);
+
+            /* Retrieve results */
+            Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
+
+            int countInteractionsAboveThreshold = 0;
+
+            for (Integer key : interactionMapping.keySet()) {
+                EncoreInteraction encoreInteraction = interactionMapping.get(key);
+
+                PsicquicClient psicquicClient = new GenericClient(resource);
+
+                Interaction interaction = psicquicClient.getInteraction(encoreInteraction);
+                if(interaction.getIntactScore() >= MINIMUM_VALID_SCORE) {
+                    countInteractionsAboveThreshold++;
+                }
+            }
+
+            ret.put(acc, countInteractionsAboveThreshold);
+
+        }
+
+        return ret;
+
+    }
+
+    /**
+     * @return Psicquic Resources sorted by name
+     * @throws PsicquicInteractionClusterException
+     */
+    public List<PsicquicResource> getResources() throws PsicquicInteractionClusterException {
+        PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
+
+        List<PsicquicResource> resourceList = new ArrayList<>();
+
+        try {
+            List<ServiceType> services = registryClient.listServices();
+            for (ServiceType service : services) {
+                PsicquicResource p = new PsicquicResource();
+                p.setActive(service.isActive());
+                p.setName(service.getName());
+                p.setRestURL(service.getRestUrl());
+                p.setSoapURL(service.getSoapUrl());
+
+                resourceList.add(p);
+            }
+
+        } catch (PsicquicRegistryClientException e) {
+            throw new PsicquicInteractionClusterException(e);
+        }
+
+        Collections.sort(resourceList);
+
+        return  resourceList;
+    }
+
+    /**
+     * Helper method that create the InteractionClusterScore.
+     *
+     * @throws PsicquicInteractionClusterException
+     */
+    private InteractionClusterScore getInteractionClusterScore(String resource, String acc) throws PsicquicInteractionClusterException {
+        final String queryMethod = "interactor/";
 
         try {
             /** Get PsicquicResource **/
             PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
             ServiceType service = registryClient.getService(resource);
 
-            for (String acc : accs) {
-                List<Interaction> interactions = new ArrayList<>();
+            /** Build service URL **/
+            String queryRestUrl = service.getRestUrl().concat(queryMethod).concat(acc);
 
-                /** Build service URL **/
-                String queryRestUrl = service.getRestUrl().concat(QUERY_METHOD).concat("/").concat(acc);
+            /** Get binaryInteractions from PSI-MI files **/
+            URL url = new URL(queryRestUrl);
 
-                /** Get binaryInteractions from PSI-MI files **/
-                URL url = new URL(queryRestUrl);
+            List<BinaryInteraction> binaryInteractions = new ArrayList<>();
 
-                List<BinaryInteraction> binaryInteractions = new ArrayList<>();
+            PsimiTabReader mitabReader = new PsimiTabReader();
+            binaryInteractions.addAll(mitabReader.read(url));
 
-                PsimiTabReader mitabReader = new PsimiTabReader();
-                binaryInteractions.addAll(mitabReader.read(url));
+            /** Run cluster using list of binary interactions as input **/
+            InteractionClusterScore interactionClusterScore = new InteractionClusterScore();
+            interactionClusterScore.setBinaryInteractionIterator(binaryInteractions.iterator());
+            interactionClusterScore.runService();
 
-                /** Run cluster using list of binary interactions as input **/
-                InteractionClusterScore interactionClusterScore = new InteractionClusterScore();
-                interactionClusterScore.setBinaryInteractionIterator(binaryInteractions.iterator());
-                interactionClusterScore.runService();
-
-                /* Retrieve results */
-                Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
-
-                for (Integer key : interactionMapping.keySet()) {
-                    EncoreInteraction encoreInteraction = interactionMapping.get(key);
-
-                    PsicquicClient psicquicClient = new GenericClient(resource);
-
-                    Interaction interaction = psicquicClient.getInteraction(encoreInteraction);
-
-                    /** make sure the acc in the search is always on link A **/
-                    if (!acc.equals(interaction.getInteractorA().getAcc())) {
-                        Interactor tempA = interaction.getInteractorA();
-
-                        interaction.setInteractorA(interaction.getInteractorB());
-                        interaction.setInteractorB(tempA);
-                    }
-
-                    if(interaction.getIntactScore() >= MINIMUM_VALID_SCORE) {
-                        interactions.add(interaction);
-                    }
-                }
-
-                Collections.sort(interactions);
-                Collections.reverse(interactions);
-
-                ret.put(acc, interactions);
-
-            }
+            return interactionClusterScore;
 
         } catch (IOException | PsimiTabException | PsicquicRegistryClientException e) {
-            e.printStackTrace();
+            throw new PsicquicInteractionClusterException(e);
         }
-
-        return ret;
-
     }
 }

@@ -25,7 +25,6 @@ public class InteractorResourceService {
 
     /**
      * Retrieves all Interactor Resources from database
-     * @return
      * @throws SQLException
      */
     public List<InteractorResource> getAll() throws SQLException {
@@ -36,7 +35,6 @@ public class InteractorResourceService {
      * Retrieve all interactor resource into a Map data structure having
      * the unique db id as the key
      *
-     * @return
      * @throws SQLException
      */
     public Map<Long, InteractorResource> getAllMappedById() throws SQLException {
@@ -52,7 +50,6 @@ public class InteractorResourceService {
     /**
      * Retrieve all interactor resource into a Map data structure having
      * the name as the key
-     * @return
      * @throws SQLException
      */
     public Map<String, InteractorResource> getAllMappedByName() throws SQLException {
