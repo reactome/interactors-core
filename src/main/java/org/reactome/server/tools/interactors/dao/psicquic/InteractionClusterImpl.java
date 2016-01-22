@@ -25,6 +25,8 @@ import java.util.*;
 
 public class InteractionClusterImpl implements PsicquicDAO {
 
+    private static final Double MINIMUM_VALID_SCORE = 0.45;
+
     private final String QUERY_METHOD = "interactor";
     private final String COMPRESSED = "compressed=true";
     private final String FIRST_PARAMETER = "?";
@@ -40,7 +42,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
         Map<String, List<Interaction>> ret = new HashMap<>();
 
         try {
-            /** Get PsicquicRegistry **/
+            /** Get PsicquicResource **/
             PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
             ServiceType service = registryClient.getService(resource);
 
@@ -81,8 +83,9 @@ public class InteractionClusterImpl implements PsicquicDAO {
                         interaction.setInteractorB(tempA);
                     }
 
-                    interactions.add(interaction);
-
+                    if(interaction.getIntactScore() >= MINIMUM_VALID_SCORE) {
+                        interactions.add(interaction);
+                    }
                 }
 
                 Collections.sort(interactions);
