@@ -31,7 +31,7 @@ public class TestPsicquicClustering {
 //            URL intactQuery = new URL("http://bar.utoronto.ca:9090/psicquic/webservices/current/search/interactor/At5g15200?compressed=true");
 //            URL intactQuery = new URL("http://www.ebi.ac.uk/Tools/webservices/psicquic/uniprot/webservices/current/search/interactor/P04626?compressed=true");
 //            URL intactQuery = new URL("http://imex.mbi.ucla.edu/psicquic-ws/webservices/current/search/interactor/P35439");
-            URL intactQuery = new URL("http://catalyst.ucsd.edu:8080/psicquic-ws/webservices/current/search/interactor/P23919");
+            URL intactQuery = new URL("http://www.ebi.ac.uk/Tools/webservices/psicquic/molcon/webservices/current/search/interactor/P22694-2");
             List<BinaryInteraction> binaryInteractions = new ArrayList<>();
             PsimiTabReader mitabReader = new PsimiTabReader();
             binaryInteractions.addAll(mitabReader.read(intactQuery));
@@ -54,8 +54,10 @@ public class TestPsicquicClustering {
 
             for (Integer integer : interactionMapping.keySet()) {
                 EncoreInteraction interaction = interactionMapping.get(integer);
-                System.out.println(interaction.getInteractorA());
-                System.out.println(interaction.getInteractorB());
+                //System.out.println(interaction.getInteractorAccsA());
+                //System.out.println(interaction.getInteractorA("uniprot"));
+                //System.out.println(interaction.getInteractorB());
+                //interaction.get
 
             }
 

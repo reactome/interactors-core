@@ -22,6 +22,6 @@ public interface InteractionDAO extends BaseDAO<Interaction> {
     List<Interaction> getByAcc(List<String> acc, Long resourceId, Integer page, Integer pageSize) throws SQLException;
     List<Interaction> getByIntactId(List<String> intactIdList, Long resourceId, Integer page, Integer pageSize) throws SQLException;
 
-    Map<String, Integer> countByAccesssions(Collection<String> accs, Long resourceId) throws SQLException;
+    Map<String, Integer> countByAccessions(Collection<String> accs, Long resourceId) throws SQLException;
 
 }

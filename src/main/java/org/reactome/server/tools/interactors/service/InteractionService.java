@@ -148,7 +148,7 @@ public class InteractionService {
             throw new InvalidInteractionResourceException();
         }
 
-        return interactionDAO.countByAccesssions(accs, interactionResource.getId());
+        return interactionDAO.countByAccessions(accs, interactionResource.getId());
 
     }
 

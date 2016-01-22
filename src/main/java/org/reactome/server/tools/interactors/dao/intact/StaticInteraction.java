@@ -27,6 +27,8 @@ public class StaticInteraction implements InteractionDAO {
     private final String ALL_COLUMNS = "INTERACTOR_A, INTERACTOR_B, AUTHOR_SCORE, MISCORE, INTERACTION_RESOURCE_ID";
     private final String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
 
+    private final Double MINIMUM_VALID_SCORE = 0.45;
+
     public StaticInteraction(InteractorsDatabase database) {
         this.connection = database.getConnection();
     }
@@ -58,8 +60,6 @@ public class StaticInteraction implements InteractionDAO {
     /**
      * Create interactions using same transaction.
      *
-     * @param interactions
-     * @return
      * @throws SQLException
      */
     public boolean create(List<Interaction> interactions) throws SQLException {
@@ -90,7 +90,7 @@ public class StaticInteraction implements InteractionDAO {
                 }
 
 
-                // maybe create the interaction details here, but it is not a good practice have two DAO's talking
+                // maybe create the interaction details here, but it is not a good practice have two DAOs talking
                 // each other.
 
             }
@@ -148,6 +148,7 @@ public class StaticInteraction implements InteractionDAO {
                            "AND      INTERACTORB.ID = INTERACTION.INTERACTOR_B " +
                            "AND      (INTERACTION.INTERACTOR_A = (select id from interactor where ACC = ?) OR INTERACTION.INTERACTOR_B = (select id from interactor where ACC = ?)) " +
                            "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
+                           "AND      INTERACTION.MISCORE >= ?" +
                            "ORDER BY INTERACTION.MISCORE DESC";
 
             /** Both are greater than -1, paginated is enabled **/
@@ -163,6 +164,7 @@ public class StaticInteraction implements InteractionDAO {
                 pstm.setString(1, acc.toUpperCase());
                 pstm.setString(2, acc.toUpperCase());
                 pstm.setLong(3, resourceId);
+                pstm.setDouble(4, MINIMUM_VALID_SCORE); /** Taking into account only score higher than 0.45 **/
 
                 ResultSet rs = pstm.executeQuery();
                 while(rs.next()){
@@ -239,7 +241,7 @@ public class StaticInteraction implements InteractionDAO {
     }
 
     @Override
-    public Map<String, Integer> countByAccesssions(Collection<String> accs, Long resourceId) throws SQLException {
+    public Map<String, Integer> countByAccessions(Collection<String> accs, Long resourceId) throws SQLException {
         Map<String, Integer> interactionsCountMap = new HashMap<>();
 
         try {
@@ -256,6 +258,7 @@ public class StaticInteraction implements InteractionDAO {
                                 "WHERE    INTERACTORA.ID = INTERACTION.INTERACTOR_A " +
                                 "AND      INTERACTION.INTERACTOR_A IN (select id from interactor where ACC in (" + csvValues.toUpperCase() + ")) " +
                                 "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
+                                "AND      INTERACTION.MISCORE >= ? " +
                                 "GROUP BY INTERACTORA.acc " +
                                 "UNION ALL " +
                                 "SELECT   COUNT(*) AS count_, INTERACTORB.acc AS accession " +
@@ -264,13 +267,16 @@ public class StaticInteraction implements InteractionDAO {
                                 "AND      INTERACTION.INTERACTOR_B IN (select id from interactor where ACC in (" + csvValues.toUpperCase() + ")) " +
                                 "AND      INTERACTION.INTERACTOR_A <> INTERACTION.INTERACTOR_B " +
                                 "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
+                                "AND      INTERACTION.MISCORE >= ? " +
                                 "GROUP BY INTERACTORB.acc " +
                             ")" +
                             "GROUP BY accession";
 
             PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setLong(1, resourceId);
-            pstm.setLong(2, resourceId);
+            pstm.setDouble(2, MINIMUM_VALID_SCORE);
+            pstm.setLong(3, resourceId);
+            pstm.setDouble(4, MINIMUM_VALID_SCORE);
 
             ResultSet rs = pstm.executeQuery();
             while(rs.next()){

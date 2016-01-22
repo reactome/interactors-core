@@ -58,7 +58,7 @@ public class TestPsicquic {
             for (ServiceType service : services) {
 
                 if(service.getName().equalsIgnoreCase("MPIDB")) {
-                    System.out.println("\n\nQuerying service: " + service.getName() + " - Active?: " + service.isActive() + " - URL: " + service.getSoapUrl());
+                    //System.out.println("\n\nQuerying service: " + service.getName() + " - Active?: " + service.isActive() + " - URL: " + service.getSoapUrl());
 
                     for (String proteinOrChemical : proteinOrChemicalList) {
 
@@ -68,11 +68,11 @@ public class TestPsicquic {
 
                         MitabSearchResult result = client.getByInteractor(proteinOrChemical, 0, 200);
 
-                        System.out.println(result.getTotalCount());
+                        //System.out.println(result.getTotalCount());
 
                         allBinaryInteraction.addAll(result.getData());
 
-                        System.out.println(allBinaryInteraction.size());
+                        //System.out.println(allBinaryInteraction.size());
                         Interactor interactor = new Interactor();
                         interactor.setInteractorResourceId(1000L);
                         interactor.setAcc(proteinOrChemical);
@@ -86,10 +86,10 @@ public class TestPsicquic {
                 }
             }
         } catch (PsicquicRegistryClientException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         } catch (PsicquicClientException e) {
-            System.out.println(" ## Error querying. It is active, but the return data couldn't be fetched");
-            e.printStackTrace();
+            //System.out.println(" ## Error querying. It is active, but the return data couldn't be fetched");
+            //.printStackTrace();
         }
     }
 
