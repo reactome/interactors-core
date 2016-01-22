@@ -24,6 +24,7 @@ import java.util.*;
  * Interaction implementation of PsicquicDAO
  * Query psicquic based ond resources
  */
+@Deprecated
 public class InteractionImpl implements PsicquicDAO {
 
     /**
