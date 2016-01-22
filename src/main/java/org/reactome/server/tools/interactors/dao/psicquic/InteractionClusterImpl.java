@@ -28,8 +28,6 @@ public class InteractionClusterImpl implements PsicquicDAO {
     private static final Double MINIMUM_VALID_SCORE = 0.45;
 
     private final String QUERY_METHOD = "interactor";
-    private final String COMPRESSED = "compressed=true";
-    private final String FIRST_PARAMETER = "?";
 
     @Override
     public List<Interaction> getInteraction(String resource, String acc) {
@@ -50,7 +48,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
                 List<Interaction> interactions = new ArrayList<>();
 
                 /** Build service URL **/
-                String queryRestUrl = service.getRestUrl().concat(QUERY_METHOD).concat("/").concat(acc).concat(FIRST_PARAMETER).concat(COMPRESSED);
+                String queryRestUrl = service.getRestUrl().concat(QUERY_METHOD).concat("/").concat(acc);
 
                 /** Get binaryInteractions from PSI-MI files **/
                 URL url = new URL(queryRestUrl);
