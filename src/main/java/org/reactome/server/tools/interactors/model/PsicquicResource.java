@@ -4,7 +4,7 @@ package org.reactome.server.tools.interactors.model;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
-public class PsicquicRegistry {
+public class PsicquicResource implements Comparable<PsicquicResource> {
 
     private String name;
     private String soapURL;
@@ -41,5 +41,26 @@ public class PsicquicRegistry {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PsicquicResource that = (PsicquicResource) o;
+
+        return name != null ? name.equals(that.name) : that.name == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
+    }
+
+    @Override
+    public int compareTo(PsicquicResource o) {
+        return name.toLowerCase().compareTo(o.name.toLowerCase());
     }
 }

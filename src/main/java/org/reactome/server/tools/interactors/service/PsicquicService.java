@@ -6,12 +6,9 @@ import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistry
 import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
 import org.reactome.server.tools.interactors.dao.PsicquicDAO;
 import org.reactome.server.tools.interactors.dao.psicquic.InteractionClusterImpl;
-import org.reactome.server.tools.interactors.dao.psicquic.InteractionImpl;
 import org.reactome.server.tools.interactors.model.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -33,21 +30,21 @@ public class PsicquicService {
         return psicquicDAO.getInteraction(resource, accs);
     }
 
-    public List<PsicquicRegistry> getRegistries(){
+    public List<PsicquicResource> getResources(){
         PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
 
-        List<PsicquicRegistry> registries = new ArrayList<>();
+        List<PsicquicResource> resourceList = new ArrayList<>();
 
         try {
             List<ServiceType> services = registryClient.listServices();
             for (ServiceType service : services) {
-                PsicquicRegistry p = new PsicquicRegistry();
+                PsicquicResource p = new PsicquicResource();
                 p.setActive(service.isActive());
                 p.setName(service.getName());
                 p.setRestURL(service.getRestUrl());
                 p.setSoapURL(service.getSoapUrl());
 
-                registries.add(p);
+                resourceList.add(p);
             }
 
 
@@ -55,7 +52,8 @@ public class PsicquicService {
             e.printStackTrace();
         }
 
-        return  registries;
+        Collections.sort(resourceList);
+        return  resourceList;
 
     }
 
