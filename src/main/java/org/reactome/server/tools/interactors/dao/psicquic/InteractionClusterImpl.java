@@ -48,7 +48,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
                 List<Interaction> interactions = new ArrayList<>();
 
                 /** Build service URL **/
-                String queryRestUrl = service.getRestUrl().concat(QUERY_METHOD).concat(acc).concat(FIRST_PARAMETER).concat(COMPRESSED);
+                String queryRestUrl = service.getRestUrl().concat(QUERY_METHOD).concat("/").concat(acc).concat(FIRST_PARAMETER).concat(COMPRESSED);
 
                 /** Get binaryInteractions from PSI-MI files **/
                 URL url = new URL(queryRestUrl);
