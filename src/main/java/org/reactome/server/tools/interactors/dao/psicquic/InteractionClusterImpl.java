@@ -107,9 +107,9 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
             if(interaction.getInteractorB().getAcc().equalsIgnoreCase(auxIndentifier)){
                 it.remove();
-            }else {
-                auxIndentifier = interaction.getInteractorB().getAcc();
             }
+
+            auxIndentifier = interaction.getInteractorB().getAcc();
 
         }
 
