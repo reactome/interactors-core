@@ -19,6 +19,7 @@ import uk.ac.ebi.enfin.mi.cluster.score.InteractionClusterScore;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -29,6 +30,19 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
     private static final Double MINIMUM_VALID_SCORE = 0.45;
 
+    /**
+     *
+     * This method queries PSICQUIC for a given resource (retrieve the resource URL directly on the server) and accession
+     * list and retrieves the interactions clustered. This method only take into account those interactions which the
+     * score is higher than MINIMUM_VALID_SCORE. It also sort by score with highest on top. Some oddity cases are being
+     * solved by the removeDuplicatedInteractor which keeps from the interactor list only the highest score.
+     *
+     * @param resource PSICQUIC Resource
+     * @param accs List of accession
+     * @return map of accession as key an its list of interaction
+     *
+     * @throws PsicquicInteractionClusterException
+     */
     public Map<String, List<Interaction>> getInteraction(String resource, Collection<String> accs) throws PsicquicInteractionClusterException {
         Map<String, List<Interaction>> ret = new HashMap<>();
 
@@ -37,7 +51,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
             InteractionClusterScore interactionClusterScore = getInteractionClusterScore(resource, acc);
 
-            /* Retrieve results */
+            /** Retrieve results **/
             Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
 
             for (Integer key : interactionMapping.keySet()) {
@@ -55,6 +69,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
                     interaction.setInteractorB(tempA);
                 }
 
+                /** Requirement: Add in the interaction list only scores higher than MINIMUM_VALID_SCORE **/
                 if(interaction.getIntactScore() >= MINIMUM_VALID_SCORE) {
                     interactions.add(interaction);
                 }
@@ -63,11 +78,40 @@ public class InteractionClusterImpl implements PsicquicDAO {
             Collections.sort(interactions);
             Collections.reverse(interactions);
 
+            removeDuplicatedInteractor(interactions);
+
             ret.put(acc, interactions);
 
         }
 
         return ret;
+
+    }
+
+    /**
+     * For the same Accession retrieve the list of interactors. If the interactors are the same we will
+     * remove the duplicates and keep the one of highest score.
+     *
+     * Requirement: Keep only the one with highest score if the interactors are the same (with different identifiers)
+     *              e.g CHEBI:16027 (16027) for ChEMBL.
+     *
+     * @param interactions A sorted and reversed list of interactions (Highest score on top).
+     */
+    private void removeDuplicatedInteractor(List<Interaction> interactions) {
+
+        Iterator<Interaction> it = interactions.iterator();
+
+        String auxIndentifier = "";
+        while(it.hasNext()) {
+            Interaction interaction = it.next();
+
+            if(interaction.getInteractorB().getAcc().equalsIgnoreCase(auxIndentifier)){
+                it.remove();
+            }else {
+                auxIndentifier = interaction.getInteractorB().getAcc();
+            }
+
+        }
 
     }
 
@@ -147,7 +191,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
             ServiceType service = registryClient.getService(resource);
 
             /** Build service URL **/
-            String queryRestUrl = service.getRestUrl().concat(queryMethod).concat(acc);
+            String queryRestUrl = service.getRestUrl().concat(queryMethod).concat(URLEncoder.encode(acc, "UTF-8"));
 
             /** Get binaryInteractions from PSI-MI files **/
             URL url = new URL(queryRestUrl);
