@@ -7,6 +7,7 @@ import org.reactome.server.tools.interactors.model.*;
 import org.reactome.server.tools.interactors.service.InteractionParserService;
 import org.reactome.server.tools.interactors.service.InteractionResourceService;
 import org.reactome.server.tools.interactors.service.InteractorResourceService;
+import org.reactome.server.tools.interactors.util.InteractorConstant;
 import org.reactome.server.tools.interactors.util.Toolbox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +92,9 @@ public class IntactParser {
      *
      */
     public void parser(String file) {
+        int totalLinesParsed = 1;
+        int totalLinesIncluded = 0;
+
         try {
             String inputLine;
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -103,8 +107,6 @@ public class IntactParser {
             /** Intact Identifiers **/
             // intact:EBI-7122727|intact:EBI-7122766|intact:EBI-7122684|intact:EBI-7121552
 
-            int lines = 1;
-
             List<Interaction> interactionList = new ArrayList<>();
             while ((inputLine = br.readLine()) != null) {
                 String[] content = inputLine.split("\\t");
@@ -112,25 +114,32 @@ public class IntactParser {
                 /** Parse the line **/
                 Interaction interaction = interactionFromFile(content);
 
-                interactionList.add(interaction);
+                /** Only persist in the Database those interactions with score higher than InteractorConstant.MINIMUM_VALID_SCORE **/
+                if(interaction.getIntactScore() >= InteractorConstant.MINIMUM_VALID_SCORE) {
 
-                /** Go to the database every 1000 interactions **/
-                if((lines % 1000) == 0){
-                    logger.info("Performing a DB save. Rows parsed [{}]", lines);
-                    try {
-                        interactionParserService.save(interactionList);
-                        interactionList.clear();
-                    }catch (SQLException e){
-                        logger.error("Exception thrown during DB save: ", e);
-                        dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
+                    interactionList.add(interaction);
+                    totalLinesIncluded++;
+
+
+                    /** Go to the database every 1000 interactions **/
+                    if((totalLinesIncluded % 1000) == 0){
+                        logger.info("Performing a DB save. Rows parsed [{}]", totalLinesIncluded);
+                        try {
+                            interactionParserService.save(interactionList);
+                            interactionList.clear();
+                        }catch (SQLException e){
+                            logger.error("Exception thrown during DB save: ", e);
+                            dbErrorMessages.add("Error inserting interactions to the Database." + e.getMessage());
+                        }
                     }
                 }
-                lines++;
+
+                totalLinesParsed++;
             }
 
             // Persist remaining items
             try {
-                logger.info("Performing a DB save. Rows parsed [{}]", lines);
+                logger.info("Performing a DB save. Rows parsed [{}]", totalLinesIncluded);
 
                 interactionParserService.save(interactionList);
                 interactionList.clear();
@@ -156,6 +165,8 @@ public class IntactParser {
                 writeOutputFile(dbErrorMessages, "db-error-messages.txt");
             }
         }
+
+        logger.info("The IntAct parser has finished. [{}] rows have been read and [{}] have been considered as an Interaction.", totalLinesParsed, totalLinesIncluded);
 
     }
 
@@ -254,7 +265,7 @@ public class IntactParser {
         interaction.setInteractorA(interactorA);
         interaction.setInteractorB(interactorB);
 
-        Long intactResourceId = interactionResourceMap.get("static").getId();
+        Long intactResourceId = interactionResourceMap.get(InteractorConstant.STATIC).getId();
         interaction.setInteractionResourceId(intactResourceId);
 
         parseConfidenceValue(line[ParserIndex.CONFIDENCE_VALUE.value], interaction);
@@ -434,7 +445,8 @@ public class IntactParser {
      * @return the file path
      * @throws IOException
      */
-    public String downloadFile(String urlFtp, String directory) throws IOException{
+    public String downloadFile(String urlFtp, String directory) throws IOException {
+        logger.info("Downloading IntAct File...");
         URL url = new URL(urlFtp);
 
         File intactFile = new File(directory, "intact-micluster.txt");

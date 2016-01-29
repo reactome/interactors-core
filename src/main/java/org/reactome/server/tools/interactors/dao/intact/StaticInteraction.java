@@ -4,6 +4,7 @@ import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.Interactor;
+import org.reactome.server.tools.interactors.util.Toolbox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,6 @@ public class StaticInteraction implements InteractionDAO {
     private final String TABLE = "INTERACTION";
     private final String ALL_COLUMNS = "INTERACTOR_A, INTERACTOR_B, AUTHOR_SCORE, MISCORE, INTERACTION_RESOURCE_ID";
     private final String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
-
-    private final Double MINIMUM_VALID_SCORE = 0.45;
 
     public StaticInteraction(InteractorsDatabase database) {
         this.connection = database.getConnection();
@@ -75,10 +74,9 @@ public class StaticInteraction implements InteractionDAO {
                 pstm.setLong(1, interaction.getInteractorA().getId());
                 pstm.setLong(2, interaction.getInteractorB().getId());
                 pstm.setDouble(3, interaction.getAuthorScore());
-                pstm.setDouble(4, interaction.getIntactScore());
+                pstm.setDouble(4, Toolbox.roundScore(interaction.getIntactScore())); // Rounding score 0.###, the score is higher than InteractorConstant.MINIMUM_VALID_SCORE
                 pstm.setLong(5, interaction.getInteractionResourceId());
 
-                //pstm.addBatch();
                 if (pstm.executeUpdate() > 0) {
                     try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
@@ -88,11 +86,6 @@ public class StaticInteraction implements InteractionDAO {
                         }
                     }
                 }
-
-
-                // maybe create the interaction details here, but it is not a good practice have two DAOs talking
-                // each other.
-
             }
 
             connection.commit();
@@ -148,7 +141,6 @@ public class StaticInteraction implements InteractionDAO {
                            "AND      INTERACTORB.ID = INTERACTION.INTERACTOR_B " +
                            "AND      (INTERACTION.INTERACTOR_A = (select id from interactor where ACC = ?) OR INTERACTION.INTERACTOR_B = (select id from interactor where ACC = ?)) " +
                            "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
-                           "AND      INTERACTION.MISCORE >= ?" +
                            "ORDER BY INTERACTION.MISCORE DESC";
 
             /** Both are greater than -1, paginated is enabled **/
@@ -164,7 +156,6 @@ public class StaticInteraction implements InteractionDAO {
                 pstm.setString(1, acc.toUpperCase());
                 pstm.setString(2, acc.toUpperCase());
                 pstm.setLong(3, resourceId);
-                pstm.setDouble(4, MINIMUM_VALID_SCORE); /** Taking into account only score higher than 0.45 **/
 
                 ResultSet rs = pstm.executeQuery();
                 while(rs.next()){
@@ -258,7 +249,6 @@ public class StaticInteraction implements InteractionDAO {
                                 "WHERE    INTERACTORA.ID = INTERACTION.INTERACTOR_A " +
                                 "AND      INTERACTION.INTERACTOR_A IN (select id from interactor where ACC in (" + csvValues.toUpperCase() + ")) " +
                                 "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
-                                "AND      INTERACTION.MISCORE >= ? " +
                                 "GROUP BY INTERACTORA.acc " +
                                 "UNION ALL " +
                                 "SELECT   COUNT(*) AS count_, INTERACTORB.acc AS accession " +
@@ -267,16 +257,13 @@ public class StaticInteraction implements InteractionDAO {
                                 "AND      INTERACTION.INTERACTOR_B IN (select id from interactor where ACC in (" + csvValues.toUpperCase() + ")) " +
                                 "AND      INTERACTION.INTERACTOR_A <> INTERACTION.INTERACTOR_B " +
                                 "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
-                                "AND      INTERACTION.MISCORE >= ? " +
                                 "GROUP BY INTERACTORB.acc " +
                             ")" +
                             "GROUP BY accession";
 
             PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setLong(1, resourceId);
-            pstm.setDouble(2, MINIMUM_VALID_SCORE);
-            pstm.setLong(3, resourceId);
-            pstm.setDouble(4, MINIMUM_VALID_SCORE);
+            pstm.setLong(2, resourceId);
 
             ResultSet rs = pstm.executeQuery();
             while(rs.next()){
