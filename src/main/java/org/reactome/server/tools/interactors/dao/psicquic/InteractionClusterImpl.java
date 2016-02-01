@@ -12,6 +12,7 @@ import org.reactome.server.tools.interactors.model.PsicquicResource;
 import org.reactome.server.tools.interactors.model.psicquic.GenericClient;
 import org.reactome.server.tools.interactors.model.psicquic.PsicquicClient;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
+import org.reactome.server.tools.interactors.util.Toolbox;
 import psidev.psi.mi.tab.PsimiTabException;
 import psidev.psi.mi.tab.PsimiTabReader;
 import psidev.psi.mi.tab.model.BinaryInteraction;
@@ -69,7 +70,10 @@ public class InteractionClusterImpl implements PsicquicDAO {
                 }
 
                 /** Requirement: Add in the interaction list only scores higher than MINIMUM_VALID_SCORE **/
-                if(interaction.getIntactScore() >= InteractorConstant.MINIMUM_VALID_SCORE) {
+                Double score = interaction.getIntactScore();
+                if(score >= InteractorConstant.MINIMUM_VALID_SCORE) {
+                    /** Must round score after checking the MINIMUM_VALID_SCORE **/
+                    interaction.setIntactScore(Toolbox.roundScore(score));
                     interactions.add(interaction);
                 }
             }

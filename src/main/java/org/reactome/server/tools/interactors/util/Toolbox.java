@@ -30,12 +30,26 @@ public class Toolbox {
     public static String getAccessionUrl(String acc) {
         String url = InteractorConstant.INTERACTOR_BASE_URL;
         if(acc.toUpperCase().contains("CHEBI")){
-            url = url + "chebi/" + acc;
+            url = url.concat("chebi/").concat(acc);
         }else {
-            url = url + "uniprot/" + acc;
+            /** Take into account the Uniprot Isoform **/
+            if(isIsoform(acc)){
+                url = url.concat("uniprot.isoform/").concat(acc);
+            }else {
+                url = url.concat("uniprot/").concat(acc);
+            }
         }
 
         return url;
+    }
+
+    /**
+     * Check if accession is part of an isoform in Uniprot.
+     */
+    public static boolean isIsoform(String acc){
+        /** This regex is based on the identifiers.org **/
+        String regex = "^([A-N,R-Z][0-9][A-Z][A-Z, 0-9][A-Z, 0-9][0-9])|([O,P,Q][0-9][A-Z, 0-9][A-Z, 0-9][A-Z, 0-9][0-9])(\\-\\d+)$";
+        return acc.matches(regex);
     }
 
     /**
