@@ -69,35 +69,55 @@ public abstract class AbstractClient implements PsicquicClient {
         return new Double(miscore);
     }
 
+//    /**
+//     * Retrieve all the alias of a given accession
+//     *
+//     * @param accessions key=dbsource{psi-mi,uniprot,etc} value=alias
+//     */
+//    public String getAlias(Map<String, List<String>> accessions) {
+//        String uniprotAlias = "";
+//        String psimiAlias = "";
+//        String otherAlias = "";
+//
+//        for (String dbSource : accessions.keySet()) {
+//            if (dbSource.equalsIgnoreCase("uniprotkb") && uniprotAlias.isEmpty()) {
+//                uniprotAlias = accessions.get(dbSource).get(0);
+//            } else if (dbSource.equalsIgnoreCase("psi-mi") && psimiAlias.isEmpty()) {
+//                psimiAlias = accessions.get(dbSource).get(0);
+//            } else if (otherAlias.isEmpty()) {
+//                otherAlias = accessions.get(dbSource).get(0);
+//            }
+//        }
+//
+//        if (!uniprotAlias.isEmpty()) return uniprotAlias;
+//
+//        if (!psimiAlias.isEmpty()) return psimiAlias;
+//
+//
+//
+//        return otherAlias;
+//    }
+
     /**
-     * Retrieve the most appropriate alias from a List of Aliases.
-     * The rule is:
-     * First: UniProtKB
-     * Second: psi-mi
-     * Third: The first instance
+     * Retrieve all the alias of a given accession
+     * Aliases are passed all in the same String delimited by $
      *
      * @param accessions key=dbsource{psi-mi,uniprot,etc} value=alias
+     * @return alias1$alias2 -2tyrosine$alias3 (1,2)
      */
     public String getAlias(Map<String, List<String>> accessions) {
-        String uniprotAlias = "";
-        String psimiAlias = "";
-        String otherAlias = "";
-
+        String allAlias = "";
         for (String dbSource : accessions.keySet()) {
-            if (dbSource.equalsIgnoreCase("uniprotkb") && uniprotAlias.isEmpty()) {
-                uniprotAlias = accessions.get(dbSource).get(0);
-            } else if (dbSource.equalsIgnoreCase("psi-mi") && psimiAlias.isEmpty()) {
-                psimiAlias = accessions.get(dbSource).get(0);
-            } else if (otherAlias.isEmpty()) {
-                otherAlias = accessions.get(dbSource).get(0);
+            for(String alias : accessions.get(dbSource)){
+                allAlias = allAlias.concat(alias).concat("$");
             }
         }
 
-        if (!uniprotAlias.isEmpty()) return uniprotAlias;
+        if(allAlias.endsWith("$")){
+            allAlias = allAlias.substring(0, allAlias.length() - 1);
+        }
 
-        if (!psimiAlias.isEmpty()) return psimiAlias;
-
-        return otherAlias;
+        return allAlias;
     }
 
     /**

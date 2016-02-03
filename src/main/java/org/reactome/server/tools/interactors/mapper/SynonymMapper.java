@@ -9,18 +9,7 @@ import java.util.List;
  */
 public class SynonymMapper {
 
-//    private String acc;
     private List<String> text;
-    private String imageUrl;
-
-//    public String getAcc() {
-//        return acc;
-//    }
-//
-//    public void setAcc(String acc) {
-//        this.acc = acc;
-//    }
-
 
     public List<String> getText() {
         return text;
@@ -30,11 +19,4 @@ public class SynonymMapper {
         this.text = text;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 }

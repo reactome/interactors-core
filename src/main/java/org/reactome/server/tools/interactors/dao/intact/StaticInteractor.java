@@ -60,28 +60,6 @@ public class StaticInteractor implements InteractorDAO {
 
     }
 
-    public boolean update(Interactor interactor) {
-        return false;
-    }
-
-    public Interactor getById(String id) throws SQLException {
-        Interactor ret = null;
-
-        String query = "SELECT " + ALL_COLUMNS_SEL +
-                " FROM " + TABLE +
-                " WHERE ID = ?";
-
-        PreparedStatement pstm = connection.prepareStatement(query);
-        pstm.setString(1, id);
-
-        ResultSet rs = pstm.executeQuery();
-        if (rs.next()) {
-            ret = buildInteractor(rs);
-        }
-
-        return ret;
-    }
-
     public Interactor getByAccession(String acc) throws SQLException {
         Interactor ret = null;
 
@@ -141,24 +119,6 @@ public class StaticInteractor implements InteractorDAO {
                 }
             }
         }
-    }
-
-    public boolean delete(String id) throws SQLException {
-        try {
-            String query = "DELETE FROM " + TABLE + " WHERE ID = ?";
-
-            PreparedStatement pstm = connection.prepareStatement(query);
-            pstm.setString(1, id);
-
-            if (pstm.executeUpdate() > 0) {
-                return true;
-            }
-
-        } finally {
-            connection.close();
-        }
-
-        return false;
     }
 
     public List<Interactor> getAll() throws SQLException {

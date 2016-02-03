@@ -38,8 +38,6 @@ public class InteractionResourceService {
     /**
      * Retrieve all interactor resource into a Map data structure having
      * the unique db id as the key
-     *
-     * @return
      * @throws SQLException
      */
     public Map<Long, InteractionResource> getAllMappedById() throws SQLException {
@@ -55,7 +53,7 @@ public class InteractionResourceService {
     /**
      * Retrieve all interactor resource into a Map data structure having
      * the name as the key
-     * @return
+     *
      * @throws SQLException
      */
     public Map<String, InteractionResource> getAllMappedByName() throws SQLException {

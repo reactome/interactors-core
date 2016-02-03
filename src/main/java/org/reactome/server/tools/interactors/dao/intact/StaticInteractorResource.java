@@ -28,22 +28,6 @@ public class StaticInteractorResource implements InteractorResourceDAO {
         this.connection = database.getConnection();
     }
 
-    public InteractorResource create(InteractorResource interactorResource) throws SQLException {
-        return null;
-    }
-
-    public boolean update(InteractorResource interactorResource) throws SQLException {
-        return false;
-    }
-
-    public InteractorResource getById(String id) throws SQLException {
-        return null;
-    }
-
-    public boolean delete(String id) throws SQLException {
-        return false;
-    }
-
     public List<InteractorResource> getAll() throws SQLException {
         logger.debug("Retrieving all InteractorResources");
 

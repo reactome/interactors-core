@@ -31,18 +31,6 @@ public class StaticInteractionResource implements InteractionResourceDAO {
         this.connection = database.getConnection();
     }
 
-    public InteractionResource create(InteractionResource interactionResource) throws SQLException {
-        return null;
-    }
-
-    public boolean update(InteractionResource interactionResource) throws SQLException {
-        return false;
-    }
-
-    public InteractionResource getById(String id) throws SQLException {
-        return null;
-    }
-
     public List<InteractionResource> getAll() throws SQLException {
         logger.debug("Retrieving all InteractionResources");
 
@@ -60,7 +48,6 @@ public class StaticInteractionResource implements InteractionResourceDAO {
 
         return ret;
     }
-
 
     public InteractionResource getByName(String name) throws SQLException {
         logger.debug("Retrieving InteractionResource by name");
@@ -80,10 +67,6 @@ public class StaticInteractionResource implements InteractionResourceDAO {
         }
 
         return interactionResource;
-    }
-    
-    public boolean delete(String id) throws SQLException {
-        return false;
     }
 
     private InteractionResource buildInteractionResource(ResultSet rs) throws SQLException {

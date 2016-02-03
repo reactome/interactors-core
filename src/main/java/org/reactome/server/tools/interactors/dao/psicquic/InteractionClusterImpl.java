@@ -12,6 +12,7 @@ import org.reactome.server.tools.interactors.model.PsicquicResource;
 import org.reactome.server.tools.interactors.model.psicquic.GenericClient;
 import org.reactome.server.tools.interactors.model.psicquic.PsicquicClient;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
+import org.reactome.server.tools.interactors.util.MapSet;
 import org.reactome.server.tools.interactors.util.Toolbox;
 import psidev.psi.mi.tab.PsimiTabException;
 import psidev.psi.mi.tab.PsimiTabReader;
@@ -78,10 +79,10 @@ public class InteractionClusterImpl implements PsicquicDAO {
                 }
             }
 
+            interactions = removeDuplicatedInteractor(interactions);
+
             Collections.sort(interactions);
             Collections.reverse(interactions);
-
-            removeDuplicatedInteractor(interactions);
 
             ret.put(acc, interactions);
 
@@ -100,21 +101,33 @@ public class InteractionClusterImpl implements PsicquicDAO {
      *
      * @param interactions A sorted and reversed list of interactions (Highest score on top).
      */
-    private void removeDuplicatedInteractor(List<Interaction> interactions) {
+    private List<Interaction> removeDuplicatedInteractor(List<Interaction> interactions) {
+        List<Interaction> ret = new ArrayList<>(interactions.size());
 
-        Iterator<Interaction> it = interactions.iterator();
+        MapSet<String, Interaction> interactionMapSet = new MapSet<>();
 
-        String auxIndentifier = "";
-        while(it.hasNext()) {
-            Interaction interaction = it.next();
+        /** Identify potential duplicates and put in a MapSet**/
+        for (Interaction interaction : interactions) {
+            interactionMapSet.add(interaction.getInteractorB().getAcc(), interaction);
+        }
 
-            if(interaction.getInteractorB().getAcc().equalsIgnoreCase(auxIndentifier)){
-                it.remove();
+        /** Interactions in the MapSet have been sorted by score as defined in the compareTo **/
+        for(String accKey : interactionMapSet.keySet()){
+            Set<Interaction> interactionSet = interactionMapSet.getElements(accKey);
+            if(interactionSet.size() >= 2){ // This interaction is not unique. Let's check the score
+                Interaction highScoreInteraction = null;
+                for (Interaction interaction : interactionSet) {
+                    highScoreInteraction = interaction;
+                }
+                ret.add(highScoreInteraction);
+            }else {
+                /** Just have only one, just add it **/
+                ret.add(interactionSet.iterator().next());
             }
 
-            auxIndentifier = interaction.getInteractorB().getAcc();
-
         }
+
+        return ret;
 
     }
 

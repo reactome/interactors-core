@@ -25,38 +25,13 @@ public class StaticInteractionDetails implements InteractionDetailsDAO {
 
     private final String TABLE = "INTERACTION_DETAILS";
     private final String ALL_COLUMNS = "INTERACTION_ID, INTERACTION_AC";
-    private final String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
 
     public StaticInteractionDetails(InteractorsDatabase database) {
         this.connection = database.getConnection();
     }
-
-    public InteractionDetails create(InteractionDetails interactionDetails) throws SQLException {
-        String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
-                + "VALUES(?, ?)";
-
-        PreparedStatement pstm = connection.prepareStatement(query);
-        pstm.setLong(1, interactionDetails.getInteractionId());
-        pstm.setString(2, interactionDetails.getInteractionAc());
-
-        if(pstm.executeUpdate() > 0) {
-            try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    interactionDetails.setId(generatedKeys.getLong(1));
-                } else {
-                    throw new SQLException("Creating InteractorDetails failed, no ID obtained.");
-                }
-            }
-        }
-
-        return interactionDetails;
-    }
-
+    
     /**
      * Create interactions details using batch approach
-     *
-     * @param interactionDetails
-     * @return
      * @throws SQLException
      */
     public boolean create(List<InteractionDetails> interactionDetails) throws SQLException {
@@ -73,15 +48,6 @@ public class StaticInteractionDetails implements InteractionDetailsDAO {
                 pstm.setString(2, interactionDetail.getInteractionAc());
 
                 pstm.addBatch();
-//                if (pstm.executeUpdate() > 0) {
-//                    try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
-//                        if (generatedKeys.next()) {
-//                            interactionDetails.setId(generatedKeys.getLong(1));
-//                        } else {
-//                            throw new SQLException("Creating InteractorDetails failed, no ID obtained.");
-//                        }
-//                    }
-//                }
             }
 
             pstm.executeBatch();
@@ -96,22 +62,6 @@ public class StaticInteractionDetails implements InteractionDetailsDAO {
 
         return true;
 
-    }
-
-    public boolean update(InteractionDetails interaction) throws SQLException {
-        return false;
-    }
-
-    public InteractionDetails getById(String id) throws SQLException {
-        return null;
-    }
-
-    public List<InteractionDetails> getAll() throws SQLException {
-        return null;
-    }
-
-    public boolean delete(String id) throws SQLException {
-        return false;
     }
 
     public List<InteractionDetails> getByInteraction(Long interactionId) throws SQLException {
@@ -137,9 +87,6 @@ public class StaticInteractionDetails implements InteractionDetailsDAO {
         }catch (SQLException e){
             logger.error("An error has occurred during interaction batch insert. Please check the following exception.");
             throw new SQLException(e);
-
-        } finally {
-            //conn.close();
         }
 
         return interactionsDetails;

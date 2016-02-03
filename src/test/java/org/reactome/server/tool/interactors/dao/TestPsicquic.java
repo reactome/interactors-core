@@ -32,6 +32,14 @@ public class TestPsicquic {
     }
 
     @Test
+    public void testGetServiceByName() throws PsicquicRegistryClientException {
+        String resource = "bar";
+        PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
+        ServiceType service = registryClient.getService(resource);
+        service.getRestUrl();
+    }
+
+    @Test
     public void testPsicquicCall() {
         try {
             List<String> proteinOrChemicalList = new ArrayList<>();

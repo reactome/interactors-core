@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
-public interface InteractionDAO extends BaseDAO<Interaction> {
+public interface InteractionDAO {
     // add here something specific for Interaction
 
     boolean create(List<Interaction> interaction) throws SQLException;

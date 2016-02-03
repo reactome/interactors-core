@@ -20,40 +20,21 @@ import java.util.*;
 
 public class StaticInteraction implements InteractionDAO {
 
-    final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
+    private enum Method {
+        BY_ACESSION,
+        BY_INTACT_ID
+    }
+
+    final Logger logger = LoggerFactory.getLogger(StaticInteraction.class);
 
     private Connection connection;
 
     private final String TABLE = "INTERACTION";
     private final String ALL_COLUMNS = "INTERACTOR_A, INTERACTOR_B, AUTHOR_SCORE, MISCORE, INTERACTION_RESOURCE_ID";
-    private final String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
+    //private final String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
 
     public StaticInteraction(InteractorsDatabase database) {
         this.connection = database.getConnection();
-    }
-
-    public Interaction create(Interaction interaction) throws SQLException {
-        String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
-                + "VALUES(?, ?, ?, ?, ?)";
-
-        PreparedStatement pstm = connection.prepareStatement(query);
-        pstm.setLong(1, interaction.getInteractorA().getId());
-        pstm.setLong(2, interaction.getInteractorB().getId());
-        pstm.setDouble(3, interaction.getAuthorScore());
-        pstm.setDouble(4, interaction.getIntactScore());
-        pstm.setLong(5, interaction.getInteractionResourceId());
-
-        if (pstm.executeUpdate() > 0) {
-            try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    interaction.setId(generatedKeys.getLong(1));
-                } else {
-                    throw new SQLException("Creating Interaction failed, no ID obtained.");
-                }
-            }
-        }
-
-        return interaction;
     }
 
     /**
@@ -103,22 +84,6 @@ public class StaticInteraction implements InteractionDAO {
         return true;
     }
 
-    public boolean update(Interaction interaction) throws SQLException {
-        return false;
-    }
-
-    public Interaction getById(String id) throws SQLException {
-        return null;
-    }
-
-    public List<Interaction> getAll() throws SQLException {
-        return null;
-    }
-
-    public boolean delete(String id) throws SQLException {
-        return false;
-    }
-
     public List<Interaction> getByAcc(String acc, Long resourceId, Integer page, Integer pageSize) throws SQLException{
         List<String> accList = new ArrayList<>(1);
         accList.add(acc);
@@ -159,7 +124,7 @@ public class StaticInteraction implements InteractionDAO {
 
                 ResultSet rs = pstm.executeQuery();
                 while(rs.next()){
-                    Interaction interaction = buildInteractionByAccession(acc, rs);
+                    Interaction interaction = buildInteraction(acc, rs, Method.BY_ACESSION);
 
                     interactions.add(interaction);
                 }
@@ -215,7 +180,7 @@ public class StaticInteraction implements InteractionDAO {
 
                 ResultSet rs = pstm.executeQuery();
                 while(rs.next()){
-                    Interaction interaction = buildInteractionByIntactId(intactId, rs);
+                    Interaction interaction = buildInteraction(intactId, rs, Method.BY_INTACT_ID);
 
                     interactions.add(interaction);
                 }
@@ -284,56 +249,13 @@ public class StaticInteraction implements InteractionDAO {
      * To reuse it make sure you are using the same alias in your query when projecting columns
      * e.g  select INTERACTOR.ID AS 'ID_A', and so on.
      *
-     * @throws SQLException
-     */
-    private Interaction buildInteractionByAccession(String acc, ResultSet rs) throws SQLException {
-        Interaction interaction = new Interaction();
-        interaction.setId(rs.getLong("INTERACTION_ID"));
-
-        Interactor interactorA = new Interactor();
-        interactorA.setId(rs.getLong("ID_A"));
-        interactorA.setAcc(rs.getString("ACC_A"));
-        interactorA.setAlias(rs.getString("ALIAS_A"));
-        interactorA.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_A_ID"));
-        interactorA.setIntactId(rs.getString("INTACT_IDA"));
-        interactorA.setTaxid(rs.getInt("TAX_IDA"));
-
-        Interactor interactorB = new Interactor();
-        interactorB.setId(rs.getLong("ID_B"));
-        interactorB.setAcc(rs.getString("ACC_B"));
-        interactorB.setAlias(rs.getString("ALIAS_B"));
-        interactorB.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_B_ID"));
-        interactorB.setIntactId(rs.getString("INTACT_IDB"));
-        interactorB.setTaxid(rs.getInt("TAX_IDB"));
-
-        /**
-         * If A interacts with B and B with A we are talking about the same interaction, so
-         * just to keep it easy to create the JSON - the interactor in the query will be always on side of A
-         * otherwise just set them as A.set(b) and B.set(a).
-         */
-        if(acc.equals(interactorA.getAcc())) {
-            interaction.setInteractorA(interactorA);
-            interaction.setInteractorB(interactorB);
-        }else {
-            interaction.setInteractorA(interactorB);
-            interaction.setInteractorB(interactorA);
-        }
-
-        interaction.setAuthorScore(rs.getDouble("AUTHOR_SCORE"));
-        interaction.setIntactScore(rs.getDouble("MISCORE"));
-        interaction.setInteractionResourceId(rs.getLong("INTERACTION_RESOURCE_ID"));
-
-        return interaction;
-    }
-
-    /**
-     * Helper method for creating Interaction object
-     * To reuse it make sure you are using the same alias in your query when projecting columns
-     * e.g  select INTERACTOR.ID AS 'ID_A', and so on.
+     * @param query is the accession or the intactId
+     * @param rs is the result set get from database
+     * @param method is the method used to build up the Interaction. This is interaction and just to avoid code duplication
      *
      * @throws SQLException
      */
-    private Interaction buildInteractionByIntactId(String intactId, ResultSet rs) throws SQLException {
+    private Interaction buildInteraction(String query, ResultSet rs, Method method) throws SQLException {
         Interaction interaction = new Interaction();
         interaction.setId(rs.getLong("INTERACTION_ID"));
 
@@ -358,12 +280,25 @@ public class StaticInteraction implements InteractionDAO {
          * just to keep it easy to create the JSON - the interactor in the query will be always on side of A
          * otherwise just set them as A.set(b) and B.set(a).
          */
-        if(intactId.equals(interactorA.getIntactId())) {
-            interaction.setInteractorA(interactorA);
-            interaction.setInteractorB(interactorB);
-        }else {
-            interaction.setInteractorA(interactorB);
-            interaction.setInteractorB(interactorA);
+        switch (method){
+            case BY_ACESSION:
+                if(query.equals(interactorA.getAcc())) {
+                    interaction.setInteractorA(interactorA);
+                    interaction.setInteractorB(interactorB);
+                }else {
+                    interaction.setInteractorA(interactorB);
+                    interaction.setInteractorB(interactorA);
+                }
+                break;
+            case BY_INTACT_ID:
+                if(query.equals(interactorA.getIntactId())) {
+                    interaction.setInteractorA(interactorA);
+                    interaction.setInteractorB(interactorB);
+                }else {
+                    interaction.setInteractorA(interactorB);
+                    interaction.setInteractorB(interactorA);
+                }
+                break;
         }
 
         interaction.setAuthorScore(rs.getDouble("AUTHOR_SCORE"));

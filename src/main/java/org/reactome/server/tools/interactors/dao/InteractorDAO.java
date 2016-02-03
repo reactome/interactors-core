@@ -9,7 +9,7 @@ import java.util.List;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
-public interface InteractorDAO extends BaseDAO<Interactor> {
+public interface InteractorDAO {
 
     // add here something specific for Interactor
     Interactor getByAccession(String acc) throws SQLException;
@@ -17,4 +17,8 @@ public interface InteractorDAO extends BaseDAO<Interactor> {
     void searchByAccessions(Interactor interactorA, Interactor interactorB) throws SQLException;
 
     List<String> getAllAccessions() throws SQLException;
+
+    List<Interactor> getAll() throws SQLException;
+
+    Interactor create(Interactor interactor) throws SQLException;
 }

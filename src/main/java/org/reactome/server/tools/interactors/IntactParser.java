@@ -253,7 +253,7 @@ public class IntactParser {
             }
 
         }else {
-            interactor.setTaxid(0);
+            interactor.setTaxid(-1);
             parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Does not have taxid.");
         }
     }
@@ -314,16 +314,54 @@ public class IntactParser {
         }
     }
 
+//    /**
+//     * Parsing the Aliases A and B for the identifiers. Separated by "|".
+//     *
+//     */
+//    private void parseAliases(String value, Interactor interactor) {
+//        if (!value.equals("-")){ // not null
+//            String[] allAliases = value.split("\\|");
+//            for (String uniqueAlias : allAliases) {
+//                /** databaseName:value **/
+//                String[] alias = uniqueAlias.split(":");
+//
+//                /**
+//                 * If alternatives IDs are null, try to figure the resource out in the alias
+//                 */
+//                if(interactor.getInteractorResourceId() == 0){
+//                    InteractorResource interactorResource = interactorResourceMap.get(alias[0]);
+//                    if(interactorResource != null){
+//                        interactor.setInteractorResourceId(interactorResource.getId());
+//                    }
+//                }
+//
+//                /** first occurrence of psi-mi should be taken as the alias **/
+//                if(alias[0].equalsIgnoreCase(PSI_MI_LABEL) && interactor.getAlias() == null){
+//                    interactor.setAlias(alias[1]);
+//                }
+//            }
+//        }
+//
+//        /** Some cases like EBI-7121639 there is no resource ???? Yes! There's resource **/
+//        if(interactor.getInteractorResourceId() == 0){
+//            parserErrorMessages.add("The Interactor ID [" + interactor.getIntactId() + "] do not have alternate identifiers. Can't get Resource.");
+//            InteractorResource interactorResource = interactorResourceMap.get("undefined");
+//            if(interactorResource != null){
+//                interactor.setInteractorResourceId(interactorResource.getId());
+//            }
+//        }
+//    }
+
     /**
      * Parsing the Aliases A and B for the identifiers. Separated by "|".
-     *
      */
     private void parseAliases(String value, Interactor interactor) {
+        String finalAliases = "";
         if (!value.equals("-")){ // not null
             String[] allAliases = value.split("\\|");
             for (String uniqueAlias : allAliases) {
                 /** databaseName:value **/
-                String[] alias = uniqueAlias.split(":");
+                String[] alias = uniqueAlias.split(":", 2);
 
                 /**
                  * If alternatives IDs are null, try to figure the resource out in the alias
@@ -335,11 +373,21 @@ public class IntactParser {
                     }
                 }
 
-                /** first occurrence of psi-mi should be taken as the alias **/
-                if(alias[0].equalsIgnoreCase(PSI_MI_LABEL) && interactor.getAlias() == null){
-                    interactor.setAlias(alias[1]);
-                }
+                /**
+                 * Saving all the alias in the same column. We don't query by alias, so it is ok.
+                 * We can't save it as CSV, otherwise when splitting the list it will split alias that has
+                 * comma.
+                 */
+                finalAliases = finalAliases.concat(alias[1]).concat("$");
+
             }
+
+            if (finalAliases.endsWith("$")) {
+                finalAliases = finalAliases.substring(0, finalAliases.length() - 1);
+            }
+
+            interactor.setAlias(finalAliases);
+
         }
 
         /** Some cases like EBI-7121639 there is no resource ???? Yes! There's resource **/

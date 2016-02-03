@@ -27,11 +27,13 @@ public class TestPsicquicClustering {
 //            URL intactQuery = new URL("http://webservice.baderlab.org:8480/psicquic-ws/webservices/current/search/query/16019");
 //            URL irefindexQuery = new URL("http://biotin.uio.no:8080/psicquic-ws/webservices/current/search/query/P07200");
 //            URL intactQuery = new URL("http://catalyst.ucsd.edu:8080/psicquic-ws/webservices/current/search/query/50002196");
-//            URL intactQuery = new URL("http://webservice.baderlab.org:8380/psi-gm/webservices/current/search/query/Q9NQ94");
+            //URL intactQuery = new URL("http://webservice.baderlab.org:8380/psi-gm/webservices/current/search/interactor/Q9NQ94");
 //            URL intactQuery = new URL("http://bar.utoronto.ca:9090/psicquic/webservices/current/search/interactor/At5g15200?compressed=true");
 //            URL intactQuery = new URL("http://www.ebi.ac.uk/Tools/webservices/psicquic/uniprot/webservices/current/search/interactor/P04626?compressed=true");
 //            URL intactQuery = new URL("http://imex.mbi.ucla.edu/psicquic-ws/webservices/current/search/interactor/P35439");
-            URL intactQuery = new URL("http://www.ebi.ac.uk/Tools/webservices/psicquic/molcon/webservices/current/search/interactor/P22694-2");
+//            URL intactQuery = new URL("http://www.ebi.ac.uk/Tools/webservices/psicquic/molcon/webservices/current/search/interactor/P22694-2");
+            URL intactQuery = new URL("http://bar.utoronto.ca:9090/psicquic/webservices/current/search/interactor/At2g36990");
+
             List<BinaryInteraction> binaryInteractions = new ArrayList<>();
             PsimiTabReader mitabReader = new PsimiTabReader();
             binaryInteractions.addAll(mitabReader.read(intactQuery));
@@ -39,7 +41,7 @@ public class TestPsicquicClustering {
 
             /* Run cluster using list of binary interactions as input */
             InteractionClusterScore iC = new InteractionClusterScore();
-            iC.addQueryAcc("P23919");
+            //iC.addQueryAcc("P23919");
 
             iC.setBinaryInteractionIterator(binaryInteractions.iterator());
             //iC.setMappingIdDbNames("uniprotkb,irefindex,ddbj/embl/genbank,refseq,chebi"); this is the default value
