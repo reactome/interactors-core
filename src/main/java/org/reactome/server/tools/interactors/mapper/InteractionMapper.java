@@ -18,7 +18,7 @@ public class InteractionMapper {
 
     private List<EntityMapper> entities;
 
-    private Map<String, SynonymMapper> synonym;
+    //private Map<String, SynonymMapper> synonym;
 
 
     public String getResource() {
@@ -53,12 +53,12 @@ public class InteractionMapper {
         this.entities = entities;
     }
 
-    public Map<String, SynonymMapper> getSynonym() {
-        return synonym;
-    }
-
-    public void setSynonym(Map<String, SynonymMapper> synonym) {
-        this.synonym = synonym;
-    }
+//    public Map<String, SynonymMapper> getSynonym() {
+//        return synonym;
+//    }
+//
+//    public void setSynonym(Map<String, SynonymMapper> synonym) {
+//        this.synonym = synonym;
+//    }
 
 }

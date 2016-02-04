@@ -14,6 +14,8 @@ public class InteractorMapper {
 
     private Double score;
 
+    private String alias;
+
     public String getAcc() {
         return acc;
     }
@@ -38,4 +40,11 @@ public class InteractorMapper {
         this.score = score;
     }
 
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 }

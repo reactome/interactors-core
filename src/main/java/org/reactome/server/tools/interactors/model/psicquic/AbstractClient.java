@@ -91,13 +91,13 @@ public abstract class AbstractClient implements PsicquicClient {
             }
         }
 
-        if (!uniprotAlias.isEmpty()) return uniprotAlias;
+        if (!uniprotAlias.isEmpty()) return uniprotAlias.toUpperCase();
 
-        if (!psimiAlias.isEmpty()) return psimiAlias;
+        if (!psimiAlias.isEmpty()) return psimiAlias.toUpperCase();
 
 
 
-        return otherAlias;
+        return otherAlias.toUpperCase();
     }
 
     /**
