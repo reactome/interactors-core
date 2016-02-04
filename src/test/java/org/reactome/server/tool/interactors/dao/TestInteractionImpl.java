@@ -6,7 +6,9 @@ import org.junit.Test;
 import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.dao.intact.StaticInteraction;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
+import org.reactome.server.tools.interactors.exception.InvalidInteractionResourceException;
 import org.reactome.server.tools.interactors.model.Interaction;
+import org.reactome.server.tools.interactors.service.InteractionService;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
 import org.reactome.server.tools.interactors.util.Toolbox;
 
@@ -23,6 +25,8 @@ public class TestInteractionImpl {
 
     private InteractionDAO interactionDAO;
 
+    private InteractionService interactionService;
+
     private final String ACCESSION = "Q13501";
     private final Long RESOURCE_ID = 1L;
 
@@ -36,6 +40,7 @@ public class TestInteractionImpl {
             e.printStackTrace();
         }
         interactionDAO = new StaticInteraction(interactors);
+        interactionService = new InteractionService(interactors);
     }
 
     @Test
@@ -90,5 +95,14 @@ public class TestInteractionImpl {
         Assert.assertEquals("20- Score not round properly", Toolbox.roundScore(0.999), new Double(0.999));
 
         Assert.assertEquals("21- Score not round properly", Toolbox.roundScore(0.9999), new Double(1)); // ask
+    }
+
+    @Test
+    public void testGetInteractionsAndRemoveDuplicates() throws SQLException, InvalidInteractionResourceException {
+        Map<String, List<Interaction>> interactions = interactionService.getInteractions(ACCESSION, InteractorConstant.STATIC);
+
+        Assert.assertFalse("Interactors list is Empty", interactions.isEmpty());
+        Assert.assertTrue("Interactor less than 10", interactions.get(ACCESSION).size() > 10);
+
     }
 }

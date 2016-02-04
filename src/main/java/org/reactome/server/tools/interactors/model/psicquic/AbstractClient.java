@@ -42,10 +42,12 @@ public abstract class AbstractClient implements PsicquicClient {
             case A:
                 interactor.setAcc(encoreInteraction.getInteractorA());
                 interactor.setAlias(getAlias(encoreInteraction.getOtherInteractorAccsA()));
+                interactor.setSynonyms(getSynonyms(encoreInteraction.getOtherInteractorAccsA()));
                 break;
             case B:
                 interactor.setAcc(encoreInteraction.getInteractorB());
                 interactor.setAlias(getAlias(encoreInteraction.getOtherInteractorAccsB()));
+                interactor.setSynonyms(getSynonyms(encoreInteraction.getOtherInteractorAccsB()));
                 break;
         }
 
@@ -69,34 +71,34 @@ public abstract class AbstractClient implements PsicquicClient {
         return new Double(miscore);
     }
 
-//    /**
-//     * Retrieve all the alias of a given accession
-//     *
-//     * @param accessions key=dbsource{psi-mi,uniprot,etc} value=alias
-//     */
-//    public String getAlias(Map<String, List<String>> accessions) {
-//        String uniprotAlias = "";
-//        String psimiAlias = "";
-//        String otherAlias = "";
-//
-//        for (String dbSource : accessions.keySet()) {
-//            if (dbSource.equalsIgnoreCase("uniprotkb") && uniprotAlias.isEmpty()) {
-//                uniprotAlias = accessions.get(dbSource).get(0);
-//            } else if (dbSource.equalsIgnoreCase("psi-mi") && psimiAlias.isEmpty()) {
-//                psimiAlias = accessions.get(dbSource).get(0);
-//            } else if (otherAlias.isEmpty()) {
-//                otherAlias = accessions.get(dbSource).get(0);
-//            }
-//        }
-//
-//        if (!uniprotAlias.isEmpty()) return uniprotAlias;
-//
-//        if (!psimiAlias.isEmpty()) return psimiAlias;
-//
-//
-//
-//        return otherAlias;
-//    }
+    /**
+     * Retrieve all the alias of a given accession
+     *
+     * @param accessions key=dbsource{psi-mi,uniprot,etc} value=alias
+     */
+    public String getAlias(Map<String, List<String>> accessions) {
+        String uniprotAlias = "";
+        String psimiAlias = "";
+        String otherAlias = "";
+
+        for (String dbSource : accessions.keySet()) {
+            if (dbSource.equalsIgnoreCase("uniprotkb") && uniprotAlias.isEmpty()) {
+                uniprotAlias = accessions.get(dbSource).get(0);
+            } else if (dbSource.equalsIgnoreCase("psi-mi") && psimiAlias.isEmpty()) {
+                psimiAlias = accessions.get(dbSource).get(0);
+            } else if (otherAlias.isEmpty()) {
+                otherAlias = accessions.get(dbSource).get(0);
+            }
+        }
+
+        if (!uniprotAlias.isEmpty()) return uniprotAlias;
+
+        if (!psimiAlias.isEmpty()) return psimiAlias;
+
+
+
+        return otherAlias;
+    }
 
     /**
      * Retrieve all the alias of a given accession
@@ -105,19 +107,19 @@ public abstract class AbstractClient implements PsicquicClient {
      * @param accessions key=dbsource{psi-mi,uniprot,etc} value=alias
      * @return alias1$alias2 -2tyrosine$alias3 (1,2)
      */
-    public String getAlias(Map<String, List<String>> accessions) {
-        String allAlias = "";
+    public String getSynonyms(Map<String, List<String>> accessions) {
+        String allSynonyms = "";
         for (String dbSource : accessions.keySet()) {
             for(String alias : accessions.get(dbSource)){
-                allAlias = allAlias.concat(alias).concat("$");
+                allSynonyms = allSynonyms.concat(alias).concat("$");
             }
         }
 
-        if(allAlias.endsWith("$")){
-            allAlias = allAlias.substring(0, allAlias.length() - 1);
+        if(allSynonyms.endsWith("$")){
+            allSynonyms = allSynonyms.substring(0, allSynonyms.length() - 1);
         }
 
-        return allAlias;
+        return allSynonyms;
     }
 
     /**

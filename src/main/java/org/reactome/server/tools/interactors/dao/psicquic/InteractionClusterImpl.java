@@ -79,51 +79,12 @@ public class InteractionClusterImpl implements PsicquicDAO {
                 }
             }
 
-            interactions = removeDuplicatedInteractor(interactions);
+            interactions = Toolbox.removeDuplicatedInteractor(interactions);
 
             Collections.sort(interactions);
             Collections.reverse(interactions);
 
             ret.put(acc, interactions);
-
-        }
-
-        return ret;
-
-    }
-
-    /**
-     * For the same Accession retrieve the list of interactors. If the interactors are the same we will
-     * remove the duplicates and keep the one of highest score.
-     *
-     * Requirement: Keep only the one with highest score if the interactors are the same (with different identifiers)
-     *              e.g CHEBI:16027 (16027) for ChEMBL.
-     *
-     * @param interactions A sorted and reversed list of interactions (Highest score on top).
-     */
-    private List<Interaction> removeDuplicatedInteractor(List<Interaction> interactions) {
-        List<Interaction> ret = new ArrayList<>(interactions.size());
-
-        MapSet<String, Interaction> interactionMapSet = new MapSet<>();
-
-        /** Identify potential duplicates and put in a MapSet**/
-        for (Interaction interaction : interactions) {
-            interactionMapSet.add(interaction.getInteractorB().getAcc(), interaction);
-        }
-
-        /** Interactions in the MapSet have been sorted by score as defined in the compareTo **/
-        for(String accKey : interactionMapSet.keySet()){
-            Set<Interaction> interactionSet = interactionMapSet.getElements(accKey);
-            if(interactionSet.size() >= 2){ // This interaction is not unique. Let's check the score
-                Interaction highScoreInteraction = null;
-                for (Interaction interaction : interactionSet) {
-                    highScoreInteraction = interaction;
-                }
-                ret.add(highScoreInteraction);
-            }else {
-                /** Just have only one, just add it **/
-                ret.add(interactionSet.iterator().next());
-            }
 
         }
 

@@ -1,6 +1,11 @@
 package org.reactome.server.tools.interactors.util;
 
+import org.reactome.server.tools.interactors.model.Interaction;
+
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -70,5 +75,42 @@ public class Toolbox {
         DecimalFormat df = new DecimalFormat("0.###");
 
         return new Double(df.format(score));
+    }
+
+    /**
+     * For the same Accession retrieve the list of interactors. If the interactors are the same we will
+     * remove the duplicates and keep the one of highest score.
+     *
+     * Requirement: Keep only the one with highest score if the interactors are the same (with different identifiers)
+     *              e.g CHEBI:16027 (16027) for ChEMBL.
+     */
+    public static List<Interaction> removeDuplicatedInteractor(List<Interaction> interactions) {
+        List<Interaction> ret = new ArrayList<>(interactions.size());
+
+        MapSet<String, Interaction> interactionMapSet = new MapSet<>();
+
+        /** Identify potential duplicates and put in a MapSet**/
+        for (Interaction interaction : interactions) {
+            /** When adding in the MapSet (TreeSet impl) it already sort the interaction by score **/
+            interactionMapSet.add(interaction.getInteractorB().getAcc(), interaction);
+        }
+
+        /** Interactions in the MapSet have been sorted by score as defined in the Interaction.compareTo **/
+        for(String accKey : interactionMapSet.keySet()){
+            Set<Interaction> interactionSet = interactionMapSet.getElements(accKey);
+            if(interactionSet.size() >= 2){ // This interaction is not unique. Let's check the score
+                Interaction highScoreInteraction = null;
+                for (Interaction interaction : interactionSet) {
+                    highScoreInteraction = interaction;
+                }
+                ret.add(highScoreInteraction);
+            }else {
+                /** Just have only one, just add it **/
+                ret.add(interactionSet.iterator().next());
+            }
+        }
+
+        return ret;
+
     }
 }

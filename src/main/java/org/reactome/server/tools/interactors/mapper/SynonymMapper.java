@@ -1,6 +1,6 @@
 package org.reactome.server.tools.interactors.mapper;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Maps a list of unique synonyms for the given identifier in the JSON
@@ -9,13 +9,13 @@ import java.util.List;
  */
 public class SynonymMapper {
 
-    private List<String> text;
+    private Set<String> text;
 
-    public List<String> getText() {
+    public Set<String> getText() {
         return text;
     }
 
-    public void setText(List<String> text) {
+    public void setText(Set<String> text) {
         this.text = text;
     }
 

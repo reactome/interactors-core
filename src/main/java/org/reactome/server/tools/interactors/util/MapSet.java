@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
+ * This mapset is implementing TreeSet
+ *
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
 @SuppressWarnings("UnusedDeclaration")
@@ -66,6 +68,10 @@ public class MapSet<S,T> implements Serializable {
     }
 
     public Set<T> values(){
+        /**
+         * The Original implementation implements HashSet.
+         * Please keep this as a TreeSet.
+         */
         Set<T> rtn = new TreeSet<>();
         for (S s : map.keySet()) {
             rtn.addAll(map.get(s));

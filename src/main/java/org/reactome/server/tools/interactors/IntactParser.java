@@ -220,6 +220,9 @@ public class IntactParser {
         /** gene/ewas name **/
         parseAliases(line[ParserIndex.ALIAS_INTERACTOR_A.value], interactorA);
 
+        /** synonyms **/
+        parseSynonyms(line[ParserIndex.ALIAS_INTERACTOR_A.value], interactorA);
+
         /** taxid:9606(human) **/
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_A.value], interactorA);
 
@@ -230,8 +233,11 @@ public class IntactParser {
         /** sample of Alt. ID(s) interactor B =>  uniprotkb:Q15301 **/
         parseAlternativeIds(line[ParserIndex.ALTERNATIVE_INTERACTOR_B.value], interactorB);
 
-        /** **/
+        /** gene/ewas name **/
         parseAliases(line[ParserIndex.ALIAS_INTERACTOR_B.value], interactorB);
+
+        /** synonyms **/
+        parseSynonyms(line[ParserIndex.ALIAS_INTERACTOR_B.value], interactorB);
 
         /** taxid:9606(human) **/
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_B.value], interactorB);
@@ -314,16 +320,55 @@ public class IntactParser {
         }
     }
 
+    /**
+     * Parsing the Aliases A and B for the identifiers. Separated by "|".
+     *
+     */
+    private void parseAliases(String value, Interactor interactor) {
+        if (!value.equals("-")){ // not null
+            String[] allAliases = value.split("\\|");
+            for (String uniqueAlias : allAliases) {
+                /** databaseName:value **/
+                String[] alias = uniqueAlias.split(":");
+
+                /**
+                 * If alternatives IDs are null, try to figure the resource out in the alias
+                 */
+                if(interactor.getInteractorResourceId() == 0){
+                    InteractorResource interactorResource = interactorResourceMap.get(alias[0]);
+                    if(interactorResource != null){
+                        interactor.setInteractorResourceId(interactorResource.getId());
+                    }
+                }
+
+                /** first occurrence of psi-mi should be taken as the alias **/
+                if(alias[0].equalsIgnoreCase(PSI_MI_LABEL) && interactor.getAlias() == null){
+                    interactor.setAlias(alias[1]);
+                }
+            }
+        }
+
+        /** Some cases like EBI-7121639 there is no resource ???? Yes! There's resource **/
+        if(interactor.getInteractorResourceId() == 0){
+            parserErrorMessages.add("The Interactor ID [" + interactor.getIntactId() + "] do not have alternate identifiers. Can't get Resource.");
+            InteractorResource interactorResource = interactorResourceMap.get("undefined");
+            if(interactorResource != null){
+                interactor.setInteractorResourceId(interactorResource.getId());
+            }
+        }
+    }
+
 //    /**
-//     * Parsing the Aliases A and B for the identifiers. Separated by "|".
-//     *
+//     * Parsing the Aliases A and B for the identifiers. Separated by "|"
+//     * We want the psi-mi as the main alias.
 //     */
 //    private void parseAliases(String value, Interactor interactor) {
+//        String synonyms = "";
 //        if (!value.equals("-")){ // not null
 //            String[] allAliases = value.split("\\|");
 //            for (String uniqueAlias : allAliases) {
 //                /** databaseName:value **/
-//                String[] alias = uniqueAlias.split(":");
+//                String[] alias = uniqueAlias.split(":", 2);
 //
 //                /**
 //                 * If alternatives IDs are null, try to figure the resource out in the alias
@@ -335,11 +380,21 @@ public class IntactParser {
 //                    }
 //                }
 //
-//                /** first occurrence of psi-mi should be taken as the alias **/
-//                if(alias[0].equalsIgnoreCase(PSI_MI_LABEL) && interactor.getAlias() == null){
-//                    interactor.setAlias(alias[1]);
-//                }
+//                /**
+//                 * Saving all the alias in the same column. We don't query by alias, so it is ok.
+//                 * We can't save it as CSV, otherwise when splitting the list it will split alias that has
+//                 * comma.
+//                 */
+//                synonyms = synonyms.concat(alias[1]).concat("$");
+//
 //            }
+//
+//            if (synonyms.endsWith("$")) {
+//                synonyms = synonyms.substring(0, synonyms.length() - 1);
+//            }
+//
+//            interactor.setAlias(synonyms);
+//
 //        }
 //
 //        /** Some cases like EBI-7121639 there is no resource ???? Yes! There's resource **/
@@ -353,10 +408,11 @@ public class IntactParser {
 //    }
 
     /**
-     * Parsing the Aliases A and B for the identifiers. Separated by "|".
+     * All other
+     *
      */
-    private void parseAliases(String value, Interactor interactor) {
-        String finalAliases = "";
+    private void parseSynonyms(String value, Interactor interactor) {
+        String synonyms = "";
         if (!value.equals("-")){ // not null
             String[] allAliases = value.split("\\|");
             for (String uniqueAlias : allAliases) {
@@ -364,39 +420,20 @@ public class IntactParser {
                 String[] alias = uniqueAlias.split(":", 2);
 
                 /**
-                 * If alternatives IDs are null, try to figure the resource out in the alias
-                 */
-                if(interactor.getInteractorResourceId() == 0){
-                    InteractorResource interactorResource = interactorResourceMap.get(alias[0]);
-                    if(interactorResource != null){
-                        interactor.setInteractorResourceId(interactorResource.getId());
-                    }
-                }
-
-                /**
                  * Saving all the alias in the same column. We don't query by alias, so it is ok.
                  * We can't save it as CSV, otherwise when splitting the list it will split alias that has
                  * comma.
                  */
-                finalAliases = finalAliases.concat(alias[1]).concat("$");
+                synonyms = synonyms.concat(alias[1]).concat("$");
 
             }
 
-            if (finalAliases.endsWith("$")) {
-                finalAliases = finalAliases.substring(0, finalAliases.length() - 1);
+            if (synonyms.endsWith("$")) {
+                synonyms = synonyms.substring(0, synonyms.length() - 1);
             }
 
-            interactor.setAlias(finalAliases);
+            interactor.setSynonyms(synonyms);
 
-        }
-
-        /** Some cases like EBI-7121639 there is no resource ???? Yes! There's resource **/
-        if(interactor.getInteractorResourceId() == 0){
-            parserErrorMessages.add("The Interactor ID [" + interactor.getIntactId() + "] do not have alternate identifiers. Can't get Resource.");
-            InteractorResource interactorResource = interactorResourceMap.get("undefined");
-            if(interactorResource != null){
-                interactor.setInteractorResourceId(interactorResource.getId());
-            }
         }
     }
 

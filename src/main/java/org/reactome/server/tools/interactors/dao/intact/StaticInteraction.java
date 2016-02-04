@@ -31,7 +31,6 @@ public class StaticInteraction implements InteractionDAO {
 
     private final String TABLE = "INTERACTION";
     private final String ALL_COLUMNS = "INTERACTOR_A, INTERACTOR_B, AUTHOR_SCORE, MISCORE, INTERACTION_RESOURCE_ID";
-    //private final String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
 
     public StaticInteraction(InteractorsDatabase database) {
         this.connection = database.getConnection();
@@ -78,7 +77,6 @@ public class StaticInteraction implements InteractionDAO {
 
         } finally {
             connection.setAutoCommit(true);
-            //conn.close();
         }
 
         return true;
@@ -96,8 +94,8 @@ public class StaticInteraction implements InteractionDAO {
 
         try {
             String query = "SELECT   INTERACTION.ID AS 'INTERACTION_ID', " +
-                                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA', INTERACTORA.TAXID AS 'TAX_IDA', " +
-                                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB', INTERACTORB.TAXID AS 'TAX_IDB', " +
+                                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA', INTERACTORA.TAXID AS 'TAX_IDA', INTERACTORA.SYNONYMS AS 'SYNONYMSA', " +
+                                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB', INTERACTORB.TAXID AS 'TAX_IDB', INTERACTORB.SYNONYMS AS 'SYNONYMSB', " +
                                     "INTERACTION.AUTHOR_SCORE, " +
                                     "INTERACTION.MISCORE, " +
                                     "INTERACTION.INTERACTION_RESOURCE_ID " +
@@ -125,62 +123,6 @@ public class StaticInteraction implements InteractionDAO {
                 ResultSet rs = pstm.executeQuery();
                 while(rs.next()){
                     Interaction interaction = buildInteraction(acc, rs, Method.BY_ACESSION);
-
-                    interactions.add(interaction);
-                }
-
-            }
-
-        }catch (SQLException e){
-            logger.error("An error has occurred during interaction batch insert. Please check the following exception.");
-            throw new SQLException(e);
-
-        }
-
-        return interactions;
-    }
-
-    public List<Interaction> getByIntactId(String intactId, Long resourceId, Integer page, Integer pageSize) throws SQLException{
-        List<String> intactIdList = new ArrayList<>(1);
-        intactIdList.add(intactId);
-
-        return getByIntactId(intactIdList, resourceId, page, pageSize);
-    }
-
-    public List<Interaction> getByIntactId(List<String> intactIdList, Long resourceId, Integer page, Integer pageSize) throws SQLException{
-        List<Interaction> interactions = new ArrayList<>();
-
-        try {
-            String query = "SELECT   INTERACTION.ID AS 'INTERACTION_ID', " +
-                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA',  INTERACTORA.TAXID AS 'TAX_IDA', " +
-                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB',  INTERACTORB.TAXID AS 'TAX_IDB', " +
-                    "INTERACTION.AUTHOR_SCORE, " +
-                    "INTERACTION.MISCORE, " +
-                    "INTERACTION.INTERACTION_RESOURCE_ID " +
-                    "FROM     INTERACTION, INTERACTOR AS INTERACTORA, INTERACTOR AS INTERACTORB " +
-                    "WHERE    INTERACTORA.ID = INTERACTION.INTERACTOR_A " +
-                    "AND      INTERACTORB.ID = INTERACTION.INTERACTOR_B " +
-                    "AND      (INTERACTION.INTERACTOR_A = (select id from interactor where INTACT_ID = ?) OR INTERACTION.INTERACTOR_B = (select id from interactor where INTACT_ID = ?)) " +
-                    "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
-                    "ORDER BY INTERACTION.MISCORE DESC";
-
-            /** Both are greater than -1, paginated is enabled **/
-            if(page > -1 && pageSize > -1){
-                int limit = (pageSize * page) - pageSize;
-                String limitQuery = String.format(" LIMIT %d, %d", limit, pageSize);
-
-                query = query.concat(limitQuery);
-            }
-
-            for (String intactId : intactIdList) {
-                PreparedStatement pstm = connection.prepareStatement(query);
-                pstm.setString(1, intactId.toUpperCase());
-                pstm.setString(2, intactId.toUpperCase());
-                pstm.setLong(3, resourceId);
-
-                ResultSet rs = pstm.executeQuery();
-                while(rs.next()){
-                    Interaction interaction = buildInteraction(intactId, rs, Method.BY_INTACT_ID);
 
                     interactions.add(interaction);
                 }
@@ -266,6 +208,7 @@ public class StaticInteraction implements InteractionDAO {
         interactorA.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_A_ID"));
         interactorA.setIntactId(rs.getString("INTACT_IDA"));
         interactorA.setTaxid(rs.getInt("TAX_IDA"));
+        interactorA.setSynonyms(rs.getString("SYNONYMSA"));
 
         Interactor interactorB = new Interactor();
         interactorB.setId(rs.getLong("ID_B"));
@@ -274,6 +217,7 @@ public class StaticInteraction implements InteractionDAO {
         interactorB.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_B_ID"));
         interactorB.setIntactId(rs.getString("INTACT_IDB"));
         interactorB.setTaxid(rs.getInt("TAX_IDB"));
+        interactorB.setSynonyms(rs.getString("SYNONYMSB"));
 
         /**
          * If A interacts with B and B with A we are talking about the same interaction, so

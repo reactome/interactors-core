@@ -28,7 +28,6 @@ public class Interactor {
 
     /**
      * The alias is basically the protein name. A text representation for the protein.
-     * This is going to be in the synonym list.
      */
     private String alias;
 
@@ -36,6 +35,11 @@ public class Interactor {
      * Taxonomy ID
      */
     private Integer taxid;
+
+    /**
+     * Synonyms list
+     */
+    private String synonyms;
 
     public Long getId() {
         return id;
@@ -115,5 +119,13 @@ public class Interactor {
 
     public void setTaxid(Integer taxid) {
         this.taxid = taxid;
+    }
+
+    public String getSynonyms() {
+        return synonyms;
+    }
+
+    public void setSynonyms(String synonyms) {
+        this.synonyms = synonyms;
     }
 }
