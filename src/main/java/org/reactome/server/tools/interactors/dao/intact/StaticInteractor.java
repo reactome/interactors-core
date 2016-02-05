@@ -37,7 +37,7 @@ public class StaticInteractor implements InteractorDAO {
         pstm.setString(1, interactor.getAcc());
         pstm.setString(2, interactor.getIntactId());
         pstm.setLong(3, interactor.getInteractorResourceId());
-        pstm.setString(4, interactor.getAlias().toUpperCase());
+        pstm.setString(4, interactor.getAlias().toUpperCase().replace("_HUMAN","").replaceAll("_", " "));
 
         Integer taxId = interactor.getTaxid();
         if (taxId == null) {

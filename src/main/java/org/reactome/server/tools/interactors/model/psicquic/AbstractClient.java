@@ -3,7 +3,6 @@ package org.reactome.server.tools.interactors.model.psicquic;
 import org.reactome.server.tools.interactors.model.InteractionDetails;
 import org.reactome.server.tools.interactors.model.Interactor;
 import psidev.psi.mi.tab.model.Confidence;
-import psidev.psi.mi.tab.model.CrossReference;
 import uk.ac.ebi.enfin.mi.cluster.EncoreInteraction;
 
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public abstract class AbstractClient implements PsicquicClient {
      * Get miscore which is calculate by InteractionClusterScore service
      * @return miscore
      */
-    public double getMiscore(List<Confidence> confidenceValues) {
+    public double getMiScore(List<Confidence> confidenceValues) {
         String miscore = "";
         for (Confidence confidence : confidenceValues) {
             String type = confidence.getType();
@@ -91,13 +90,13 @@ public abstract class AbstractClient implements PsicquicClient {
             }
         }
 
-        if (!uniprotAlias.isEmpty()) return uniprotAlias.toUpperCase();
-
-        if (!psimiAlias.isEmpty()) return psimiAlias.toUpperCase();
-
-
-
-        return otherAlias.toUpperCase();
+        String rtn = otherAlias;
+        if (!uniprotAlias.isEmpty()){
+            rtn = uniprotAlias;
+        } else if (!psimiAlias.isEmpty()){
+            rtn = psimiAlias;
+        }
+        return rtn.toUpperCase().replace("_HUMAN","").replaceAll("_"," ");
     }
 
     /**

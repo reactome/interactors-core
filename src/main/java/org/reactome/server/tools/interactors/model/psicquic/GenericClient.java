@@ -24,7 +24,7 @@ public class GenericClient extends AbstractClient {
         interaction.setInteractorA(interactorA);
         interaction.setInteractorB(interactorB);
 
-        interaction.setIntactScore(getMiscore(encoreInteraction.getConfidenceValues()));
+        interaction.setIntactScore(getMiScore(encoreInteraction.getConfidenceValues()));
 
         interaction.setInteractionDetailsList(getInteractionAc(encoreInteraction.getExperimentToDatabase()));
 
