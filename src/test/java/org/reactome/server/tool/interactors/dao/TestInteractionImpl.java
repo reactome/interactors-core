@@ -13,8 +13,10 @@ import org.reactome.server.tools.interactors.util.InteractorConstant;
 import org.reactome.server.tools.interactors.util.Toolbox;
 
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -80,7 +82,7 @@ public class TestInteractionImpl {
         Assert.assertEquals("7- Score not round properly", Toolbox.roundScore(0.4499), new Double(0.45));
         Assert.assertEquals("8- Score not round properly", Toolbox.roundScore(0.45), new Double(0.45));
         Assert.assertEquals("8- Score not round properly", Toolbox.roundScore(0.4499999), new Double(0.45)); // ask
-        Assert.assertEquals("9- Score not round properly", Toolbox.roundScore(0.4445), new Double(0.444));
+        Assert.assertEquals("9- Score not round properly", Toolbox.roundScore(0.4445), new Double(0.445));
         Assert.assertEquals("10- Score not round properly", Toolbox.roundScore(0.4466), new Double(0.447));
 
         Assert.assertEquals("11- Score not round properly", Toolbox.roundScore(0.447), new Double(0.447));

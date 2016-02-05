@@ -56,7 +56,7 @@ public class TestPsicquicClustering {
 
             for (Integer integer : interactionMapping.keySet()) {
                 EncoreInteraction interaction = interactionMapping.get(integer);
-                System.out.println(interaction.getInteractorAccsA());
+                //System.out.println(interaction.getInteractorAccsA());
                 //System.out.println(interaction.getInteractorA("uniprot"));
                 //System.out.println(interaction.getInteractorB());
                 //interaction.get

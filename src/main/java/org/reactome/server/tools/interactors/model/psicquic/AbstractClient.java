@@ -76,27 +76,28 @@ public abstract class AbstractClient implements PsicquicClient {
      * @param accessions key=dbsource{psi-mi,uniprot,etc} value=alias
      */
     public String getAlias(Map<String, List<String>> accessions) {
-        String uniprotAlias = "";
         String psimiAlias = "";
+        String uniprotAlias = "";
         String otherAlias = "";
 
         for (String dbSource : accessions.keySet()) {
-            if (dbSource.equalsIgnoreCase("uniprotkb") && uniprotAlias.isEmpty()) {
-                uniprotAlias = accessions.get(dbSource).get(0);
-            } else if (dbSource.equalsIgnoreCase("psi-mi") && psimiAlias.isEmpty()) {
+            if (dbSource.equalsIgnoreCase("psi-mi") && psimiAlias.isEmpty()) {
                 psimiAlias = accessions.get(dbSource).get(0);
+            } else if (dbSource.equalsIgnoreCase("uniprotkb") && uniprotAlias.isEmpty()) {
+                uniprotAlias = accessions.get(dbSource).get(0);
             } else if (otherAlias.isEmpty()) {
                 otherAlias = accessions.get(dbSource).get(0);
             }
         }
 
         String rtn = otherAlias;
-        if (!uniprotAlias.isEmpty()){
-            rtn = uniprotAlias;
-        } else if (!psimiAlias.isEmpty()){
+        if (!psimiAlias.isEmpty()){
             rtn = psimiAlias;
+        } else if (!uniprotAlias.isEmpty()){
+            rtn = uniprotAlias;
         }
-        return rtn.toUpperCase().replace("_HUMAN","").replaceAll("_"," ");
+
+        return rtn.toUpperCase();
     }
 
     /**

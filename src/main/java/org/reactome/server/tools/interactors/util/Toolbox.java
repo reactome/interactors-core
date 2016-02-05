@@ -71,10 +71,12 @@ public class Toolbox {
         return databaseName;
     }
 
+    /**
+     * Round score having three decimal places
+     * The amount of zeros represents the decimal places.
+     */
     public static Double roundScore(Double score){
-        DecimalFormat df = new DecimalFormat("0.###");
-
-        return new Double(df.format(score));
+        return Math.round(score * 1000d) / 1000d;
     }
 
     /**

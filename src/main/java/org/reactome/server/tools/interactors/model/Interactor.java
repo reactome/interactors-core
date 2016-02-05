@@ -1,5 +1,7 @@
 package org.reactome.server.tools.interactors.model;
 
+import java.util.Objects;
+
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
@@ -79,11 +81,14 @@ public class Interactor {
     }
 
     public String getAlias() {
-        return alias;
+        if (Objects.equals(alias, acc)) return null;
+        return alias == null ? null : alias.replace("_HUMAN", "").replaceAll("_", " ");
     }
 
     public void setAlias(String alias) {
-        this.alias = alias.replaceAll("\"", "");
+        if(alias != null) {
+            this.alias = alias.toUpperCase().replaceAll("\"", "");
+        }
     }
 
     @Override
@@ -126,6 +131,8 @@ public class Interactor {
     }
 
     public void setSynonyms(String synonyms) {
-        this.synonyms = synonyms;
+        if(synonyms != null) {
+            this.synonyms = synonyms.replaceAll("\"", "");
+        }
     }
 }

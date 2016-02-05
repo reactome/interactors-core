@@ -264,7 +264,6 @@ public class IntactParser {
         }
     }
 
-
     private Interaction prepareInteractions(String[] line, Interactor interactorA, Interactor interactorB) {
         Interaction interaction = new Interaction();
 
@@ -357,55 +356,6 @@ public class IntactParser {
             }
         }
     }
-
-//    /**
-//     * Parsing the Aliases A and B for the identifiers. Separated by "|"
-//     * We want the psi-mi as the main alias.
-//     */
-//    private void parseAliases(String value, Interactor interactor) {
-//        String synonyms = "";
-//        if (!value.equals("-")){ // not null
-//            String[] allAliases = value.split("\\|");
-//            for (String uniqueAlias : allAliases) {
-//                /** databaseName:value **/
-//                String[] alias = uniqueAlias.split(":", 2);
-//
-//                /**
-//                 * If alternatives IDs are null, try to figure the resource out in the alias
-//                 */
-//                if(interactor.getInteractorResourceId() == 0){
-//                    InteractorResource interactorResource = interactorResourceMap.get(alias[0]);
-//                    if(interactorResource != null){
-//                        interactor.setInteractorResourceId(interactorResource.getId());
-//                    }
-//                }
-//
-//                /**
-//                 * Saving all the alias in the same column. We don't query by alias, so it is ok.
-//                 * We can't save it as CSV, otherwise when splitting the list it will split alias that has
-//                 * comma.
-//                 */
-//                synonyms = synonyms.concat(alias[1]).concat("$");
-//
-//            }
-//
-//            if (synonyms.endsWith("$")) {
-//                synonyms = synonyms.substring(0, synonyms.length() - 1);
-//            }
-//
-//            interactor.setAlias(synonyms);
-//
-//        }
-//
-//        /** Some cases like EBI-7121639 there is no resource ???? Yes! There's resource **/
-//        if(interactor.getInteractorResourceId() == 0){
-//            parserErrorMessages.add("The Interactor ID [" + interactor.getIntactId() + "] do not have alternate identifiers. Can't get Resource.");
-//            InteractorResource interactorResource = interactorResourceMap.get("undefined");
-//            if(interactorResource != null){
-//                interactor.setInteractorResourceId(interactorResource.getId());
-//            }
-//        }
-//    }
 
     /**
      * All other
