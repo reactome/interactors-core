@@ -7,11 +7,12 @@ import java.util.List;
  *
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-public class EntityMapper {
+@SuppressWarnings("unused")
+public class InteractorEntity {
 
     private String acc;
     private Integer count;
-    private List<InteractorMapper> interactors;
+    private List<Interactor> interactors;
 
     public String getAcc() {
         return acc;
@@ -29,11 +30,11 @@ public class EntityMapper {
         this.count = count;
     }
 
-    public List<InteractorMapper> getInteractors() {
+    public List<Interactor> getInteractors() {
         return interactors;
     }
 
-    public void setInteractors(List<InteractorMapper> interactors) {
+    public void setInteractors(List<Interactor> interactors) {
         this.interactors = interactors;
     }
 }

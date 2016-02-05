@@ -5,16 +5,17 @@ package org.reactome.server.tools.interactors.mapper;
  *
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-public class InteractorMapper {
+@SuppressWarnings("unused")
+public class Interactor {
 
     private String acc;
+
+    private String alias;
 
     /** Interaction ID **/
     private String id;
 
     private Double score;
-
-    private String alias;
 
     public String getAcc() {
         return acc;
@@ -22,6 +23,14 @@ public class InteractorMapper {
 
     public void setAcc(String acc) {
         this.acc = acc;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public String getId() {
@@ -40,11 +49,4 @@ public class InteractorMapper {
         this.score = score;
     }
 
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
 }
