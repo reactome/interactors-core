@@ -1,7 +1,7 @@
 package org.reactome.server.tools.interactors.service;
 
-import org.reactome.server.tools.interactors.dao.PsicquicDAO;
-import org.reactome.server.tools.interactors.dao.psicquic.InteractionClusterImpl;
+import org.reactome.server.tools.interactors.psicquic.PsicquicDAO;
+import org.reactome.server.tools.interactors.psicquic.impl.InteractionClusterImpl;
 import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.PsicquicResource;

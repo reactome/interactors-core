@@ -1,18 +1,17 @@
-package org.reactome.server.tools.interactors.dao.psicquic;
+package org.reactome.server.tools.interactors.psicquic.impl;
 
 import org.hupo.psi.mi.psicquic.registry.ServiceType;
 import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
 import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistryClient;
 import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
-import org.reactome.server.tools.interactors.dao.PsicquicDAO;
+import org.reactome.server.tools.interactors.psicquic.PsicquicDAO;
 import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.Interactor;
 import org.reactome.server.tools.interactors.model.PsicquicResource;
-import org.reactome.server.tools.interactors.model.psicquic.GenericClient;
-import org.reactome.server.tools.interactors.model.psicquic.PsicquicClient;
+import org.reactome.server.tools.interactors.psicquic.PsicquicClient;
+import org.reactome.server.tools.interactors.psicquic.clients.ClientFactory;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
-import org.reactome.server.tools.interactors.util.MapSet;
 import org.reactome.server.tools.interactors.util.Toolbox;
 import psidev.psi.mi.tab.PsimiTabException;
 import psidev.psi.mi.tab.PsimiTabReader;
@@ -55,11 +54,10 @@ public class InteractionClusterImpl implements PsicquicDAO {
             /** Retrieve results **/
             Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
 
+            PsicquicClient psicquicClient = ClientFactory.getClient(resource);
+
             for (Integer key : interactionMapping.keySet()) {
                 EncoreInteraction encoreInteraction = interactionMapping.get(key);
-
-                PsicquicClient psicquicClient = new GenericClient(resource);
-
                 Interaction interaction = psicquicClient.getInteraction(encoreInteraction);
 
                 /** make sure the acc in the search is always on link A **/
@@ -108,7 +106,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
             for (Integer key : interactionMapping.keySet()) {
                 EncoreInteraction encoreInteraction = interactionMapping.get(key);
 
-                PsicquicClient psicquicClient = new GenericClient(resource);
+                PsicquicClient psicquicClient = ClientFactory.getClient(resource);
 
                 Interaction interaction = psicquicClient.getInteraction(encoreInteraction);
                 if(interaction.getIntactScore() >= InteractorConstant.MINIMUM_VALID_SCORE) {

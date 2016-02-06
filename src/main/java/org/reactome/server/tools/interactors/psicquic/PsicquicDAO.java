@@ -1,4 +1,4 @@
-package org.reactome.server.tools.interactors.dao;
+package org.reactome.server.tools.interactors.psicquic;
 
 import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.model.Interaction;

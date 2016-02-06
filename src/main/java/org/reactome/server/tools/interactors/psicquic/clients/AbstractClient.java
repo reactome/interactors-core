@@ -1,7 +1,9 @@
-package org.reactome.server.tools.interactors.model.psicquic;
+package org.reactome.server.tools.interactors.psicquic.clients;
 
+import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.InteractionDetails;
 import org.reactome.server.tools.interactors.model.Interactor;
+import org.reactome.server.tools.interactors.psicquic.PsicquicClient;
 import psidev.psi.mi.tab.model.Confidence;
 import uk.ac.ebi.enfin.mi.cluster.EncoreInteraction;
 
@@ -15,14 +17,11 @@ import java.util.Map;
 
 public abstract class AbstractClient implements PsicquicClient {
 
-    enum InteractorLink {
-        A,
-        B
-    }
+    enum InteractorLink {A, B}
 
     private String resource;
 
-    public AbstractClient(String resource) {
+    AbstractClient(String resource) {
         this.resource = resource;
     }
 
@@ -32,6 +31,23 @@ public abstract class AbstractClient implements PsicquicClient {
 
     public void setResource(String resource) {
         this.resource = resource;
+    }
+
+    @Override
+    public Interaction getInteraction(EncoreInteraction encoreInteraction) {
+        Interaction interaction = new Interaction();
+
+        Interactor interactorA = getInteractor(encoreInteraction, InteractorLink.A);
+        Interactor interactorB = getInteractor(encoreInteraction, InteractorLink.B);
+
+        interaction.setInteractorA(interactorA);
+        interaction.setInteractorB(interactorB);
+
+        interaction.setIntactScore(getMiScore(encoreInteraction.getConfidenceValues()));
+
+        interaction.setInteractionDetailsList(getInteractionAc(encoreInteraction.getExperimentToDatabase()));
+
+        return interaction;
     }
 
     public Interactor getInteractor(EncoreInteraction encoreInteraction, InteractorLink link) {
@@ -136,6 +152,5 @@ public abstract class AbstractClient implements PsicquicClient {
 
         return interactionDetailsList;
     }
-
 
 }
