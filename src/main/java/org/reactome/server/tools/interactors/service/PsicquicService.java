@@ -1,10 +1,10 @@
 package org.reactome.server.tools.interactors.service;
 
-import org.reactome.server.tools.interactors.psicquic.PsicquicDAO;
-import org.reactome.server.tools.interactors.psicquic.impl.InteractionClusterImpl;
 import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.PsicquicResource;
+import org.reactome.server.tools.interactors.psicquic.PsicquicDAO;
+import org.reactome.server.tools.interactors.psicquic.impl.InteractionClusterImpl;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,6 +14,7 @@ import java.util.Map;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
+@SuppressWarnings("unused")
 public class PsicquicService {
 
     private PsicquicDAO psicquicDAO;
