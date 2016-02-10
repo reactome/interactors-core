@@ -10,6 +10,7 @@ import uk.ac.ebi.enfin.mi.cluster.EncoreInteraction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -19,7 +20,10 @@ public abstract class AbstractClient implements PsicquicClient {
 
     enum InteractorLink {A, B}
 
-    private String resource;
+    protected final String MAPPING_DATABASES_NAMES = "uniprotkb,chebi,irefindex,ddbj/embl/genbank,refseq,entrez gene/locuslink,unknown";
+    protected final int CHEMICAL_ALIAS_SIZE_THRESHOLD = 15;
+
+    protected String resource;
 
     AbstractClient(String resource) {
         this.resource = resource;
@@ -45,7 +49,7 @@ public abstract class AbstractClient implements PsicquicClient {
 
         interaction.setIntactScore(getMiScore(encoreInteraction.getConfidenceValues()));
 
-        interaction.setInteractionDetailsList(getInteractionAc(encoreInteraction.getExperimentToDatabase()));
+        interaction.setInteractionDetailsList(getInteractionIdentifier(encoreInteraction.getExperimentToDatabase()));
 
         return interaction;
     }
@@ -56,13 +60,12 @@ public abstract class AbstractClient implements PsicquicClient {
         switch (link){
             case A:
                 interactor.setAcc(encoreInteraction.getInteractorA());
+                interactor.setAcc(getAcc(encoreInteraction.getInteractorAccsA()));
                 interactor.setAlias(getAlias(encoreInteraction.getOtherInteractorAccsA()));
-                interactor.setSynonyms(getSynonyms(encoreInteraction.getOtherInteractorAccsA()));
                 break;
             case B:
-                interactor.setAcc(encoreInteraction.getInteractorB());
+                interactor.setAcc(getAcc(encoreInteraction.getInteractorAccsB()));
                 interactor.setAlias(getAlias(encoreInteraction.getOtherInteractorAccsB()));
-                interactor.setSynonyms(getSynonyms(encoreInteraction.getOtherInteractorAccsB()));
                 break;
         }
 
@@ -98,7 +101,13 @@ public abstract class AbstractClient implements PsicquicClient {
 
         for (String dbSource : accessions.keySet()) {
             if (dbSource.equalsIgnoreCase("psi-mi") && psimiAlias.isEmpty()) {
-                psimiAlias = accessions.get(dbSource).get(0);
+                //psimiAlias = accessions.get(dbSource).get(0);
+                for (String alias : accessions.get(dbSource)){
+                    // if it matches the regex : assign
+                    if(isPotencialAlias(alias) && psimiAlias.isEmpty()) {
+                        psimiAlias = alias;
+                    }
+                }
             } else if (dbSource.equalsIgnoreCase("uniprotkb") && uniprotAlias.isEmpty()) {
                 uniprotAlias = accessions.get(dbSource).get(0);
             } else if (otherAlias.isEmpty()) {
@@ -113,7 +122,32 @@ public abstract class AbstractClient implements PsicquicClient {
             rtn = uniprotAlias;
         }
 
-        return rtn.toUpperCase();
+        // Checking the size is a save the day solution.
+        return rtn.length() > CHEMICAL_ALIAS_SIZE_THRESHOLD ? null : rtn.toUpperCase();
+    }
+
+    /**
+     * This is the same implementation from AbstractEncoreInteraction
+     * It queries the mapping db and return the first occurrence.
+     *
+     * @param interactorAccs List of interactor Accs. dbName,identifier
+     * @return the one that matches the dbNames
+     */
+    public String getAcc(Map<String, String> interactorAccs) {
+        String interactorAcc = null;
+        String[] databaseNames = getDatabaseNames().split(",");
+        for (String db : databaseNames) {
+            if(interactorAccs.containsKey(db)) {
+                interactorAcc = interactorAccs.get(db);
+                break;
+            }
+        }
+
+        if(interactorAcc == null) {
+            interactorAcc = interactorAccs.values().iterator().next();
+        }
+
+        return interactorAcc;
     }
 
     /**
@@ -142,7 +176,7 @@ public abstract class AbstractClient implements PsicquicClient {
      * Get interaction identifier
      * @param interactionAcs key=interactionId, value=dbSource
      */
-    public List<InteractionDetails> getInteractionAc(Map<String, List<String>> interactionAcs) {
+    public List<InteractionDetails> getInteractionIdentifier(Map<String, List<String>> interactionAcs) {
         List<InteractionDetails> interactionDetailsList = new ArrayList<>();
         for (String interactionId : interactionAcs.keySet()) {
             InteractionDetails interactionDetails = new InteractionDetails();
@@ -153,4 +187,13 @@ public abstract class AbstractClient implements PsicquicClient {
         return interactionDetailsList;
     }
 
+    protected boolean isPotencialAlias(String pAlias){
+        Pattern p = Pattern.compile("^([a-zA-Z0-9\\s:-_]{2,15})");
+        return p.matcher(pAlias).matches();
+    }
+
+    @Override
+    public String getDatabaseNames() {
+        return MAPPING_DATABASES_NAMES;
+    }
 }

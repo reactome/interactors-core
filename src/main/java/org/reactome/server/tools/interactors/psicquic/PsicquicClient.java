@@ -11,4 +11,5 @@ public interface PsicquicClient {
 
     Interaction getInteraction(EncoreInteraction encoreInteraction);
 
+    String getDatabaseNames();
 }

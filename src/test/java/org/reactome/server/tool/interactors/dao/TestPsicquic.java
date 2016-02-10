@@ -37,6 +37,9 @@ public class TestPsicquic {
         PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
         ServiceType service = registryClient.getService(resource);
         service.getRestUrl();
+//        for(ServiceType s : registryClient.listServices()){
+//            System.out.println(s.getName());
+//        }
     }
 
     @Test

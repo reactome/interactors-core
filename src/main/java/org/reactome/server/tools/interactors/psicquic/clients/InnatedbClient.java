@@ -6,11 +6,11 @@ import java.util.Map;
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
-public class ChemblClient extends AbstractClient {
+public class InnatedbClient extends AbstractClient {
 
     //"https://www.ebi.ac.uk/chembl/compound/inspect/##ID##";
 
-    ChemblClient(String resource) {
+    InnatedbClient(String resource) {
         super(resource);
     }
 
@@ -53,7 +53,28 @@ public class ChemblClient extends AbstractClient {
     }
 
     @Override
+    public String getAcc(Map<String, String> interactorAccs) {
+        String innateAcc = "";
+        String uniprotAlias = "";
+
+        for (String dbSource : interactorAccs.keySet()) {
+            if (dbSource.equalsIgnoreCase("innatedb") && innateAcc.isEmpty()) {
+                innateAcc = interactorAccs.get(dbSource);
+            } else if (dbSource.equalsIgnoreCase("uniprotkb") && uniprotAlias.isEmpty()) {
+                uniprotAlias = interactorAccs.get(dbSource);
+            }
+        }
+
+        String rtn = uniprotAlias;
+        if(!innateAcc.isEmpty()){
+            rtn = innateAcc;
+        }
+
+        return rtn;
+    }
+
+    @Override
     public String getDatabaseNames() {
-        return "uniprotkb,chembl,chebi,unknown";
+        return "innatedb";
     }
 }

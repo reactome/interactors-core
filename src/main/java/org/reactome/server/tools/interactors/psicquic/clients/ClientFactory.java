@@ -12,6 +12,12 @@ public abstract class ClientFactory {
         switch (resource.toUpperCase()) {
             case "CHEMBL":
                 return new ChemblClient(resource);
+            case "BIND":
+                return new BindClient(resource);
+            case "BIOGRID":
+                return new BiogridClient(resource);
+//            case "INNATEDB":
+//                return new InnatedbClient(resource);
             default:
                 return new GenericClient(resource);
         }

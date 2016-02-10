@@ -4,12 +4,12 @@ import org.hupo.psi.mi.psicquic.registry.ServiceType;
 import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
 import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistryClient;
 import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
-import org.reactome.server.tools.interactors.psicquic.PsicquicDAO;
 import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.Interactor;
 import org.reactome.server.tools.interactors.model.PsicquicResource;
 import org.reactome.server.tools.interactors.psicquic.PsicquicClient;
+import org.reactome.server.tools.interactors.psicquic.PsicquicDAO;
 import org.reactome.server.tools.interactors.psicquic.clients.ClientFactory;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
 import org.reactome.server.tools.interactors.util.Toolbox;
@@ -49,15 +49,18 @@ public class InteractionClusterImpl implements PsicquicDAO {
         for (String acc : accs) {
             List<Interaction> interactions = new ArrayList<>();
 
-            InteractionClusterScore interactionClusterScore = getInteractionClusterScore(resource, acc);
+            PsicquicClient psicquicClient = ClientFactory.getClient(resource);
+            String databaseNames = psicquicClient.getDatabaseNames();
+
+            InteractionClusterScore interactionClusterScore = getInteractionClusterScore(resource, acc, databaseNames);
 
             /** Retrieve results **/
             Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
 
-            PsicquicClient psicquicClient = ClientFactory.getClient(resource);
-
             for (Integer key : interactionMapping.keySet()) {
                 EncoreInteraction encoreInteraction = interactionMapping.get(key);
+                encoreInteraction.setMappingIdDbNames(interactionClusterScore.getMappingIdDbNames());
+
                 Interaction interaction = psicquicClient.getInteraction(encoreInteraction);
 
                 /** make sure the acc in the search is always on link A **/
@@ -96,7 +99,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
         for (String acc : accs) {
 
             /** Run cluster using list of binary interactions as input **/
-            InteractionClusterScore interactionClusterScore = getInteractionClusterScore(resource, acc);
+            InteractionClusterScore interactionClusterScore = getInteractionClusterScore(resource, acc, null);
 
             /* Retrieve results */
             Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
@@ -157,7 +160,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
      *
      * @throws PsicquicInteractionClusterException
      */
-    private InteractionClusterScore getInteractionClusterScore(String resource, String acc) throws PsicquicInteractionClusterException {
+    private InteractionClusterScore getInteractionClusterScore(String resource, String acc, String databaseNames) throws PsicquicInteractionClusterException {
         final String queryMethod = "interactor/";
 
         try {
@@ -179,6 +182,10 @@ public class InteractionClusterImpl implements PsicquicDAO {
             /** Run cluster using list of binary interactions as input **/
             InteractionClusterScore interactionClusterScore = new InteractionClusterScore();
             interactionClusterScore.setBinaryInteractionIterator(binaryInteractions.iterator());
+
+            /** This is the dbSource added in the alias **/
+            interactionClusterScore.setMappingIdDbNames(databaseNames);
+
             interactionClusterScore.runService();
 
             return interactionClusterScore;
