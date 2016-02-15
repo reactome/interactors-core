@@ -14,6 +14,21 @@ public class ChemblClient extends AbstractClient {
         super(resource);
     }
 
+    /**
+     * NOTICE:
+     *
+     *  We decided to use CHEMBL identifier instead of ChEBI. This class has implemented this.
+     *    == Problem ==
+     *    Querying ChEMBL to show the Chemical Structure, retrieves an image with white background,
+     *    when this image takes place in the Diagram it becomes very ugly. ChEMBL is about to use
+     *    PNG image shortly.
+     *    So, we decided to use ChEBI identifiers and query it in order to a proper image until ChEMBL
+     *    provides an update.
+     *
+     *  We won't reach this code for a while until ChEMBL provides the images.
+     *
+     */
+
     @Override
     public String getAlias(Map<String, List<String>> accessions) {
         String psimiAlias = "";
@@ -56,4 +71,5 @@ public class ChemblClient extends AbstractClient {
     public String getDatabaseNames() {
         return "uniprotkb,chembl,chebi,unknown";
     }
+
 }

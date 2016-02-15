@@ -59,7 +59,6 @@ public abstract class AbstractClient implements PsicquicClient {
 
         switch (link){
             case A:
-                interactor.setAcc(encoreInteraction.getInteractorA());
                 interactor.setAcc(getAcc(encoreInteraction.getInteractorAccsA()));
                 interactor.setAlias(getAlias(encoreInteraction.getOtherInteractorAccsA()));
                 break;
