@@ -10,8 +10,8 @@ public enum ResourceURL {
     APID(InteractorConstant.DEFAULT_PROTEIN_URL, null, null),
     BIOGRID("http://identifiers.org/biogrid/##ID##", null, null),
     BIND("http://identifiers.org/bind/##ID##", null, null),
-    BINDINGDB("http://identifiers.org/bindingDB/##ID##", null, null),
-    CHEMBL(null, null, null),
+    BINDINGDB("http://identifiers.org/bindingDB/##ID##", InteractorConstant.DEFAULT_CHEMICAL_URL, null),
+    CHEMBL(InteractorConstant.DEFAULT_PROTEIN_URL, null, null),
     //CHEMBL(InteractorConstant.DEFAULT_PROTEIN_URL, "https://www.ebi.ac.uk/chembldb/index.php/compound/inspect/##ID##", "https://www.ebi.ac.uk/chembldb/index.php/assay/inspect/##ID##"),
     DIP("http://identifiers.org/dip/##ID##", null, null),
     DRUGBANK(null, null, null),
@@ -20,12 +20,12 @@ public enum ResourceURL {
     IREFINDEX(null, null, null),
     INTEROPORC(null, null, null),
     MATRIXDB(null, null, null),
-    MENTHA(null, null, null), // tricky
-    REACTOME(null, null, null),
-    REACTOMEFIS(null, null, null),
+    MENTHA(InteractorConstant.DEFAULT_PROTEIN_URL, null, null), // tricky
+    REACTOME(InteractorConstant.DEFAULT_PROTEIN_URL, null, null),
+    REACTOMEFIS(InteractorConstant.DEFAULT_PROTEIN_URL, null, null),
     GENEMANIA(null, null, null),// tricky
-    BAR(null, null, null),
-    EBIGOANONINTACT(null, null, null),
+    BAR(null, null, null), // psicquic does not link here
+    EBIGOANONINTACT(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, null),
     VIRHOSTNET(null, null, null),
     DEFAULT(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, InteractorConstant.DEFAULT_INTERACTION_URL);
 
