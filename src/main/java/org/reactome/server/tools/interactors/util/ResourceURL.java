@@ -9,7 +9,8 @@ public enum ResourceURL {
 
     DIP("http://identifiers/dip/##ID##", null, null),
     BIOGRID("http://identifiers/biogrid/##ID##", null, null),
-    BIND("http://identifiers/bind/##ID##", null, null);
+    BIND("http://identifiers/bind/##ID##", null, null),
+    DEFAULT(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, InteractorConstant.DEFAULT_INTERACTION_URL);
 
     private String protein;
     private String chemical;
@@ -51,6 +52,6 @@ public enum ResourceURL {
         for (ResourceURL resourceURL : values()) {
             if(resourceURL.name().toUpperCase().equals(term)) return resourceURL;
         }
-        return null;
+        return DEFAULT;
     }
 }
