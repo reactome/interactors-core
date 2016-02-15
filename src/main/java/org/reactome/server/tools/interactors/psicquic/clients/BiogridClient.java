@@ -40,4 +40,9 @@ public class BiogridClient extends AbstractClient {
         return rtn.isEmpty() ? null : rtn.toUpperCase();
     }
 
+    @Override
+    public String getDatabaseNames() {
+        return "uniprotkb,chebi,intact,irefindex,ddbj/embl/genbank,refseq,entrez gene/locuslink,unknown";
+    }
+
 }

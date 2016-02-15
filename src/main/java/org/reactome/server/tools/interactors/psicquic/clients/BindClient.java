@@ -38,4 +38,9 @@ public class BindClient extends AbstractClient {
 
         return rtn.isEmpty() ? null : rtn.toUpperCase();
     }
+
+    @Override
+    public String getDatabaseNames() {
+        return "uniprotkb,chebi,irefindex,ddbj/embl/genbank,refseq,unknown";
+    }
 }

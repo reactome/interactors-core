@@ -65,14 +65,14 @@ public class TestPsicquicClustering {
 
     @Test
     public void testSpecificPsicquicResource(){
-        String resourceName = "InnateDB";
+        String resourceName = "MINT";
 
         try {
             long start = System.currentTimeMillis();
             Map<String, List<Interaction>> interactions =  psicquicService.getInteractions(resourceName, getSampleAccessions(resourceName));
             long elapsedTime = System.currentTimeMillis() - start;
 
-            //System.out.println();
+            System.out.println();
 //            System.out.println(interactions.get("161511").get(0).getInteractorA().getAlias());
         } catch (PsicquicInteractionClusterException e) {
             e.printStackTrace();
@@ -165,7 +165,7 @@ public class TestPsicquicClustering {
                 break;
 
             case "MINT":
-                accessions.add("");
+                accessions.add("O60231");
                 break;
 
             case "Reactome":

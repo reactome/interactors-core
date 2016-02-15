@@ -20,7 +20,6 @@ public abstract class AbstractClient implements PsicquicClient {
 
     enum InteractorLink {A, B}
 
-    protected final String MAPPING_DATABASES_NAMES = "uniprotkb,chebi,irefindex,ddbj/embl/genbank,refseq,entrez gene/locuslink,unknown";
     protected final int CHEMICAL_ALIAS_SIZE_THRESHOLD = 15;
 
     protected String resource;
@@ -189,10 +188,5 @@ public abstract class AbstractClient implements PsicquicClient {
     protected boolean isPotencialAlias(String pAlias){
         Pattern p = Pattern.compile("^([a-zA-Z0-9\\s:-_]{2,15})");
         return p.matcher(pAlias).matches();
-    }
-
-    @Override
-    public String getDatabaseNames() {
-        return MAPPING_DATABASES_NAMES;
     }
 }

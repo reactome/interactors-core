@@ -10,4 +10,8 @@ public class GenericClient extends AbstractClient {
         super(resource);
     }
 
+    @Override
+    public String getDatabaseNames() {
+        return "uniprotkb,chebi,intact,irefindex,ddbj/embl/genbank,refseq,unknown";
+    }
 }
