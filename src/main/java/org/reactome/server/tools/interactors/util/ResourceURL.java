@@ -8,12 +8,12 @@ package org.reactome.server.tools.interactors.util;
 public enum ResourceURL {
 
     APID(InteractorConstant.DEFAULT_PROTEIN_URL, null, null),
-    BIOGRID("http://identifiers/biogrid/##ID##", null, null),
-    BIND("http://identifiers/bind/##ID##", null, null),
+    BIOGRID("http://identifiers.org/biogrid/##ID##", null, null),
+    BIND("http://identifiers.org/bind/##ID##", null, null),
     BINDINGDB("http://identifiers.org/bindingDB/##ID##", null, null),
     CHEMBL(null, null, null),
     //CHEMBL(InteractorConstant.DEFAULT_PROTEIN_URL, "https://www.ebi.ac.uk/chembldb/index.php/compound/inspect/##ID##", "https://www.ebi.ac.uk/chembldb/index.php/assay/inspect/##ID##"),
-    DIP("http://identifiers/dip/##ID##", null, null),
+    DIP("http://identifiers.org/dip/##ID##", null, null),
     DRUGBANK(null, null, null),
     INNATEDB(null, null, null),
     INNATEDBALL(null, null, null),
