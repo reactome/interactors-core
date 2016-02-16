@@ -2,7 +2,6 @@ package org.reactome.server.tools.interactors.util;
 
 import org.reactome.server.tools.interactors.model.Interaction;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +16,7 @@ public class Toolbox {
      * Instead of calling the Double.valueOf(...) in a try-catch statement and many of the checks to fail due to
      * not being a number then performance of this mechanism will not be great, since you're relying upon
      * exceptions being thrown for each failure, which is a fairly expensive operation.
-     * <p>
+     * <p/>
      * An alternative approach may be to use a regular expression to check for validity of being a number:
      *
      * @return true if is Number
@@ -34,13 +33,13 @@ public class Toolbox {
      */
     public static String getAccessionUrl(String acc) {
         String url = InteractorConstant.INTERACTOR_BASE_URL;
-        if(acc.toUpperCase().contains("CHEBI")){
+        if (acc.toUpperCase().contains("CHEBI")) {
             url = url.concat("chebi/").concat(acc);
-        }else {
+        } else {
             /** Take into account the Uniprot Isoform **/
-            if(isIsoform(acc)){
+            if (isIsoform(acc)) {
                 url = url.concat("uniprot.isoform/").concat(acc);
-            }else {
+            } else {
                 url = url.concat("uniprot/").concat(acc);
             }
         }
@@ -51,7 +50,7 @@ public class Toolbox {
     /**
      * Check if accession is part of an isoform in Uniprot.
      */
-    public static boolean isIsoform(String acc){
+    public static boolean isIsoform(String acc) {
         /** This regex is based on the identifiers.org **/
         String regex = "^([A-N,R-Z][0-9][A-Z][A-Z, 0-9][A-Z, 0-9][0-9])|([O,P,Q][0-9][A-Z, 0-9][A-Z, 0-9][A-Z, 0-9][0-9])(\\-\\d+)$";
         return acc.matches(regex);
@@ -65,7 +64,7 @@ public class Toolbox {
      */
     public static String getDatabaseName(String acc) {
         String databaseName = "UniProt";
-        if(acc.toUpperCase().contains("CHEBI")){
+        if (acc.toUpperCase().contains("CHEBI")) {
             databaseName = "ChEBI";
         }
         return databaseName;
@@ -75,16 +74,16 @@ public class Toolbox {
      * Round score having three decimal places
      * The amount of zeros represents the decimal places.
      */
-    public static Double roundScore(Double score){
+    public static Double roundScore(Double score) {
         return Math.round(score * 1000d) / 1000d;
     }
 
     /**
      * For the same Accession retrieve the list of interactors. If the interactors are the same we will
      * remove the duplicates and keep the one of highest score.
-     *
+     * <p/>
      * Requirement: Keep only the one with highest score if the interactors are the same (with different identifiers)
-     *              e.g CHEBI:16027 (16027) for ChEMBL.
+     * e.g CHEBI:16027 (16027) for ChEMBL.
      */
     public static List<Interaction> removeDuplicatedInteractor(List<Interaction> interactions) {
         List<Interaction> ret = new ArrayList<>(interactions.size());
@@ -98,21 +97,76 @@ public class Toolbox {
         }
 
         /** Interactions in the MapSet have been sorted by score as defined in the Interaction.compareTo **/
-        for(String accKey : interactionMapSet.keySet()){
+        for (String accKey : interactionMapSet.keySet()) {
             Set<Interaction> interactionSet = interactionMapSet.getElements(accKey);
-            if(interactionSet.size() >= 2){ // This interaction is not unique. Let's check the score
+            if (interactionSet.size() >= 2) { // This interaction is not unique. Let's check the score
                 Interaction highScoreInteraction = null;
                 for (Interaction interaction : interactionSet) {
                     highScoreInteraction = interaction;
                 }
                 ret.add(highScoreInteraction);
-            }else {
+            } else {
                 /** Just have only one, just add it **/
                 ret.add(interactionSet.iterator().next());
             }
         }
 
         return ret;
+
+    }
+
+    public static String getAccessionURL(String acc, String resource) {
+        String retURL;
+        ResourceURL resourceURL = ResourceURL.getByName(resource);
+
+        boolean isChebi = acc.startsWith("CHEBI:");
+        if (isChebi) {
+            retURL = resourceURL.getChemical();
+        } else {
+            retURL = resourceURL.getProtein();
+        }
+
+        if(retURL != null) {
+            retURL = retURL.replace("##ID##", acc);
+        }
+
+        return retURL;
+    }
+
+    public static String getEvidencesURL(List<String> evidences, String resource) {
+        if (evidences == null || evidences.isEmpty()) {
+            return null;
+        }
+
+        ResourceURL resourceURL = ResourceURL.getByName(resource);
+        final String OR = "%20OR%20";
+
+        String retURL = resourceURL.getInteraction();
+        if (retURL != null) {
+            String term = "";
+            if (resourceURL.isMultivalue()) {
+                for (int i = 0; i < evidences.size(); i++) {
+                    term = term.concat(evidences.get(i));
+                    if (i < evidences.size() - 1) {
+                        term = term.concat(OR);
+                    }
+                }
+            } else {
+                term = evidences.get(0);
+            }
+
+            if (term == null || term.isEmpty()) {
+                retURL = null;
+            } else {
+                retURL = retURL.replace("##ID##", term);
+            }
+        }
+        return retURL;
+    }
+
+    public void isUniprotAccession() {
+        //String regexUniprot = "^([A-N,R-Z][0-9]([A-Z][A-Z, 0-9][A-Z, 0-9][0-9]){1,2})|([O,P,Q][0-9][A-Z, 0-9][A-Z, 0-9][A-Z, 0-9][0-9])(\\.\\d+)?$";
+        //String regexUniprotIsoform = "^([A-N,R-Z][0-9][A-Z][A-Z, 0-9][A-Z, 0-9][0-9])|([O,P,Q][0-9][A-Z, 0-9][A-Z, 0-9][A-Z, 0-9][0-9])(\\-\\d+)$";
 
     }
 }

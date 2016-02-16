@@ -65,7 +65,7 @@ public class TestPsicquicClustering {
 
     @Test
     public void testSpecificPsicquicResource(){
-        String resourceName = "MINT";
+        String resourceName = "mentha";
 
         try {
             long start = System.currentTimeMillis();
@@ -149,7 +149,8 @@ public class TestPsicquicClustering {
                 break;
 
             case "mentha":
-                accessions.add("");
+                //accessions.add("Q9NWZ3");
+                accessions.add("P39060");
                 break;
 
             case "MPIDB":

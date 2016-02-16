@@ -19,6 +19,8 @@ public abstract class ClientFactory {
                 return new BiogridClient(resource);
             case "MINT":
                 return new MintClient(resource);
+            case "MENTHA":
+                return new MenthaClient(resource);
 //            case "INNATEDB":
 //                return new InnatedbClient(resource);
             default:
