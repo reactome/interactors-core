@@ -99,10 +99,10 @@ public class TestInteractionImpl {
 
     @Test
     public void testGetInteractionsAndRemoveDuplicates() throws SQLException, InvalidInteractionResourceException {
-        Map<String, List<Interaction>> interactions = interactionService.getInteractions(ACCESSION, InteractorConstant.STATIC);
+        List<Interaction> interactions = interactionService.getInteractions(ACCESSION, InteractorConstant.STATIC);
 
         Assert.assertFalse("Interactors list is Empty", interactions.isEmpty());
-        Assert.assertTrue("Interactor less than 10", interactions.get(ACCESSION).size() > 10);
+        Assert.assertTrue("Interactor less than 10", interactions.size() > 10);
 
     }
 }

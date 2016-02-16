@@ -3,8 +3,8 @@ package org.reactome.server.tools.interactors.service;
 import org.reactome.server.tools.interactors.dao.InteractionDAO;
 import org.reactome.server.tools.interactors.dao.InteractionDetailsDAO;
 import org.reactome.server.tools.interactors.dao.InteractionResourceDAO;
-import org.reactome.server.tools.interactors.dao.intact.StaticInteractionDetails;
 import org.reactome.server.tools.interactors.dao.intact.StaticInteraction;
+import org.reactome.server.tools.interactors.dao.intact.StaticInteractionDetails;
 import org.reactome.server.tools.interactors.dao.intact.StaticInteractionResource;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.exception.InvalidInteractionResourceException;
@@ -39,11 +39,8 @@ public class InteractionService {
      * @throws InvalidInteractionResourceException
      * @throws SQLException
      */
-    public Map<String, List<Interaction>> getInteractions(String acc, String resource) throws InvalidInteractionResourceException, SQLException {
-        List<String> accs = new ArrayList<>(1);
-        accs.add(acc);
-
-        return getInteractions(accs,resource, -1, -1);
+    public List<Interaction> getInteractions(String acc, String resource) throws InvalidInteractionResourceException, SQLException {
+        return getInteractions(Collections.singletonList(acc), resource, -1, -1).get(acc);
     }
 
     /**
@@ -63,11 +60,8 @@ public class InteractionService {
      * @throws InvalidInteractionResourceException
      * @throws SQLException
      */
-    public Map<String, List<Interaction>> getInteractions(String acc, String resource, Integer page, Integer pageSize) throws InvalidInteractionResourceException, SQLException {
-        List<String> accs = new ArrayList<>(1);
-        accs.add(acc);
-
-        return getInteractions(accs,resource, page, pageSize);
+    public List<Interaction> getInteractions(String acc, String resource, Integer page, Integer pageSize) throws InvalidInteractionResourceException, SQLException {
+        return getInteractions(Collections.singletonList(acc), resource, page, pageSize).get(acc);
     }
 
     /**
@@ -112,11 +106,8 @@ public class InteractionService {
      * @throws InvalidInteractionResourceException
      * @throws SQLException
      */
-    public Map<String, Integer> countInteractionsByAccession(String acc, String resource) throws InvalidInteractionResourceException, SQLException {
-        List<String> accs = new ArrayList<>(1);
-        accs.add(acc);
-
-        return countInteractionsByAccessions(accs, resource);
+    public Integer countInteractionsByAccession(String acc, String resource) throws InvalidInteractionResourceException, SQLException {
+        return countInteractionsByAccessions(Collections.singletonList(acc), resource).get(acc);
     }
 
     /**
