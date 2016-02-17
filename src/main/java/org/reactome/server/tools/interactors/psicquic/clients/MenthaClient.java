@@ -20,22 +20,6 @@ public class MenthaClient extends AbstractClient {
         return "uniprotkb,chebi,intact,mint,biogrid,dip,matrixdb";
     }
 
-//    /**
-//     * Get interaction identifier
-//     * @param interactionAcs key=interactionId, value=dbSource
-//     */
-//    public List<InteractionDetails> getInteractionIdentifier(Map<String, List<String>> interactionAcs) {
-//        List<InteractionDetails> interactionDetailsList = new ArrayList<>();
-//        for (String interactionId : interactionAcs.keySet()) {
-//            InteractionDetails interactionDetails = new InteractionDetails();
-//            interactionDetails.setInteractionAc(interactionId + ":" + interactionAcs.get(interactionId).get(0));
-//
-//            interactionDetailsList.add(interactionDetails);
-//        }
-//
-//        return interactionDetailsList;
-//    }
-
     /**
      * The identifier in Mentha is a little bit messy. It has various databases as part of the interaction identifier.
      * In this case the database will part of the identifier.
@@ -51,7 +35,7 @@ public class MenthaClient extends AbstractClient {
             for (String interactionId : interactionAcs.keySet()) {
                 if (db.equals(interactionAcs.get(interactionId).get(0))) {
                     InteractionDetails interactionDetails = new InteractionDetails();
-                    interactionDetails.setInteractionAc(interactionId + ":" + interactionAcs.get(interactionId).get(0));
+                    interactionDetails.setInteractionAc(interactionId + "#" + interactionAcs.get(interactionId).get(0));
 
                     interactionDetailsList.add(interactionDetails);
                 }
@@ -61,7 +45,7 @@ public class MenthaClient extends AbstractClient {
         if (interactionDetailsList.isEmpty()) {
             for (String interactionId : interactionAcs.keySet()) {
                 InteractionDetails interactionDetails = new InteractionDetails();
-                interactionDetails.setInteractionAc(interactionId + ":" + interactionAcs.get(interactionId).get(0));
+                interactionDetails.setInteractionAc(interactionId + "#" + interactionAcs.get(interactionId).get(0));
 
                 interactionDetailsList.add(interactionDetails);
             }

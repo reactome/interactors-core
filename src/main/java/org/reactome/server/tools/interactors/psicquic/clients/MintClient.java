@@ -11,6 +11,6 @@ public class MintClient extends AbstractClient {
 
     @Override
     public String getDatabaseNames() {
-        return "uniprotkb,chebi,intact";
+        return "uniprotkb,chebi,intact,mint";
     }
 }

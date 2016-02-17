@@ -65,17 +65,17 @@ public class TestPsicquicClustering {
 
     @Test
     public void testSpecificPsicquicResource(){
-        String resourceName = "mentha";
+        String resourceName = "InnateDB-All";
 
         try {
             long start = System.currentTimeMillis();
             Map<String, List<Interaction>> interactions =  psicquicService.getInteractions(resourceName, getSampleAccessions(resourceName));
             long elapsedTime = System.currentTimeMillis() - start;
 
-            System.out.println();
+            //System.out.println();
 //            System.out.println(interactions.get("161511").get(0).getInteractorA().getAlias());
         } catch (PsicquicInteractionClusterException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -184,7 +184,6 @@ public class TestPsicquicClustering {
             case "BIND":
                 accessions.add("16761");
                 accessions.add("P04275");
-                accessions.add("P07948");
                 accessions.add("Q9HCN6");
                 accessions.add("P06241");
                 break;
@@ -311,8 +310,8 @@ public class TestPsicquicClustering {
             binaryInteractionMapping.put(mappingId,bI);
         }
 
-        System.out.println();
         /* Test */
 //        assertTrue(binaryInteractionMapping.size() > 0);
     }
+
 }

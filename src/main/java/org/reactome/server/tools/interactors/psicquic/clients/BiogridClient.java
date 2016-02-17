@@ -8,8 +8,6 @@ import java.util.Map;
  */
 public class BiogridClient extends AbstractClient {
 
-    //"http://www.ncbi.nlm.nih.gov/gene/##ID##";
-
     BiogridClient(String resource) {
         super(resource);
     }

@@ -21,8 +21,9 @@ public abstract class ClientFactory {
                 return new MintClient(resource);
             case "MENTHA":
                 return new MenthaClient(resource);
-//            case "INNATEDB":
-//                return new InnatedbClient(resource);
+            case "INNATEDB":
+            case "INNATEDB-ALL":
+                return new InnatedbClient(resource);
             default:
                 return new GenericClient(resource);
         }

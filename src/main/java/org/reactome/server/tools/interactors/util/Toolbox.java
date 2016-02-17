@@ -126,7 +126,7 @@ public class Toolbox {
             retURL = resourceURL.getProtein();
         }
 
-        if(retURL != null) {
+        if (retURL != null) {
             retURL = retURL.replace("##ID##", acc);
         }
 
@@ -141,32 +141,52 @@ public class Toolbox {
         ResourceURL resourceURL = ResourceURL.getByName(resource);
         final String OR = "%20OR%20";
 
-        String retURL = resourceURL.getInteraction();
-        if (retURL != null) {
+        String retURL = "";
+
+        // Check if resource has interaction URL
+        if (resourceURL.hasInteractionUrl()) {
+
             String term = "";
+            String dbSource = resource.toUpperCase().replaceAll("-", "");
+
+            // If resource is multivalue than the URL will concat the identifiers in the queryString
             if (resourceURL.isMultivalue()) {
+
+                retURL = resourceURL.getInteraction().get(dbSource);
+
                 for (int i = 0; i < evidences.size(); i++) {
-                    term = term.concat(evidences.get(i));
+                    String evidence = evidences.get(i);
+
+                    term = term.concat(evidence);
                     if (i < evidences.size() - 1) {
                         term = term.concat(OR);
                     }
                 }
             } else {
                 term = evidences.get(0);
+
+                // If evidences contains # then we have split and get the url accordingly to the dbsource
+                if (evidences.get(0).contains("#")) {
+                    // e.g IDBG-123123:innatedb
+                    String[] eviArray = evidences.get(0).split("#");
+                    term = eviArray[0];
+                    dbSource = eviArray[1].toUpperCase();
+                }
+
+                retURL = resourceURL.getInteraction().get(dbSource);
+
             }
 
             if (term == null || term.isEmpty()) {
                 retURL = null;
             } else {
+                if (retURL == null) {
+                    retURL = InteractorConstant.DEFAULT_INTERACTION_URL;
+                }
                 retURL = retURL.replace("##ID##", term);
             }
         }
+
         return retURL;
-    }
-
-    public void isUniprotAccession() {
-        //String regexUniprot = "^([A-N,R-Z][0-9]([A-Z][A-Z, 0-9][A-Z, 0-9][0-9]){1,2})|([O,P,Q][0-9][A-Z, 0-9][A-Z, 0-9][A-Z, 0-9][0-9])(\\.\\d+)?$";
-        //String regexUniprotIsoform = "^([A-N,R-Z][0-9][A-Z][A-Z, 0-9][A-Z, 0-9][0-9])|([O,P,Q][0-9][A-Z, 0-9][A-Z, 0-9][A-Z, 0-9][0-9])(\\-\\d+)$";
-
     }
 }
