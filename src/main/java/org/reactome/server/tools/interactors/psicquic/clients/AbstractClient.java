@@ -46,7 +46,7 @@ public abstract class AbstractClient implements PsicquicClient {
         interaction.setInteractorA(interactorA);
         interaction.setInteractorB(interactorB);
 
-        interaction.setIntactScore(getMiScore(encoreInteraction.getConfidenceValues()));
+        interaction.setIntactScore(getScore(encoreInteraction.getConfidenceValues()));
 
         interaction.setInteractionDetailsList(getInteractionIdentifier(encoreInteraction.getExperimentToDatabase()));
 
@@ -72,19 +72,28 @@ public abstract class AbstractClient implements PsicquicClient {
 
     /**
      * Get miscore which is calculate by InteractionClusterScore service
-     * @return miscore
+     * Now, if intact-miscore is present, take intact-miscore.
+     *
+     * @return confidence value
      */
-    public double getMiScore(List<Confidence> confidenceValues) {
+    public double getScore(List<Confidence> confidenceValues) {
+        String intactMiscore = "";
         String miscore = "";
         for (Confidence confidence : confidenceValues) {
             String type = confidence.getType();
-            if (type.equalsIgnoreCase("miscore")) {
+            if (type.equalsIgnoreCase("intact-miscore") && intactMiscore.isEmpty()) {
+                intactMiscore = confidence.getValue();
+            } else if (type.equalsIgnoreCase("miscore") && miscore.isEmpty()) {
                 miscore = confidence.getValue();
-                break;
             }
         }
 
-        return new Double(miscore);
+        String retScore = miscore;
+        if(!intactMiscore.isEmpty()){
+            retScore = intactMiscore;
+        }
+
+        return new Double(retScore);
     }
 
     /**

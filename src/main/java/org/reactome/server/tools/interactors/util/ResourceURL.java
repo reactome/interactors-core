@@ -21,16 +21,17 @@ public enum ResourceURL {
     INNATEDB("http://innatedb.com/getGeneCard.do?id=##ID##", null, true, false),
     INNATEDBALL("http://innatedb.com/getGeneCard.do?id=##ID##", null, true, false),
     IREFINDEX(null, null, false, false),
-    INTEROPORC(null, null, false, false),
-    MATRIXDB(null, null, false, false),
+    INTEROPORC(InteractorConstant.DEFAULT_PROTEIN_URL, null, false, false),
+    MATRIXDB(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, false, false),
     MENTHA(InteractorConstant.DEFAULT_PROTEIN_URL, null, true, false),
     REACTOME(InteractorConstant.DEFAULT_PROTEIN_URL, null, false, false),
     REACTOMEFIS(InteractorConstant.DEFAULT_PROTEIN_URL, null, false, false),
+    SPIKE(InteractorConstant.DEFAULT_PROTEIN_URL, null, false, false),
     GENEMANIA(null, null, false, false), // huge, very slow
     BAR(null, null, false, false), // psicquic does not link
     EBIGOANONINTACT(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, false, false),
-    VIRHOSTNET(null, null, false, false),
-    DEFAULT(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, true, true);
+    VIRHOSTNET(InteractorConstant.DEFAULT_PROTEIN_URL, null, false, false),
+    STATIC(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, true, true);
 
     private String protein;
     private String chemical;
@@ -96,7 +97,7 @@ public enum ResourceURL {
         for (ResourceURL resourceURL : values()) {
             if (resourceURL.name().toUpperCase().equals(term)) return resourceURL;
         }
-        return DEFAULT;
+        return STATIC;
     }
 
     public Map<String, String> interactionUrls() {

@@ -32,6 +32,16 @@
             <groupId>uk.ac.ebi.enfin.mi.cluster</groupId>
             <artifactId>micluster</artifactId>
             <version>1.7.3-SNAPSHOT</version>
+            <!--
+                MICluster is using the 1.1.1-SNAPSHOT which is not properly deployed in the nexus.
+                I am using the 1.1.0 (release).
+            -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hupo.psi.mi.psicquic</groupId>
+                    <artifactId>psicquic-registry-client</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- PSICQUIC -->
@@ -136,6 +146,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>

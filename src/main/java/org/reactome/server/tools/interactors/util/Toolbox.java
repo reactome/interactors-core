@@ -5,6 +5,8 @@ import org.reactome.server.tools.interactors.model.Interaction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -119,9 +121,18 @@ public class Toolbox {
         String retURL;
         ResourceURL resourceURL = ResourceURL.getByName(resource);
 
-        boolean isChebi = acc.startsWith("CHEBI:");
-        if (isChebi) {
+        /**
+         * We do not hold the Accession, then intact just assign the IntactId to the Accession.
+         * If accession is an IntAct ID removes the link
+         */
+        if(acc.startsWith("EBI-")){
+            return null;
+        }
+
+        if (isChemical(acc)) {
             retURL = resourceURL.getChemical();
+        } else if(isUniprotAccession(acc)){
+            retURL = InteractorConstant.DEFAULT_PROTEIN_URL;
         } else {
             retURL = resourceURL.getProtein();
         }
@@ -188,5 +199,22 @@ public class Toolbox {
         }
 
         return retURL;
+    }
+
+    public static boolean isUniprotAccession(String accession){
+        String uniprotRegex = "[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}";
+
+        Pattern p = Pattern.compile(uniprotRegex);
+        Matcher m = p.matcher(accession);
+
+        if (m.find()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean isChemical(String accession){
+        return accession.startsWith("CHEBI:") || accession.startsWith("CHEMBL");
     }
 }

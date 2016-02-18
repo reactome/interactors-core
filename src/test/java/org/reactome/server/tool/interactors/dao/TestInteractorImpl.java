@@ -7,6 +7,7 @@ import org.reactome.server.tools.interactors.dao.InteractorDAO;
 import org.reactome.server.tools.interactors.dao.intact.StaticInteractor;
 import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.reactome.server.tools.interactors.model.Interactor;
+import org.reactome.server.tools.interactors.util.Toolbox;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -39,4 +40,14 @@ public class TestInteractorImpl {
 
     }
 
+    @Test
+    public void testUniprotAccessionRegex(){
+        Assert.assertTrue("Not a valid Uniprot accession.", Toolbox.isUniprotAccession("A2BC19"));
+        Assert.assertTrue("Not a valid Uniprot accession.", Toolbox.isUniprotAccession("P12345"));
+        Assert.assertTrue("Not a valid Uniprot accession.", Toolbox.isUniprotAccession("A0A022YWF9"));
+        Assert.assertTrue("Not a valid Uniprot accession.", Toolbox.isUniprotAccession("Q9WMX2-PRO_0000037552"));
+        Assert.assertTrue("Not a valid Uniprot accession.", Toolbox.isUniprotAccession("Q9WMX2-2"));
+        Assert.assertFalse("Accession XX1323 is not a valid one.", Toolbox.isUniprotAccession("XX1323"));
+        Assert.assertFalse("Accession 123445 is not a valid one.", Toolbox.isUniprotAccession("123445"));
+    }
 }

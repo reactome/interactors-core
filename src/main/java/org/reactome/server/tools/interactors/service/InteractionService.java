@@ -83,7 +83,6 @@ public class InteractionService {
 
             // Set details
             for (Interaction interaction : interactions) {
-                // TODO: pay attention here - maybe this method drains the performance. It will make a lot of queries in the DB
                 interaction.setInteractionDetailsList(interactionDetailsDAO.getByInteraction(interaction.getId()));
             }
 

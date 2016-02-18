@@ -4,108 +4,75 @@ import org.hupo.psi.mi.psicquic.registry.ServiceType;
 import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
 import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistryClient;
 import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.service.PsicquicService;
-import psidev.psi.mi.tab.PsimiTabException;
-import psidev.psi.mi.tab.PsimiTabReader;
-import psidev.psi.mi.tab.model.BinaryInteraction;
-import uk.ac.ebi.enfin.mi.cluster.Encore2Binary;
-import uk.ac.ebi.enfin.mi.cluster.EncoreInteraction;
-import uk.ac.ebi.enfin.mi.cluster.score.InteractionClusterScore;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
+ * For mor PSICQUIC examples: https://github.com/EBI-IntAct/micluster/blob/master/micluster-score/src/test/java/TestInteractionClusterScore.java
+ *
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-
 public class TestPsicquicClustering {
 
     PsicquicService psicquicService;
 
     @Before
-    public void setup(){
+    public void setup() {
         psicquicService = new PsicquicService();
     }
 
-    //@Test
-    public void testAllPsicquicServices(){
-        try {
-
-            /* Get binaryInteractions from PSI-MI files */
-//            URL intactQuery = new URL("http://www.ebi.ac.uk/Tools/webservices/psicquic/intact/webservices/current/search/query/P07200");
-//            URL intactQuery = new URL("http://webservice.baderlab.org:8480/psicquic-ws/webservices/current/search/query/16019");
-//            URL irefindexQuery = new URL("http://biotin.uio.no:8080/psicquic-ws/webservices/current/search/query/P07200");
-//            URL intactQuery = new URL("http://catalyst.ucsd.edu:8080/psicquic-ws/webservices/current/search/query/50002196");
-//            URL intactQuery = new URL("http://webservice.baderlab.org:8380/psi-gm/webservices/current/search/interactor/Q9NQ94");
-//            URL intactQuery = new URL("http://bar.utoronto.ca:9090/psicquic/webservices/current/search/interactor/At5g15200?compressed=true");
-//            URL intactQuery = new URL("http://www.ebi.ac.uk/Tools/webservices/psicquic/uniprot/webservices/current/search/interactor/P04626?compressed=true");
-//            URL intactQuery = new URL("http://imex.mbi.ucla.edu/psicquic-ws/webservices/current/search/interactor/P35439");
-//            URL intactQuery = new URL("http://www.ebi.ac.uk/Tools/webservices/psicquic/molcon/webservices/current/search/interactor/P22694-2");
-//            URL intactQuery = new URL("http://bar.utoronto.ca:9090/psicquic/webservices/current/search/interactor/At2g36990");
-
-            for (String resourceName : getPsicquicResource()) {
-
-                Map<String, List<Interaction>> interactions =  psicquicService.getInteractions(resourceName, getSampleAccessions(resourceName));
-
-            }
-
-
-        } catch (PsicquicInteractionClusterException | PsicquicRegistryClientException e) {
-            e.printStackTrace();
-        }
-
+    @Test
+    public void testPsicquicResource() {
+        Assert.assertNotNull("PsicquicRegistryClientExceptio has been thrown", getPsicquicResource());
+        Assert.assertTrue("No resources have been returned from PSICQUIC", getPsicquicResource().size() > 0);
     }
 
     @Test
-    public void testSpecificPsicquicResource(){
-        String resourceName = "InnateDB-All";
+    public void testSpecificPsicquicResource() {
+        String resourceName = "MINT";
 
         try {
-            long start = System.currentTimeMillis();
-            Map<String, List<Interaction>> interactions =  psicquicService.getInteractions(resourceName, getSampleAccessions(resourceName));
-            long elapsedTime = System.currentTimeMillis() - start;
+            //long start = System.currentTimeMillis();
+            Map<String, List<Interaction>> interactions = psicquicService.getInteractions(resourceName, getSampleAccessions(resourceName));
+            //long elapsedTime = System.currentTimeMillis() - start;
 
-            //System.out.println();
-//            System.out.println(interactions.get("161511").get(0).getInteractorA().getAlias());
+            Assert.assertTrue("No interactors present in " + resourceName + " database.", interactions.size() >= 1);
+
         } catch (PsicquicInteractionClusterException e) {
-            //e.printStackTrace();
+            Assert.fail("Error querying PSICQUIC");
         }
     }
 
-    //@Test
-    public void testRegex(){
-        String text = "Kinase phosph";
+    private List<String> getPsicquicResource() {
+        try {
+            PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
 
-        Pattern p = Pattern.compile("^([a-zA-Z0-9\\s:-_]{2,15})");
-        if(p.matcher(text).matches()){
+            List<ServiceType> services = registryClient.listActiveServices();
 
+            List<String> resources = new ArrayList<>(services.size());
+            for (ServiceType service : services) {
+                resources.add(service.getName());
+            }
+
+            return resources;
+        } catch (PsicquicRegistryClientException e) {
+            return null;
         }
     }
 
-    private List<String> getPsicquicResource() throws PsicquicRegistryClientException {
-        PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
-
-        List<ServiceType> services = registryClient.listActiveServices();
-
-        List<String> resources = new ArrayList<>(services.size());
-        for (ServiceType service : services) {
-            resources.add(service.getName());
-        }
-
-        return resources;
-    }
-
-    private Collection<String> getSampleAccessions(String resource){
+    private Collection<String> getSampleAccessions(String resource) {
         Collection<String> accessions = new ArrayList<>(1);
 
-        switch (resource){
+        switch (resource) {
             case "APID":
                 accessions.add("P00533");
                 break;
@@ -118,6 +85,18 @@ public class TestPsicquicClustering {
             case "BioGrid":
                 accessions.add("29101");
                 break;
+
+            case "BIND":
+                accessions.add("16761");
+                accessions.add("P04275");
+                accessions.add("Q9HCN6");
+                accessions.add("P06241");
+                break;
+
+            case "BindingDB":
+                accessions.add("O43353");
+                break;
+
             case "bhf-ucl":
                 accessions.add("P35222");
                 break;
@@ -132,20 +111,57 @@ public class TestPsicquicClustering {
                 accessions.add("Q8IHE3");
                 break;
 
+            case "DrugBank":
+                accessions.add(""); // DOWN
+                break;
+
+            case "EBI-GOA-nonIntAct":
+                accessions.add("Q13485");
+                accessions.add("P84022");
+                break;
+
+            case "GeneMANIA":
+                accessions.add("Q13501"); // This is impossible (better if we remove it ... we should report this error in the score
+                break;
+
             case "HPIDb":
-                accessions.add("");
+                accessions.add("Q32PH0");
                 break;
 
             case "InnateDB":
-                accessions.add("P30679");
+                accessions.add("Q9BXM7");
                 break;
 
             case "InnateDB-All":
-                accessions.add("P30679");
+                accessions.add("Q9BXM7");
                 break;
 
             case "IntAct":
-                accessions.add("");
+                accessions.add("Q13501");
+                break;
+
+            case "iRefIndex":
+                accessions.add(""); // DOWN
+                break;
+
+            case "Interoporc":
+                accessions.add(""); // does not have score, can't find any higher than 0.45. Very old DB.
+                break;
+
+            case "I2D":
+                accessions.add(""); // does not have score, can't find any higher than 0.45.
+                break;
+
+            case "I2D-IMEx":
+                accessions.add("P12830");
+                break;
+
+            case "InnateDB-IMEx":
+                accessions.add("Q8N7N6");
+                break;
+
+            case "MatrixDB":
+                accessions.add("P13213");
                 break;
 
             case "mentha":
@@ -154,164 +170,53 @@ public class TestPsicquicClustering {
                 break;
 
             case "MPIDB":
-                accessions.add("");
+                accessions.add("Q70M91");
                 break;
 
-            case "iRefIndex":
-                accessions.add("");
-                break;
-
-            case "MatrixDB":
-                accessions.add("");
+            case "MBInfo":
+                accessions.add("P07228");
                 break;
 
             case "MINT":
                 accessions.add("O60231");
                 break;
 
+            case "MolCon":
+                accessions.add("Q92917");
+                break;
+
             case "Reactome":
-                accessions.add("");
+                accessions.add("Q99661"); // does not have score, can't find any higher than 0.45.
                 break;
 
             case "Reactome-FIs":
-                accessions.add("");
+                accessions.add("O75534");
                 break;
 
             case "STRING":
-                accessions.add("");
-                break;
-
-            case "BIND":
-                accessions.add("16761");
-                accessions.add("P04275");
-                accessions.add("Q9HCN6");
-                accessions.add("P06241");
-                break;
-
-            case "Interoporc":
-                accessions.add("");
-                break;
-
-            case "DrugBank":
                 accessions.add(""); // DOWN
                 break;
 
-            case "I2D":
-                accessions.add("");
+            case "Spike":
+                accessions.add("P05412");
                 break;
 
-            case "I2D-IMEx":
-                accessions.add("");
-                break;
-
-            case "InnateDB-IMEx":
-                accessions.add("");
-                break;
-
-            case "MolCon":
-                accessions.add("");
+            case "TopFind":
+                accessions.add(""); // DOWN
                 break;
 
             case "UniProt":
                 accessions.add("");
                 break;
 
-            case "MBInfo":
-                accessions.add("");
-                break;
-
-            case "BindingDB":
-                accessions.add("O43353");
-                break;
-
             case "VirHostNet":
-                accessions.add("");
-                break;
-
-            case "TopFind":
-                accessions.add("");
-                break;
-
-            case "Spike":
-                accessions.add("");
-                break;
-
-            case "GeneMANIA":
-                accessions.add("Q13501");
-                break;
-
-            case "EBI-GOA-nonIntAct":
-                accessions.add("Q13485");
-                accessions.add("P84022");
+                accessions.add(""); // does not have score, can't find any higher than 0.45.
                 break;
 
         }
 
         return accessions;
 
-    }
-
-
-    /**
-     * @link https://github.com/EBI-IntAct/micluster/blob/master/micluster-score/src/test/java/TestInteractionClusterScore.java
-     */
-    //@Test
-    public void testInteractionClusterScoreWithBinaryInteractions(){
-        try {
-            /* Get binaryInteractions from PSI-MI files */
-            URL intactQuery = new URL("http://tyersrest.tyerslab.com:8805/psicquic/webservices/current/search/query/560144");
-            List<BinaryInteraction> binaryInteractions = new ArrayList<>();
-            PsimiTabReader mitabReader = new PsimiTabReader();
-            binaryInteractions.addAll(mitabReader.read(intactQuery));
-
-            /* Run cluster using list of binary interactions as input */
-            InteractionClusterScore iC = new InteractionClusterScore();
-            iC.setBinaryInteractionIterator(binaryInteractions.iterator());
-            iC.setMappingIdDbNames("uniprotkb,irefindex,ddbj/embl/genbank,refseq,chebi,chembl,entrez gene/locuslink,unknown");
-
-            iC.runService();
-
-            /* Retrieve results */
-            Map<Integer, EncoreInteraction> interactionMapping = iC.getInteractionMapping();
-            Map<String, List<Integer>> interactorMapping = iC.getInteractorMapping();
-            Map<String, String> synonymMapping = iC.getSynonymMapping();
-            int interactionMappingId = iC.getInteractionMappingId();
-
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (PsimiTabException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-    }
-
-    //@Test
-    public void testEncore2Binary(){
-        PsimiTabReader mitabReader = new PsimiTabReader();
-        /* Run cluster using list of binary interactions as input */
-        InteractionClusterScore iC = new InteractionClusterScore();
-        /* Add interactions from Psicquic */
-        iC.addQueryAcc("560144");
-        iC.addQuerySource("biogrid");
-//        iC.addQuerySource("intact");
-        /* Set priority for molecule accession mapping (Find database names in MI Ontology) */
-        iC.setMappingIdDbNames("uniprotkb,irefindex,ddbj/embl/genbank,refseq,chebi");
-        /* Run clustering service */
-        iC.runService();
-
-        /* Retrieve results */
-        Map<Integer, EncoreInteraction> interactionMapping = iC.getInteractionMapping();
-
-        /* Get PSI binary Interactions */
-        Map<Integer, BinaryInteraction> binaryInteractionMapping = new HashMap<>();
-        Encore2Binary iConverter = new Encore2Binary(iC.getMappingIdDbNames());
-        for(int mappingId:interactionMapping.keySet()){
-            EncoreInteraction eI = interactionMapping.get(mappingId);
-            BinaryInteraction bI = iConverter.getBinaryInteractionForScoring(eI);
-            binaryInteractionMapping.put(mappingId,bI);
-        }
-
-        /* Test */
-//        assertTrue(binaryInteractionMapping.size() > 0);
     }
 
 }
