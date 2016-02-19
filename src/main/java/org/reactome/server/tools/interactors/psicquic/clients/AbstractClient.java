@@ -186,9 +186,11 @@ public abstract class AbstractClient implements PsicquicClient {
     public List<InteractionDetails> getInteractionIdentifier(Map<String, List<String>> interactionAcs) {
         List<InteractionDetails> interactionDetailsList = new ArrayList<>();
         for (String interactionId : interactionAcs.keySet()) {
-            InteractionDetails interactionDetails = new InteractionDetails();
-            interactionDetails.setInteractionAc(interactionId);
-            interactionDetailsList.add(interactionDetails);
+            if(interactionId != null && !interactionId.isEmpty()) {
+                InteractionDetails interactionDetails = new InteractionDetails();
+                interactionDetails.setInteractionAc(interactionId);
+                interactionDetailsList.add(interactionDetails);
+            }
         }
 
         return interactionDetailsList;
