@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
+@SuppressWarnings("unused")
 public class Toolbox {
 
     /**
@@ -25,28 +26,6 @@ public class Toolbox {
      */
     public static boolean isNumeric(String str) {
         return str != null && str.matches("-?\\d+(\\.\\d+)?");
-    }
-
-    /**
-     * Retrieve the identifier url of a given accession
-     *
-     * @param acc is the Accession: Q13501 or CHEBI:16207
-     * @return the identifier url
-     */
-    public static String getAccessionUrl(String acc) {
-        String url = InteractorConstant.INTERACTOR_BASE_URL;
-        if (acc.toUpperCase().contains("CHEBI")) {
-            url = url.concat("chebi/").concat(acc);
-        } else {
-            /** Take into account the Uniprot Isoform **/
-            if (isIsoform(acc)) {
-                url = url.concat("uniprot.isoform/").concat(acc);
-            } else {
-                url = url.concat("uniprot/").concat(acc);
-            }
-        }
-
-        return url;
     }
 
     /**
@@ -144,57 +123,74 @@ public class Toolbox {
         return retURL;
     }
 
-    public static String getEvidencesURL(List<String> evidences, String resource) {
+    /**
+     * Prepare the evidences URL based on the queried resource and the evidences list
+     * Depends on the Resource, it allows querying multiple values. For certain cases
+     * the resources links the evidences to another database, then it comes with the identifier,
+     * which is split and then the URL is taken automatically.
+     *
+     * @param evidences List of interaction evidences
+     * @param psicquicResource the PSICQUIC resource we are querying. STATIC resource applies straight forward.
+     * @return the evidencesUrl
+     */
+    public static String getEvidencesURL(List<String> evidences, String psicquicResource) {
         if (evidences == null || evidences.isEmpty()) {
             return null;
         }
 
-        ResourceURL resourceURL = ResourceURL.getByName(resource);
-        final String OR = "%20OR%20";
+        // base resourceUrl - coming from PSICQUIC
+        ResourceURL psicquicResourceURL = ResourceURL.getByName(psicquicResource);
 
         String retURL = "";
 
         // Check if resource has interaction URL
-        if (resourceURL.hasInteractionUrl()) {
-
+        if (psicquicResourceURL.hasInteractionEvidenceUrl()) {
             String term = "";
-            String dbSource = resource.toUpperCase().replaceAll("-", "");
+            String dbSource = psicquicResource.toUpperCase().replaceAll("-", "");
 
-            // If resource is multivalue than the URL will concat the identifiers in the queryString
-            if (resourceURL.isMultivalue()) {
-
-                retURL = resourceURL.getInteraction().get(dbSource);
-
-                for (int i = 0; i < evidences.size(); i++) {
-                    String evidence = evidences.get(i);
-
-                    term = term.concat(evidence);
-                    if (i < evidences.size() - 1) {
-                        term = term.concat(OR);
-                    }
-                }
-            } else {
-                term = evidences.get(0);
-
-                // If evidences contains # then we have split and get the url accordingly to the dbsource
-                if (evidences.get(0).contains("#")) {
-                    // e.g IDBG-123123:innatedb
-                    String[] eviArray = evidences.get(0).split("#");
-                    term = eviArray[0];
+            // dbsource as the key and the evidences present in this dbsource
+            MapSet<String, String> evidencesMapSet = new MapSet<>();
+            for(String evidence : evidences) {
+                if (evidence.contains("#")) {
+                    // e.g IDBG-123123#innatedb
+                    String[] eviArray = evidence.split("#");
+                    evidence = eviArray[0];
                     dbSource = eviArray[1].toUpperCase();
                 }
-
-                retURL = resourceURL.getInteraction().get(dbSource);
-
+                evidencesMapSet.add(dbSource, evidence);
             }
 
-            if (term == null || term.isEmpty()) {
-                retURL = null;
-            } else {
-                if (retURL == null) {
-                    retURL = InteractorConstant.DEFAULT_INTERACTION_URL;
+            // get first key and value in the evidenceMap and build URL based on that.
+            if(!evidencesMapSet.isEmpty()) {
+                String dbSourceKey = (String)evidencesMapSet.keySet().toArray()[0];
+                Set<String> evidencesSet = evidencesMapSet.getElements(dbSourceKey);
+
+                // based on the database present in the map we get its ResourcesURL
+                ResourceURL resourceURL = ResourceURL.getByName(dbSourceKey);
+
+                // If resource is multivalued than the URL will concat the identifiers in the queryString
+                if (resourceURL.isMultivalued()) {
+                    String or = "";
+                    for (String evidence : evidencesSet) {
+                        term = term.concat(or);
+                        or = "%20OR%20";
+                        term = term.concat(evidence);
+                    }
+                } else {
+                    term = evidencesSet.iterator().next();
                 }
-                retURL = retURL.replace("##ID##", term);
+
+                // get the evidence url that corresponds to the dbSourceKey
+                retURL = resourceURL.getInteractionEvidencesURLs().get(dbSourceKey);
+
+                if (term == null || term.isEmpty()) {
+                    retURL = null;
+                } else {
+                    if (retURL == null) {
+                        retURL = InteractorConstant.DEFAULT_INTERACTION_URL;
+                    }
+                    retURL = retURL.replace("##ID##", term);
+                }
             }
         }
 
@@ -207,13 +203,13 @@ public class Toolbox {
         Pattern p = Pattern.compile(uniprotRegex);
         Matcher m = p.matcher(accession);
 
-        if (m.find()) {
-            return true;
-        }
-
-        return false;
+        return m.find();
     }
 
+    /**
+     * Check if the given accession is a Chemical
+     * @return true if the accession represents a Chemical
+     */
     public static boolean isChemical(String accession){
         return accession.startsWith("CHEBI:") || accession.startsWith("CHEMBL");
     }

@@ -17,12 +17,12 @@ public class MenthaClient extends AbstractClient {
 
     @Override
     public String getDatabaseNames() {
-        return "uniprotkb,chebi,intact,mint,biogrid,dip,matrixdb";
+        return "uniprotkb,chebi,intact,mint,dip,matrixdb";
     }
 
     /**
      * The identifier in Mentha is a little bit messy. It has various databases as part of the interaction identifier.
-     * In this case the database will part of the identifier.
+     * In this case the database will be part of the identifier.
      *
      * @param interactionAcs key=interactionId, value=dbSource
      *
