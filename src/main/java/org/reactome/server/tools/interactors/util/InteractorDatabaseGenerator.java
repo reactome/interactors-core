@@ -5,9 +5,11 @@ import org.reactome.server.tools.interactors.database.InteractorsDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -88,6 +90,15 @@ public class InteractorDatabaseGenerator {
         String database = config.getString("interactors-database-path");
         InteractorsDatabase interactors;
         try {
+
+            File dbFile = new File(database);
+            if(dbFile.exists()){
+                logger.warn("Database already exists and it will be renamed.");
+                if(!dbFile.renameTo(new File(dbFile.getPath() + "." + new Date().toString()))){
+                    logger.warn("Database file has not been renamed properly");
+                }
+            }
+
             interactors = new InteractorsDatabase(database);
             generateNewDatabase(interactors.getConnection());
 

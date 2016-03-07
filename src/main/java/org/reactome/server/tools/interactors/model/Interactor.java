@@ -56,9 +56,9 @@ public class Interactor {
     }
 
     public void setAcc(String acc) {
-        if(acc.equals("-")){
+        if (acc.equals("-")) {
             this.acc = this.intactId;
-        }else {
+        } else {
             this.acc = acc.replaceAll("\"", "");
         }
 
@@ -80,13 +80,50 @@ public class Interactor {
         this.interactorResourceId = interactorResourceId;
     }
 
+    //    public String getAlias() {
+//        if (Objects.equals(alias, acc)) return null;
+//        return alias == null ? null : alias.replace("_HUMAN", "").replaceAll("_", " ");
+//    }
+
+    /**
+     * Get alias returns the plain alias value. We cannot parse it here,
+     * for the reason this alias will be indexed.
+     *
+     * @return plain alias
+     */
     public String getAlias() {
         if (Objects.equals(alias, acc)) return null;
-        return alias == null ? null : alias.replace("_HUMAN", "").replaceAll("_", " ");
+        return alias == null ? null : alias.toUpperCase();
+    }
+
+    /**
+     * Split alias into the species bit and get just the alias without the species.
+     *
+     * We agreed the requirements has different behavior in the Search (filter species) and in the JSON (no filter about species)
+     *
+     * @param removeOnlyHuman this flag controls either removing _HUMAN or _ANYSPECIES in the alias.
+     * @return alias without species
+     */
+    public String getAliasWithoutSpecies(boolean removeOnlyHuman) {
+        String newAlias = alias;
+        if (Objects.equals(alias, acc)) return null;
+
+        if (alias == null) return null;
+
+        if(removeOnlyHuman) {
+            newAlias = alias.replace("_HUMAN", "").replaceAll("_", " ");
+        } else {
+            if (alias.contains("_")) { // If alias contains 'underscore' then we split it and take only the first piece
+                String[] aliasSplit = alias.split("_", 2);
+                newAlias = aliasSplit[0];
+            }
+        }
+
+        return newAlias;
     }
 
     public void setAlias(String alias) {
-        if(alias != null) {
+        if (alias != null) {
             this.alias = alias.toUpperCase().replaceAll("\"", "");
         }
     }
@@ -131,7 +168,7 @@ public class Interactor {
     }
 
     public void setSynonyms(String synonyms) {
-        if(synonyms != null) {
+        if (synonyms != null) {
             this.synonyms = synonyms.replaceAll("\"", "");
         }
     }
