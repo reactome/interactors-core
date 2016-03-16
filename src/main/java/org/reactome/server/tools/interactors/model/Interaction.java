@@ -100,4 +100,23 @@ public class Interaction implements Comparable<Interaction> {
     public int compareTo(Interaction o) {
         return this.intactScore.compareTo(o.intactScore);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Interaction that = (Interaction) o;
+
+        if (interactorA != null ? !interactorA.equals(that.interactorA) : that.interactorA != null) return false;
+        return !(interactorB != null ? !interactorB.equals(that.interactorB) : that.interactorB != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = interactorA != null ? interactorA.hashCode() : 0;
+        result = 31 * result + (interactorB != null ? interactorB.hashCode() : 0);
+        return result;
+    }
 }
