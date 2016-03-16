@@ -11,10 +11,7 @@ import org.reactome.server.tools.interactors.exception.PsicquicInteractionCluste
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.service.PsicquicService;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * For mor PSICQUIC examples: https://github.com/EBI-IntAct/micluster/blob/master/micluster-score/src/test/java/TestInteractionClusterScore.java
@@ -38,12 +35,27 @@ public class TestPsicquicClustering {
 
     @Test
     public void testSpecificPsicquicResource() {
-        String resourceName = "mentha";
+        String resourceName = "Reactome-FIs";
 
         try {
             //long start = System.currentTimeMillis();
             Map<String, List<Interaction>> interactions = psicquicService.getInteractions(resourceName, getSampleAccessions(resourceName));
             //long elapsedTime = System.currentTimeMillis() - start;
+
+            Assert.assertTrue("No interactors present in " + resourceName + " database.", interactions.size() >= 1);
+
+        } catch (PsicquicInteractionClusterException e) {
+            Assert.fail("Error querying PSICQUIC");
+        }
+    }
+
+    @Test
+    public void testSpecificPsicquicResourceAndAccession() {
+        String resourceName = "Reactome-FIs";
+        String accession = "Q02750";
+
+        try {
+            Map<String, List<Interaction>> interactions = psicquicService.getInteractions(resourceName, Collections.singleton(accession));
 
             Assert.assertTrue("No interactors present in " + resourceName + " database.", interactions.size() >= 1);
 
