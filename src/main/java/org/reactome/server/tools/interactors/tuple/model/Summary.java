@@ -52,4 +52,15 @@ public class Summary {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "Summary{" +
+                "token='" + token + '\'' +
+                ", interactors=" + interactors +
+                ", interactions=" + interactions +
+                ", fileName='" + fileName + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

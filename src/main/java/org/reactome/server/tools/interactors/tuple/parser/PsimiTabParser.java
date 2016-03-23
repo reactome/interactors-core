@@ -19,6 +19,8 @@ public class PsimiTabParser extends CommonParser {
 
     @Override
     public TupleResult parse(List<String> input) throws ParserException {
+        // TODO apply the micluster ?
+
         String token = UUID.randomUUID().toString();
 
         List<BinaryInteraction> binaryInteractions = new ArrayList<>();
@@ -37,12 +39,31 @@ public class PsimiTabParser extends CommonParser {
 
         for (BinaryInteraction binaryInteraction : binaryInteractions) {
             CustomInteraction customInteraction = new CustomInteraction();
-            customInteraction.setInteractorIdA(binaryInteraction.getInteractorA().getIdentifiers().get(0).getIdentifier());
-            customInteraction.setInteractorIdB(binaryInteraction.getInteractorB().getIdentifiers().get(0).getIdentifier());
+            boolean hasWarning = false;
 
-            customInteraction.setConfidenceValue(((ConfidenceImpl) binaryInteraction.getConfidenceValues().get(0)).getValue());
+            if (binaryInteraction.getInteractorA() != null) {
+                customInteraction.setInteractorIdA(binaryInteraction.getInteractorA().getIdentifiers().get(0).getIdentifier());
+            } else {
+                warningResponses.add("Interactor A is null");
+                hasWarning = true;
+            }
 
-            udc.addCustomInteraction(customInteraction);
+            if (binaryInteraction.getInteractorB() != null) {
+                customInteraction.setInteractorIdB(binaryInteraction.getInteractorB().getIdentifiers().get(0).getIdentifier());
+            } else {
+                warningResponses.add("Interactor B is null");
+                hasWarning = true;
+            }
+
+            if (binaryInteraction.getConfidenceValues() != null) {
+                customInteraction.setConfidenceValue(((ConfidenceImpl) binaryInteraction.getConfidenceValues().get(0)).getValue());
+            } else {
+                //warningResponses.add("Confidence value is null");
+            }
+
+            if (!hasWarning) {
+                udc.addCustomInteraction(customInteraction);
+            }
         }
 
         Summary summary = new Summary();

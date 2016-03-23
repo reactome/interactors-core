@@ -1,80 +1,79 @@
 package org.reactome.server.tool.interactors.dao;
 
-
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
+import org.junit.Test;
 import org.reactome.server.tools.interactors.tuple.exception.ParserException;
-import org.reactome.server.tools.interactors.tuple.exception.TupleParserException;
-import org.reactome.server.tools.interactors.tuple.parser.CommonParser;
-import org.reactome.server.tools.interactors.tuple.parser.ExtendedParser;
+import org.reactome.server.tools.interactors.tuple.model.TupleResult;
 import org.reactome.server.tools.interactors.tuple.parser.Parser;
 import org.reactome.server.tools.interactors.tuple.parser.ParserFactory;
-import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
-import org.reactome.server.tools.interactors.util.Toolbox;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
-import java.util.Set;
-
-//import org.reflections.Reflections;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-
 public class TestParser {
 
-    public String tupleFile = "/Users/gsviteri/Sites/extended.txt";
+    private static final String PATH = "tuple.samples/";
+    private static final String EXTENDED_TXT = PATH.concat("extended.txt");
+    private static final String EXTENDED_CSV = PATH.concat("extended.csv");
 
-    //@Test
-    public void testParser() throws IOException, ParserException {
-        InputStream is = new FileInputStream(tupleFile);
 
-        List<String> lines = IOUtils.readLines(is);
+    @Test
+    public void testExtendedTxt() throws IOException, ParserException {
+        File file = getFileFromResources(EXTENDED_TXT);
 
-        IOUtils.toString(is);
+        List<String> lines = IOUtils.readLines(new FileInputStream(file));
+
         Parser p = ParserFactory.build(lines);
+        TupleResult result = p.parse(lines);
+
+        Assert.assertTrue("Haven't found six interactors", result.getSummary().getInteractions() == 6);
+        Assert.assertNotNull("Warning messages list is null", result.getWarningMessages());
+        Assert.assertTrue("Haven't found two warning messages", result.getWarningMessages().size() == 2);
 
     }
 
-    //@Test
-    public void testExtendedParser() throws IOException {
-        Parser p = new ExtendedParser();
+    @Test
+    public void testExtendedCsv() throws IOException, ParserException {
+        File file = getFileFromResources(EXTENDED_CSV);
 
-//        List<String> lines = IOUtils.readLines(new FileInputStream("/Users/gsviteri/Sites/extended2.txt"));
-//        List<String> lines = IOUtils.readLines(new FileInputStream("/Users/gsviteri/Sites/extended.csv"));
-        List<String> lines = IOUtils.readLines(new FileInputStream("/Users/gsviteri/Sites/extended2.txt"));
+        List<String> lines = IOUtils.readLines(new FileInputStream(file));
 
-        try {
-            p.parse(lines);
-        } catch (TupleParserException e) {
-            System.out.println(e.getErrorMessages());
-        } catch (ParserException e) {
-            e.printStackTrace();
-        }
+        Parser p = ParserFactory.build(lines);
+        TupleResult result = p.parse(lines);
+
+        Assert.assertTrue("Haven't found six interactors", result.getSummary().getInteractions() == 6);
+        Assert.assertNotNull("Warning messages list is null", result.getWarningMessages());
+        Assert.assertTrue("Haven't found two warning messages", result.getWarningMessages().size() == 2);
     }
 
-    //@Test
-    public void testReadSubClass() throws Exception {
-        List<String> lines = IOUtils.readLines(new FileInputStream("/Users/gsviteri/Sites/extended2.txt"));
+    // TODO: create more test cases
 
-        Set<Class<? extends CommonParser>> c = Toolbox.getSubTypesOf("org.reactome.server.tools.interactors.tuple.parser", CommonParser.class);
+    private File getFileFromResources(String fileName) {
+        String msg = "Can't get an instance of ".concat(fileName);
 
-        FileDefinition def = null;
-        for (Class aClass : c) {
-            CommonParser cp = (CommonParser)aClass.newInstance();
-            def = cp.getParserDefinition(lines);
-            if (def != null) {
-                break;
-            }
+        ClassLoader classLoader = getClass().getClassLoader();
+        if (classLoader == null) {
+            Assert.fail("[1] - ".concat(msg));
         }
 
-        // will fail if is null.
-        Assert.assertNotNull(def);
+        URL url = classLoader.getResource(fileName);
+        if (url == null) {
+            Assert.fail("[2] - ".concat(msg));
+        }
 
+        File file = new File(url.getFile());
+        if (!file.exists()) {
+            Assert.fail("[3] - ".concat(msg));
+        }
+
+        return file;
     }
-
 
 }

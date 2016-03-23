@@ -27,4 +27,12 @@ public class TupleResult {
     public void setWarningMessages(List<String> warningMessages) {
         this.warningMessages = warningMessages;
     }
+
+    @Override
+    public String toString() {
+        return "TupleResult{" +
+                "summary=" + summary +
+                ", warningMessages=" + warningMessages +
+                '}';
+    }
 }
