@@ -3,13 +3,13 @@ package org.reactome.server.tools.interactors.tuple.parser;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.reactome.server.tools.interactors.tuple.exception.TupleParserException;
-import org.reactome.server.tools.interactors.tuple.model.CustomInteraction;
-import org.reactome.server.tools.interactors.tuple.model.Summary;
-import org.reactome.server.tools.interactors.tuple.model.UserDataContainer;
-import org.reactome.server.tools.interactors.tuple.token.TokenUtil;
+import org.reactome.server.tools.interactors.tuple.model.*;
+import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringTokenizer;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.reactome.server.tools.interactors.tuple.parser.response.Response.*;
@@ -54,8 +54,9 @@ public class TupleParser extends CommonParser {
     private List<String> headerColumnNames = new LinkedList<>();
 
     @Override
-    public Summary parse(List<String> input) throws TupleParserException {
+    public TupleResult parse(List<String> input) throws TupleParserException {
         UserDataContainer userDataContainer = new UserDataContainer();
+        String token = UUID.randomUUID().toString();
 
         long start = System.currentTimeMillis();
 
@@ -78,14 +79,18 @@ public class TupleParser extends CommonParser {
         }
 
 
-        Summary summary = new Summary(TokenUtil.generateToken(), userDataContainer);
+        Summary summary = new Summary();
+        summary.setToken(token);
+        summary.setInteractions(userDataContainer.getCustomInteractions().size());
+        summary.setInteractors(10);
 
-        summary.setErrorMessages(errorResponses);
-        summary.setWarningMessages(warningResponses);
-        summary.setHeaderColumns(headerColumnNames);
-        summary.setNumberOfInteractors(userDataContainer.getCustomInteractions().size());
+        TupleResult result = new TupleResult();
+        result.setSummary(summary);
+        result.setWarningMessages(warningResponses);
 
-        return summary;
+        CustomInteractorRepository.save(token, userDataContainer);
+
+        return result;
     }
 
     /**
@@ -146,9 +151,6 @@ public class TupleParser extends CommonParser {
         for (String columnName : cols) {
             headerColumnNames.add(StringEscapeUtils.escapeJava(columnName.trim()));
         }
-
-        //Header must match the columns, then based on the name we can get columns properly
-
     }
 
     /**
@@ -225,5 +227,42 @@ public class TupleParser extends CommonParser {
                 }
             }
         }
+    }
+
+    @Override
+    public FileDefinition getParserDefinition(List<String> lines) {
+        int attempts = 0;
+
+        /** Note also that using + instead of * avoids replacing empty strings and therefore might also speed up the process. **/
+        String regexp = MULTI_LINE_CONTENT_SPLIT_REGEX;
+
+        Pattern p = Pattern.compile(regexp);
+
+        for (String line : lines) {
+
+            if (StringUtils.isEmpty(line)) {
+                continue;
+            }
+
+            /** Note that using String.replaceAll() will compile the regular expression each time you call it. **/
+            line = p.matcher(line).replaceAll(" "); // slow slow slow
+
+            //StringTokenizer has more performance to offer than String.slit.
+            StringTokenizer st = new StringTokenizer(line); //space is default delimiter.
+            int tokens = st.countTokens();
+
+            // it is not a tuple... stop it and return null;
+            if (tokens != 2) {
+                return null;
+            }
+
+            attempts++;
+            if (attempts == 50) {
+                break;
+                // don't need to iterate through all the file
+            }
+        }
+
+        return FileDefinition.REDUCED_DATA;
     }
 }

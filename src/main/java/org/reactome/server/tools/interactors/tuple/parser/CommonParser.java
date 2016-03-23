@@ -1,6 +1,7 @@
 package org.reactome.server.tools.interactors.tuple.parser;
 
 import org.apache.log4j.Logger;
+import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,5 +30,15 @@ public abstract class CommonParser implements Parser {
     protected boolean hasError() {
         return errorResponses.size() >= 1;
     }
+
+    /**
+     * Retrieve the parser definition based on the specific implementation.
+     * Each implementation of CommonParser has its own mechanism to identify the file definition
+     *
+     * @param lines is the content to be analysed
+     * @return the FileDefinition
+     */
+    public abstract FileDefinition getParserDefinition(List<String> lines);
+
 
 }

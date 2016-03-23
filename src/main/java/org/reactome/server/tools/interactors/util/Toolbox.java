@@ -1,6 +1,7 @@
 package org.reactome.server.tools.interactors.util;
 
 import org.reactome.server.tools.interactors.model.Interaction;
+import org.reflections.Reflections;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,13 +105,13 @@ public class Toolbox {
          * We do not hold the Accession, then intact just assign the IntactId to the Accession.
          * If accession is an IntAct ID removes the link
          */
-        if(acc.startsWith("EBI-")){
+        if (acc.startsWith("EBI-")) {
             return null;
         }
 
         if (isChemical(acc)) {
             retURL = resourceURL.getChemical();
-        } else if(isUniprotAccession(acc)){
+        } else if (isUniprotAccession(acc)) {
             retURL = InteractorConstant.DEFAULT_PROTEIN_URL;
         } else {
             retURL = resourceURL.getProtein();
@@ -129,7 +130,7 @@ public class Toolbox {
      * the resources links the evidences to another database, then it comes with the identifier,
      * which is split and then the URL is taken automatically.
      *
-     * @param evidences List of interaction evidences
+     * @param evidences        List of interaction evidences
      * @param psicquicResource the PSICQUIC resource we are querying. STATIC resource applies straight forward.
      * @return the evidencesUrl
      */
@@ -141,7 +142,7 @@ public class Toolbox {
         // base resourceUrl - coming from PSICQUIC
         ResourceURL psicquicResourceURL = ResourceURL.getByName(psicquicResource);
 
-        String retURL = "";
+        String retURL = null;
 
         // Check if resource has interaction URL
         if (psicquicResourceURL.hasInteractionEvidenceUrl()) {
@@ -150,7 +151,7 @@ public class Toolbox {
 
             // dbsource as the key and the evidences present in this dbsource
             MapSet<String, String> evidencesMapSet = new MapSet<>();
-            for(String evidence : evidences) {
+            for (String evidence : evidences) {
                 if (evidence.contains("#")) {
                     // e.g IDBG-123123#innatedb
                     String[] eviArray = evidence.split("#");
@@ -161,8 +162,8 @@ public class Toolbox {
             }
 
             // get first key and value in the evidenceMap and build URL based on that.
-            if(!evidencesMapSet.isEmpty()) {
-                String dbSourceKey = (String)evidencesMapSet.keySet().toArray()[0];
+            if (!evidencesMapSet.isEmpty()) {
+                String dbSourceKey = (String) evidencesMapSet.keySet().toArray()[0];
                 Set<String> evidencesSet = evidencesMapSet.getElements(dbSourceKey);
 
                 // based on the database present in the map we get its ResourcesURL
@@ -197,7 +198,13 @@ public class Toolbox {
         return retURL;
     }
 
-    public static boolean isUniprotAccession(String accession){
+    /**
+     * Check if the given accession is a valid Uniprot Accession based on Uniprot RegEx.
+     *
+     * @param accession the accession to be verified
+     * @return true if valid, false otherwise.
+     */
+    public static boolean isUniprotAccession(String accession) {
         String uniprotRegex = "[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}";
 
         Pattern p = Pattern.compile(uniprotRegex);
@@ -208,9 +215,21 @@ public class Toolbox {
 
     /**
      * Check if the given accession is a Chemical
+     *
      * @return true if the accession represents a Chemical
      */
-    public static boolean isChemical(String accession){
+    public static boolean isChemical(String accession) {
         return accession.startsWith("CHEBI:") || accession.startsWith("CHEMBL");
+    }
+
+    /**
+     * Retrieves a list of classes that extends the given clazz.
+     *
+     * @param packageName package to scan the classes
+     * @param superClazz  the super class.
+     */
+    public static <T> Set<Class<? extends T>> getSubTypesOf(String packageName, Class<T> superClazz) {
+        Reflections reflections = new Reflections(packageName);
+        return reflections.getSubTypesOf(superClazz);
     }
 }

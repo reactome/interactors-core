@@ -29,7 +29,7 @@ public class TestPsicquicClustering {
 
     @Test
     public void testPsicquicResource() {
-        Assert.assertNotNull("PsicquicRegistryClientExceptio has been thrown", getPsicquicResource());
+        Assert.assertNotNull("PsicquicRegistryClientException has been thrown", getPsicquicResource());
         Assert.assertTrue("No resources have been returned from PSICQUIC", getPsicquicResource().size() > 0);
     }
 

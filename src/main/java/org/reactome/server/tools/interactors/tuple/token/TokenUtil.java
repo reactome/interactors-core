@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public class TokenUtil {
 
-    public static Token generateToken(){
-        return new Token(UUID.randomUUID().toString());
+    public static String generateToken(){
+        return UUID.randomUUID().toString();
     }
 
 }

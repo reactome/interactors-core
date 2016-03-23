@@ -1,74 +1,55 @@
 package org.reactome.server.tools.interactors.tuple.model;
 
-import org.reactome.server.tools.interactors.tuple.token.Token;
-
-import java.util.List;
-
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
 public class Summary {
 
-    private Token token;
+    private String token;
 
-    private UserDataContainer data;
+    private Integer interactors;
+    private Integer interactions;
+    private String fileName;
+    private String name;
 
-    public Summary(Token token, UserDataContainer data) {
-        this.token = token;
-        this.data = data;
-    }
-
-    private List<String> warningMessages;
-    private List<String> errorMessages; // maybe the error error message goes in the Exception
-    private List<String> headerColumns;
-    private Integer numberOfInteractors;
-
-    public Token getToken() {
+    public String getToken() {
         return token;
     }
 
-    public void setToken(Token token) {
+    public void setToken(String token) {
         this.token = token;
     }
 
-    public UserDataContainer getData() {
-        return data;
+    public Integer getInteractors() {
+        return interactors;
     }
 
-    public void setData(UserDataContainer data) {
-        this.data = data;
+    public void setInteractors(Integer interactors) {
+        this.interactors = interactors;
     }
 
-    public List<String> getWarningMessages() {
-        return warningMessages;
+    public Integer getInteractions() {
+        return interactions;
     }
 
-    public void setWarningMessages(List<String> warningMessages) {
-        this.warningMessages = warningMessages;
+    public void setInteractions(Integer interactions) {
+        this.interactions = interactions;
     }
 
-    public List<String> getErrorMessages() {
-        return errorMessages;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setErrorMessages(List<String> errorMessages) {
-        this.errorMessages = errorMessages;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
-    public List<String> getHeaderColumns() {
-        return headerColumns;
+    public String getName() {
+        return name;
     }
 
-    public void setHeaderColumns(List<String> headerColumns) {
-        this.headerColumns = headerColumns;
-    }
-
-    public Integer getNumberOfInteractors() {
-        return numberOfInteractors;
-    }
-
-    public void setNumberOfInteractors(Integer numberOfInteractors) {
-        this.numberOfInteractors = numberOfInteractors;
+    public void setName(String name) {
+        this.name = name;
     }
 }

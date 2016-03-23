@@ -9,7 +9,7 @@ package org.reactome.server.tools.interactors.tuple.model;
 public class CustomInteraction {
 
     public enum CustomInteractionColumn {
-        ID_INTERACTOR_A,  // add COLUMN DEFINITION NAMES which might be mandatory in the file...
+        ID_INTERACTOR_A,
         ID_INTERACTOR_B,
         ALTERNATIVE_INTERACTOR_A,
         ALTERNATIVE_INTERACTOR_B,
@@ -23,13 +23,7 @@ public class CustomInteraction {
         INTERACTION_TYPE,
         SOURCE_DATABASE,
         INTERACTION_IDENTIFIER,
-        CONFIDENCE_VALUE;
-
-//        final String columnName;
-//        CustomInteractionIndex(String columnName){
-//            this.columnName = columnName;
-//        }
-
+        CONFIDENCE_VALUE
     }
 
     /**

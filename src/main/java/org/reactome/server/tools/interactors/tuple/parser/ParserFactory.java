@@ -1,8 +1,11 @@
 package org.reactome.server.tools.interactors.tuple.parser;
 
 import org.reactome.server.tools.interactors.tuple.exception.ParserException;
+import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
+import org.reactome.server.tools.interactors.util.Toolbox;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -10,23 +13,24 @@ import java.util.List;
 
 public class ParserFactory {
 
-    public enum FileDefinition {
-        REDUCED_DATA(2),
-        EXTENDED_DATA(15),
-        PSIMITAB_DATA(15);
+    /** Package where our parses reside **/
+    private static final String PARSER_PACKAGE = "org.reactome.server.tools.interactors.tuple.parser";
 
-        final int columns;
-
-        FileDefinition(int columns) {
-            this.columns = columns;
-        }
-
-    }
-
+    /**
+     * Build the parser based on the file content that is analysed in order to return the proper instance
+     *
+     * @return the specific parser
+     * @throws ParserException
+     */
     public static Parser build(List<String> lines) throws ParserException {
         Parser parser;
 
-        FileDefinition fileDefinition = getFileDefinition(lines);
+        FileDefinition fileDefinition = getParserDefinition(lines);
+
+        if (fileDefinition == null) {
+            throw new ParserException("Could not Parse your file");
+        }
+
         switch (fileDefinition) {
             case REDUCED_DATA:
                 parser = new TupleParser();
@@ -45,25 +49,30 @@ public class ParserFactory {
         return parser;
     }
 
-    private static FileDefinition getFileDefinition(List<String> lines) throws ParserException {
+    /**
+     * Scan all parsers that are extending CommonParser
+     *
+     * @param lines content file to be analysed
+     * @return the File Definition Implementation
+     * @throws ParserException
+     */
+    private static FileDefinition getParserDefinition(List<String> lines) throws ParserException {
+        try {
+            Set<Class<? extends CommonParser>> parsers = Toolbox.getSubTypesOf(PARSER_PACKAGE, CommonParser.class);
+            for (Class aClass : parsers) {
+                CommonParser commonParser = (CommonParser) aClass.newInstance();
 
-        // some logic here to get the file definition ... check number of columns.
-
-        // the easiest is try to parse the psimitab and get the exception
-
-        String header = lines.get(0);
-        if (header.startsWith("#") || header.startsWith("//")) {
-            header = header.replaceAll("^(#|//)", "");
-
-            String[] cols = header.split("[\\t,;]+");
-
-            if (cols.length == 2) {
-                return FileDefinition.REDUCED_DATA;
+                FileDefinition fileDef = commonParser.getParserDefinition(lines);
+                if (fileDef != null) {
+                    return fileDef;
+                }
             }
-
-            return FileDefinition.EXTENDED_DATA;
+        } catch (InstantiationException e) {
+            throw new ParserException("Couldn't instantiate the parser which identifies the format", e);
+        } catch (IllegalAccessException e) {
+            throw new ParserException("Illegal access to the parser. Couldn't identify the format", e);
         }
 
-        return FileDefinition.PSIMITAB_DATA;
+        return null;
     }
 }
