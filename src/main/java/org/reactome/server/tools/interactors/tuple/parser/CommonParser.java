@@ -1,10 +1,15 @@
 package org.reactome.server.tools.interactors.tuple.parser;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.reactome.server.tools.interactors.tuple.model.ColumnDefinition;
+import org.reactome.server.tools.interactors.tuple.model.CustomInteraction;
+import org.reactome.server.tools.interactors.tuple.model.UserDataContainer;
 import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * This is what is common between our parsers.
@@ -40,5 +45,43 @@ public abstract class CommonParser implements Parser {
      */
     public abstract FileDefinition getParserDefinition(List<String> lines);
 
+    protected List<String> checkMandatoriesAttributes(CustomInteraction customInteraction) {
+        List<String> mandatoriesList = new ArrayList<>();
+
+        List<ColumnDefinition> mand = ColumnDefinition.getMandatoryColumns();
+        for (ColumnDefinition columnDefinition : mand) {
+            try {
+                String getter = "get".concat(StringUtils.capitalize(columnDefinition.attribute));
+                Method method = customInteraction.getClass().getMethod(getter);
+                Object returnValue = method.invoke(customInteraction);
+
+                if (method.getReturnType().equals(String.class)) {
+                    String returnValueStr = (String) returnValue;
+                    if (StringUtils.isBlank(returnValueStr)) {
+                        mandatoriesList.add(columnDefinition.name());
+                    }
+                }
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return mandatoriesList;
+
+    }
+
+    protected int countInteractors(UserDataContainer userDataContainer) {
+        Set<String> interactors = new HashSet<>(userDataContainer.getCustomInteractions().size());
+
+        for (CustomInteraction interaction : userDataContainer.getCustomInteractions()) {
+            // add interactors into a set in order to count them as unique.
+            interactors.add(interaction.getInteractorIdA());
+            interactors.add(interaction.getInteractorIdB());
+
+        }
+
+        return interactors.size();
+
+    }
 
 }

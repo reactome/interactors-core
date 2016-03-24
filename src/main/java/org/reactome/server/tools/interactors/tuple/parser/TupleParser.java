@@ -82,7 +82,7 @@ public class TupleParser extends CommonParser {
         Summary summary = new Summary();
         summary.setToken(token);
         summary.setInteractions(userDataContainer.getCustomInteractions().size());
-        summary.setInteractors(10);
+        summary.setInteractors(countInteractors(userDataContainer));
 
         TupleResult result = new TupleResult();
         result.setSummary(summary);
@@ -238,6 +238,9 @@ public class TupleParser extends CommonParser {
 
         Pattern p = Pattern.compile(regexp);
 
+        int right = 0;
+        int wrong = 0;
+
         for (String line : lines) {
 
             if (StringUtils.isEmpty(line)) {
@@ -252,8 +255,10 @@ public class TupleParser extends CommonParser {
             int tokens = st.countTokens();
 
             // it is not a tuple... stop it and return null;
-            if (tokens != 2) {
-                return null;
+            if (tokens == 2) {
+                right++;
+            } else {
+                wrong++;
             }
 
             attempts++;
@@ -263,6 +268,10 @@ public class TupleParser extends CommonParser {
             }
         }
 
-        return FileDefinition.REDUCED_DATA;
+        if (right > wrong) {
+            return FileDefinition.REDUCED_DATA;
+        }
+
+        return null;
     }
 }

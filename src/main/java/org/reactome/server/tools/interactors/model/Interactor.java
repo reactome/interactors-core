@@ -1,5 +1,7 @@
 package org.reactome.server.tools.interactors.model;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Objects;
 
 /**
@@ -123,7 +125,9 @@ public class Interactor {
     }
 
     public void setAlias(String alias) {
-        if (alias != null) {
+        this.alias = null;
+        if(StringUtils.isNotEmpty(alias)){
+            //if (alias != null) {
             this.alias = alias.toUpperCase().replaceAll("\"", "");
         }
     }

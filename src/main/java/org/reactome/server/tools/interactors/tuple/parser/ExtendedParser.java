@@ -15,8 +15,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 import static org.reactome.server.tools.interactors.tuple.parser.response.Response.*;
@@ -85,7 +83,7 @@ public class ExtendedParser extends CommonParser {
         Summary summary = new Summary();
         summary.setToken(token);
         summary.setInteractions(userDataContainer.getCustomInteractions().size());
-        summary.setInteractors(10000);
+        summary.setInteractors(countInteractors(userDataContainer));
 
         TupleResult result = new TupleResult();
         result.setSummary(summary);
@@ -137,31 +135,6 @@ public class ExtendedParser extends CommonParser {
             errorResponses.add(Response.getMessage(Response.COLUMN_MISMATCH, beanReader.getLineNumber(), header.length, beanReader.length()));
             setCustomInterationFromCsvBeanReader(beanReader, header, userDataContainer);
         }
-    }
-
-    private List<String> checkMandatoriesAttributes(CustomInteraction customInteraction) {
-        List<String> mandatoriesList = new ArrayList<>();
-
-        List<ColumnDefinition> mand = ColumnDefinition.getMandatoryColumns();
-        for (ColumnDefinition columnDefinition : mand) {
-            try {
-                String getter = "get".concat(StringUtils.capitalize(columnDefinition.attribute));
-                Method method = customInteraction.getClass().getMethod(getter);
-                Object returnValue = method.invoke(customInteraction);
-
-                if (method.getReturnType().equals(String.class)) {
-                    String returnValueStr = (String) returnValue;
-                    if (StringUtils.isBlank(returnValueStr)) {
-                        mandatoriesList.add(columnDefinition.name());
-                    }
-                }
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return mandatoriesList;
-
     }
 
     private Map<String, ColumnDefinition> getHeaderMapping() {
@@ -258,12 +231,12 @@ public class ExtendedParser extends CommonParser {
                 }
             }
 
-            if(isOK) {
+            if (isOK) {
                 right++;
             }
         }
 
-        if(right == 0) {
+        if (right == 0) {
             return null;
         }
 
