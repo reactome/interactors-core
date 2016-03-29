@@ -46,7 +46,7 @@ public class ParserUtils {
 
         Summary s = new Summary();
         s.setName(name);
-        s.setToken("{PSI}" + UUID.randomUUID().toString());
+        s.setToken("PSI-" + UUID.randomUUID().toString());
 
         ret.setSummary(s);
 
