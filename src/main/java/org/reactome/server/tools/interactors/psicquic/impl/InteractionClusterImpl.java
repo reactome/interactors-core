@@ -4,6 +4,7 @@ import org.hupo.psi.mi.psicquic.registry.ServiceType;
 import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
 import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistryClient;
 import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
+import org.reactome.server.tools.interactors.exception.CustomPsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.Interactor;
@@ -31,18 +32,17 @@ import java.util.*;
 public class InteractionClusterImpl implements PsicquicDAO {
 
     /**
-     *
      * This method queries PSICQUIC for a given resource (retrieve the resource URL directly on the server) and accession
      * list and retrieves the interactions clustered. This method only take into account those interactions which the
      * score is higher than MINIMUM_VALID_SCORE. It also sort by score with highest on top. Some oddity cases are being
      * solved by the removeDuplicatedInteractor which keeps from the interactor list only the highest score.
      *
      * @param resource PSICQUIC Resource
-     * @param accs List of accession
+     * @param accs     List of accession
      * @return map of accession as key an its list of interaction
-     *
      * @throws PsicquicInteractionClusterException
      */
+    @Override
     public Map<String, List<Interaction>> getInteraction(String resource, Collection<String> accs) throws PsicquicInteractionClusterException {
         Map<String, List<Interaction>> ret = new HashMap<>();
 
@@ -73,7 +73,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
                 /** Requirement: Add in the interaction list only scores higher than MINIMUM_VALID_SCORE **/
                 Double score = interaction.getIntactScore();
-                if(score >= InteractorConstant.MINIMUM_VALID_SCORE) {
+                if (score >= InteractorConstant.MINIMUM_VALID_SCORE) {
                     /** Must round score after checking the MINIMUM_VALID_SCORE **/
                     interaction.setIntactScore(Toolbox.roundScore(score));
                     interactions.add(interaction);
@@ -93,6 +93,58 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
     }
 
+    @Override
+    public Map<String, List<Interaction>> getInteractionFromCustomPsicquic(String url, Collection<String> accs) throws CustomPsicquicInteractionClusterException {
+        Map<String, List<Interaction>> ret = new HashMap<>();
+
+        for (String acc : accs) {
+            List<Interaction> interactions = new ArrayList<>();
+
+            PsicquicClient psicquicClient = ClientFactory.getClient("CUSTOM-PSI"); // This client does not exist and the GenericClient will be instantiate.
+            String databaseNames = psicquicClient.getDatabaseNames();
+
+            InteractionClusterScore interactionClusterScore = getInteractionClusterForCustomPsicquic(url, acc, databaseNames);
+
+            /** Retrieve results **/
+            Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
+
+            for (Integer key : interactionMapping.keySet()) {
+                EncoreInteraction encoreInteraction = interactionMapping.get(key);
+                encoreInteraction.setMappingIdDbNames(interactionClusterScore.getMappingIdDbNames());
+
+                Interaction interaction = psicquicClient.getInteraction(encoreInteraction);
+
+                /** make sure the acc in the search is always on link A **/
+                if (!acc.equals(interaction.getInteractorA().getAcc())) {
+                    Interactor tempA = interaction.getInteractorA();
+
+                    interaction.setInteractorA(interaction.getInteractorB());
+                    interaction.setInteractorB(tempA);
+                }
+
+                /** Requirement: Add in the interaction list only scores higher than MINIMUM_VALID_SCORE **/
+                Double score = interaction.getIntactScore();
+                if (score >= InteractorConstant.MINIMUM_VALID_SCORE) {
+                    /** Must round score after checking the MINIMUM_VALID_SCORE **/
+                    interaction.setIntactScore(Toolbox.roundScore(score));
+                    interactions.add(interaction);
+                }
+            }
+
+            interactions = Toolbox.removeDuplicatedInteractor(interactions);
+
+            Collections.sort(interactions);
+            Collections.reverse(interactions);
+
+            ret.put(acc, interactions);
+
+        }
+
+        return ret;
+
+    }
+
+    @Override
     public Map<String, Integer> countInteraction(String resource, Collection<String> accs) throws PsicquicInteractionClusterException {
         Map<String, Integer> ret = new HashMap<>();
 
@@ -112,7 +164,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
                 PsicquicClient psicquicClient = ClientFactory.getClient(resource);
 
                 Interaction interaction = psicquicClient.getInteraction(encoreInteraction);
-                if(interaction.getIntactScore() >= InteractorConstant.MINIMUM_VALID_SCORE) {
+                if (interaction.getIntactScore() >= InteractorConstant.MINIMUM_VALID_SCORE) {
                     countInteractionsAboveThreshold++;
                 }
             }
@@ -129,6 +181,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
      * @return Psicquic Resources sorted by name
      * @throws PsicquicInteractionClusterException
      */
+    @Override
     public List<PsicquicResource> getResources() throws PsicquicInteractionClusterException {
         PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
 
@@ -152,7 +205,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
         Collections.sort(resourceList);
 
-        return  resourceList;
+        return resourceList;
     }
 
     /**
@@ -192,6 +245,43 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
         } catch (IOException | PsimiTabException | PsicquicRegistryClientException e) {
             throw new PsicquicInteractionClusterException(e);
+        }
+    }
+
+    /**
+     * Helper method that create the InteractionClusterScore.
+     *
+     * @throws CustomPsicquicInteractionClusterException
+     */
+    private InteractionClusterScore getInteractionClusterForCustomPsicquic(String customURL, String acc, String databaseNames) throws CustomPsicquicInteractionClusterException {
+//        final String queryMethod = "interactor/";
+        final String queryMethod = "";
+
+        try {
+            /** Build service URL **/
+            String queryRestUrl = customURL.concat(queryMethod).concat(URLEncoder.encode(acc, "UTF-8"));
+
+            /** Get binaryInteractions from PSI-MI files **/
+            URL url = new URL(queryRestUrl);
+
+            List<BinaryInteraction> binaryInteractions = new ArrayList<>();
+
+            PsimiTabReader mitabReader = new PsimiTabReader();
+            binaryInteractions.addAll(mitabReader.read(url));
+
+            /** Run cluster using list of binary interactions as input **/
+            InteractionClusterScore interactionClusterScore = new InteractionClusterScore();
+            interactionClusterScore.setBinaryInteractionIterator(binaryInteractions.iterator());
+
+            /** This is the dbSource added in the alias **/
+            interactionClusterScore.setMappingIdDbNames(databaseNames);
+
+            interactionClusterScore.runService();
+
+            return interactionClusterScore;
+
+        } catch (IOException | PsimiTabException e) {
+            throw new CustomPsicquicInteractionClusterException(e);
         }
     }
 }

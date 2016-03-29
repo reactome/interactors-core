@@ -2,6 +2,8 @@ package org.reactome.server.tools.interactors.tuple.util;
 
 import org.apache.commons.io.IOUtils;
 import org.reactome.server.tools.interactors.tuple.exception.ParserException;
+import org.reactome.server.tools.interactors.tuple.model.CustomPsicquicRepository;
+import org.reactome.server.tools.interactors.tuple.model.Summary;
 import org.reactome.server.tools.interactors.tuple.model.TupleResult;
 import org.reactome.server.tools.interactors.tuple.parser.Parser;
 import org.reactome.server.tools.interactors.tuple.parser.ParserFactory;
@@ -9,6 +11,7 @@ import org.reactome.server.tools.interactors.tuple.parser.ParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -35,6 +38,25 @@ public class ParserUtils {
         Parser p = ParserFactory.build(lines);
         return p.parse(lines);
 
+    }
+
+    public static TupleResult processCustomPsicquic(String name, String url) throws ParserException {
+
+        TupleResult ret = new TupleResult();
+
+        Summary s = new Summary();
+        s.setName(name);
+        s.setToken("{PSI}" + UUID.randomUUID().toString());
+
+        ret.setSummary(s);
+
+        if(!url.endsWith("/")) {
+            url = url + "/";
+        }
+
+        CustomPsicquicRepository.save(s.getToken(), url);
+
+        return ret;
     }
 
 }
