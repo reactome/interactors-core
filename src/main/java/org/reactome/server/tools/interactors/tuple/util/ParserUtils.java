@@ -7,6 +7,7 @@ import org.reactome.server.tools.interactors.tuple.model.Summary;
 import org.reactome.server.tools.interactors.tuple.model.TupleResult;
 import org.reactome.server.tools.interactors.tuple.parser.Parser;
 import org.reactome.server.tools.interactors.tuple.parser.ParserFactory;
+import org.reactome.server.tools.interactors.util.InteractorConstant;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +47,7 @@ public class ParserUtils {
 
         Summary s = new Summary();
         s.setName(name);
-        s.setToken("PSI-" + UUID.randomUUID().toString());
+        s.setToken(InteractorConstant.TUPLE_PREFIX + UUID.randomUUID().toString());
 
         ret.setSummary(s);
 

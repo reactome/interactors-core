@@ -224,24 +224,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
             /** Build service URL **/
             String queryRestUrl = service.getRestUrl().concat(queryMethod).concat(URLEncoder.encode(acc, "UTF-8"));
 
-            /** Get binaryInteractions from PSI-MI files **/
-            URL url = new URL(queryRestUrl);
-
-            List<BinaryInteraction> binaryInteractions = new ArrayList<>();
-
-            PsimiTabReader mitabReader = new PsimiTabReader();
-            binaryInteractions.addAll(mitabReader.read(url));
-
-            /** Run cluster using list of binary interactions as input **/
-            InteractionClusterScore interactionClusterScore = new InteractionClusterScore();
-            interactionClusterScore.setBinaryInteractionIterator(binaryInteractions.iterator());
-
-            /** This is the dbSource added in the alias **/
-            interactionClusterScore.setMappingIdDbNames(databaseNames);
-
-            interactionClusterScore.runService();
-
-            return interactionClusterScore;
+            return prepareInteratorClusterScore(queryRestUrl, databaseNames);
 
         } catch (IOException | PsimiTabException | PsicquicRegistryClientException e) {
             throw new PsicquicInteractionClusterException(e);
@@ -261,27 +244,36 @@ public class InteractionClusterImpl implements PsicquicDAO {
             /** Build service URL **/
             String queryRestUrl = customURL.concat(queryMethod).concat(URLEncoder.encode(acc, "UTF-8"));
 
-            /** Get binaryInteractions from PSI-MI files **/
-            URL url = new URL(queryRestUrl);
-
-            List<BinaryInteraction> binaryInteractions = new ArrayList<>();
-
-            PsimiTabReader mitabReader = new PsimiTabReader();
-            binaryInteractions.addAll(mitabReader.read(url));
-
-            /** Run cluster using list of binary interactions as input **/
-            InteractionClusterScore interactionClusterScore = new InteractionClusterScore();
-            interactionClusterScore.setBinaryInteractionIterator(binaryInteractions.iterator());
-
-            /** This is the dbSource added in the alias **/
-            interactionClusterScore.setMappingIdDbNames(databaseNames);
-
-            interactionClusterScore.runService();
-
-            return interactionClusterScore;
+            return prepareInteratorClusterScore(queryRestUrl, databaseNames);
 
         } catch (IOException | PsimiTabException e) {
             throw new CustomPsicquicInteractionClusterException(e);
         }
     }
+
+    /**
+     * Common method to get the InteractorClusterScore.
+     * It fits either in Psicquic or Custom Psicquic
+     */
+    private InteractionClusterScore prepareInteratorClusterScore(String queryRestUrl, String databaseNames) throws IOException, PsimiTabException {
+        /** Get binaryInteractions from PSI-MI files **/
+        URL url = new URL(queryRestUrl);
+
+        List<BinaryInteraction> binaryInteractions = new ArrayList<>();
+
+        PsimiTabReader mitabReader = new PsimiTabReader();
+        binaryInteractions.addAll(mitabReader.read(url));
+
+        /** Run cluster using list of binary interactions as input **/
+        InteractionClusterScore interactionClusterScore = new InteractionClusterScore();
+        interactionClusterScore.setBinaryInteractionIterator(binaryInteractions.iterator());
+
+        /** This is the dbSource added in the alias **/
+        interactionClusterScore.setMappingIdDbNames(databaseNames);
+
+        interactionClusterScore.runService();
+
+        return interactionClusterScore;
+    }
+
 }
