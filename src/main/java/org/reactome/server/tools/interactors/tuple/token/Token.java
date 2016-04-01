@@ -5,16 +5,13 @@ import java.util.Date;
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-
+@Deprecated
 public class Token {
 
     private String id;
-    private String sampleName;
     private Date createDate = new Date();
-    private Date updateDate = new Date();
-    private boolean valid = true;
 
-    public Token (String id) {
+    public Token(String id) {
         this.id = id;
     }
 
@@ -24,38 +21,6 @@ public class Token {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getSampleName() {
-        return sampleName;
-    }
-
-    public void setSampleName(String sampleName) {
-        this.sampleName = sampleName;
-    }
-
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
-
-    public Date getUpdateDate() {
-        return updateDate;
-    }
-
-    public void setUpdateDate(Date updateDate) {
-        this.updateDate = updateDate;
-    }
-
-    public boolean isValid() {
-        return valid;
-    }
-
-    public void setValid(boolean valid) {
-        this.valid = valid;
     }
 
     @Override
@@ -78,10 +43,7 @@ public class Token {
     public String toString() {
         return "Token{" +
                 "id='" + id + '\'' +
-                ", sampleName='" + sampleName + '\'' +
                 ", createDate=" + createDate +
-                ", updateDate=" + updateDate +
-                ", valid=" + valid +
                 '}';
     }
 }

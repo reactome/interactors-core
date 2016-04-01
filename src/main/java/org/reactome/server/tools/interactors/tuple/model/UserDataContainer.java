@@ -29,7 +29,4 @@ public class UserDataContainer {
 
         customInteractions.add(customInteraction);
     }
-
-
-
 }

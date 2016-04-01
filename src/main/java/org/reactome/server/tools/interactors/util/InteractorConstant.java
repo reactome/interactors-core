@@ -11,6 +11,8 @@ public class InteractorConstant {
 
     public static final Double MINIMUM_VALID_SCORE = 0.45;
 
+    public static final String TUPLE_PREFIX = "PSI-";
+
     //public static final String INTERACTOR_BASE_URL = "http://identifiers.org/";
 
     public static final String DEFAULT_PROTEIN_URL = "http://www.uniprot.org/uniprot/##ID##";

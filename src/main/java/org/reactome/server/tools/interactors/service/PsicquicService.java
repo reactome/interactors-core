@@ -1,5 +1,6 @@
 package org.reactome.server.tools.interactors.service;
 
+import org.reactome.server.tools.interactors.exception.CustomPsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.PsicquicResource;
@@ -19,12 +20,16 @@ public class PsicquicService {
 
     private PsicquicDAO psicquicDAO;
 
-    public PsicquicService(){
-       psicquicDAO  = new InteractionClusterImpl();
+    public PsicquicService() {
+        psicquicDAO = new InteractionClusterImpl();
     }
 
     public Map<String, List<Interaction>> getInteractions(String resource, Collection<String> accs) throws PsicquicInteractionClusterException {
         return psicquicDAO.getInteraction(resource, accs);
+    }
+
+    public Map<String, List<Interaction>> getInteractionFromCustomPsicquic(String url, Collection<String> accs) throws CustomPsicquicInteractionClusterException {
+        return psicquicDAO.getInteractionFromCustomPsicquic(url, accs);
     }
 
     public List<PsicquicResource> getResources() throws PsicquicInteractionClusterException {

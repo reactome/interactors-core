@@ -108,6 +108,13 @@
             <version>2.4.0</version>
         </dependency>
 
+        <!-- Reflections -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -55,8 +55,8 @@ public class Interaction implements Comparable<Interaction> {
         this.interactionDetailsList = interactionDetailsList;
     }
 
-    public void addInteractionDetails(InteractionDetails interactionDetails){
-        if(interactionDetailsList == null){
+    public void addInteractionDetails(InteractionDetails interactionDetails) {
+        if (interactionDetailsList == null) {
             interactionDetailsList = new ArrayList<>();
         }
         interactionDetailsList.add(interactionDetails);
@@ -97,8 +97,21 @@ public class Interaction implements Comparable<Interaction> {
     }
 
     @Override
-    public int compareTo(Interaction o) {
-        return this.intactScore.compareTo(o.intactScore);
+    public int compareTo(Interaction that) {
+        // Taking into account that the score can be null in the custom interactions.
+        if (this.intactScore == null) {
+            if (that.intactScore == null) {
+                return 0; //equal
+            } else {
+                return -1; // null is before other strings
+            }
+        } else {// this.member != null
+            if (that.intactScore == null) {
+                return 1;  // all other strings are after null
+            } else {
+                return this.intactScore.compareTo(that.intactScore);
+            }
+        }
     }
 
     @Override

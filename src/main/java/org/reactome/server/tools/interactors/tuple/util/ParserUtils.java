@@ -2,13 +2,17 @@ package org.reactome.server.tools.interactors.tuple.util;
 
 import org.apache.commons.io.IOUtils;
 import org.reactome.server.tools.interactors.tuple.exception.ParserException;
+import org.reactome.server.tools.interactors.tuple.model.CustomPsicquicRepository;
 import org.reactome.server.tools.interactors.tuple.model.Summary;
+import org.reactome.server.tools.interactors.tuple.model.TupleResult;
 import org.reactome.server.tools.interactors.tuple.parser.Parser;
 import org.reactome.server.tools.interactors.tuple.parser.ParserFactory;
+import org.reactome.server.tools.interactors.util.InteractorConstant;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -16,17 +20,44 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class ParserUtils {
 
-    public static Summary getUserDataContainer(InputStream is) throws IOException, ParserException {
+    public static TupleResult getUserDataContainer(String name, String filename, InputStream is) throws IOException, ParserException {
         List<String> linesList = IOUtils.readLines(is);
-        Summary rtn = processData(linesList);
 
-        return rtn;
+        TupleResult ret = processData(linesList);
+
+        /** set filename and name to be part as the json **/
+        ret.getSummary().setFileName(filename);
+        ret.getSummary().setName(name);
+
+        return ret;
     }
 
-    private static Summary processData(List<String> lines) throws ParserException{
+    /**
+     * Invoke the parser
+     */
+    private static TupleResult processData(List<String> lines) throws ParserException{
         Parser p = ParserFactory.build(lines);
         return p.parse(lines);
 
+    }
+
+    public static TupleResult processCustomPsicquic(String name, String url) throws ParserException {
+
+        TupleResult ret = new TupleResult();
+
+        Summary s = new Summary();
+        s.setName(name);
+        s.setToken(InteractorConstant.TUPLE_PREFIX + UUID.randomUUID().toString());
+
+        ret.setSummary(s);
+
+        if(!url.endsWith("/")) {
+            url = url + "/";
+        }
+
+        CustomPsicquicRepository.save(s.getToken(), url);
+
+        return ret;
     }
 
 }

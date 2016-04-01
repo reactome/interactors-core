@@ -1,39 +1,46 @@
 Parser Package
 =============
 
-This package includes information about how the parsers work and what are the right data format to be submitted.
-
+This package includes information about how the parsers work and what are the right data format to be submitted. Currently, the user can submit three different formats:
 * Tuple
+* Extended File
+* PSI-MI TAB
 
-## Introduction ##
 
-In the tuple file it is mandatory to have only two identifiers columns, and them the parser will automatically detect
- it and parser. Take into account that any empty or inline problems will be summarised and returned in a format of warning or error
- depends on its nature.
+Tuple
+------
+
+#### Introduction ####
+
+In the tuple file it is mandatory to have only two identifiers columns, and them the parser will automatically detect it and parser. Take into account that any empty or inline problems will be summarised and returned in a format of warning or error depends on its nature. 
 Although it is a good practice submit files with a qualifying header, in tuples it is not mandatory. If present, should start with # or //.
 
 - as CSV (Comma-Separated value)
 
-  # ID A, ID B
-  Q13501,P49800
-  P12311,Q11223
+```
+#ID A,ID B
+Q13501,P49800
+P12311,Q11223
+```
 
 - as TSV (Tab-Separated value)
 
-  # ID A    ID B
-  Q13501    P49800
-  P12311    Q11223
+```
+#ID A   ID B
+Q13501  P49800
+P12311  Q11223
+```
 
+Extended File
+------
 
-* Extended File
-
-## Introduction ##
+#### Introduction ####
 
 In the extended file the user has the ability to submit their own list of interactors and more than a tuple, provides information such as
 alias for identifiers A and B, also provides an evidence identifier for the interaction itself, the score, etc.
 The extended file should be followed as CSV or TSV. A header is mandatory to mapping the columns.
 
-## Columns Definitions ##
+#### Columns Definitions ####
 
 The header columns should be as follows:
 
@@ -46,6 +53,20 @@ The header columns should be as follows:
   1. EVIDENCE
   1. SCORE
 
+##### Sample #####
+
+```
+#ID A	ID B	ALIAS A	ALIAS B	TAX_ID A	TAX_ID B	EVIDENCE		SCORE
+Q13501	Q9H0R8	SQSTM	GBRL1	9606		9606		EBI-1010739		0.48
+Q9GZQ8	P41743	MLP3B	KPCI	9606		9606		EBI-2604042		0.79
+Q14596	Q13501	NBR1	SQSTM	9606		9606		EBI-2947446		0.22
+Q14596	Q13501	NBR1	SQSTM	9606		9606		EBI-755491		0.96
+Q13501	Q9GZQ8	SQSTM	MLP3B	9606		9606		EBI-2603774		0.85
+P41743	Q13501	KPCI	GBRL1	9606		9606		EBI-3197899		0.74
+Q9H0R8	Q14596	MLP3B	NBR1	9606		9606		EBI-8276688		0.49
+Q9H0R8	Q14596	MLP3B	NBR1	9606		9606		EBI-7392199		0.67
+```
+
 The column contents should be as follows:
 
   1. **Unique identifier for interactor A**. Mostly UniProt accession or Chemicals from ChEBI. e.g Q13501
@@ -56,11 +77,12 @@ The column contents should be as follows:
   1. **Taxonomy ID for B**
   1. **Interaction identifier(s)**. e.g EBI-10107390
   1. **Confidence score**. e.g 0.96
+ 
 
+PSI-MI TAB
+------
 
-* PSI-MI TAB
-
-## Introduction ##
+#### Introduction ####
 
 The MITAB25 format is part of the PSI-MI 2.5 standard (1). It has been derived from the tabular format provided by BioGrid. MITAB25 only describes binary interactions, one pair of interactors per row. Columns are separated by tabulations. Tools allowing to manipulate this data format are available (2).
 
@@ -69,7 +91,7 @@ The MITAB25 format is part of the PSI-MI 2.5 standard (1). It has been derived f
 (2) http://www.psidev.info/index.php?q=node/60#tools
 
 
-## Column definitions ##
+#### Column definitions ####
 
 The column contents should be as follows:
 
@@ -91,7 +113,7 @@ The column contents should be as follows:
 
 All columns are mandatory.
 
-## Syntax ##
+#### Syntax ###
 
 Columns are normally formed by fields delimited by "|", with a structure like this one:
 
@@ -130,4 +152,3 @@ uniprotkb:P12345("a \"nice\" protein")
 ```
 
 The information above has been copied from https://github.com/MICommunity/psicquic/blob/wiki/MITAB25Format.md
-

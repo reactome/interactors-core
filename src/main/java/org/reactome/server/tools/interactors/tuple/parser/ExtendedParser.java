@@ -4,12 +4,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.reactome.server.tools.interactors.tuple.exception.ParserException;
 import org.reactome.server.tools.interactors.tuple.exception.TupleParserException;
-import org.reactome.server.tools.interactors.tuple.model.ColumnDefinition;
-import org.reactome.server.tools.interactors.tuple.model.CustomInteraction;
-import org.reactome.server.tools.interactors.tuple.model.Summary;
-import org.reactome.server.tools.interactors.tuple.model.UserDataContainer;
+import org.reactome.server.tools.interactors.tuple.model.*;
 import org.reactome.server.tools.interactors.tuple.parser.response.Response;
-import org.reactome.server.tools.interactors.tuple.token.TokenUtil;
+import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
 import org.supercsv.io.CsvBeanReader;
 import org.supercsv.io.ICsvBeanReader;
 import org.supercsv.prefs.CsvPreference;
@@ -18,8 +15,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 import static org.reactome.server.tools.interactors.tuple.parser.response.Response.*;
@@ -27,14 +22,17 @@ import static org.reactome.server.tools.interactors.tuple.parser.response.Respon
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-
 public class ExtendedParser extends CommonParser {
 
+    private String headerLine;
+
     @Override
-    public Summary parse(List<String> input) throws ParserException {
+    public TupleResult parse(List<String> input) throws ParserException {
+
+        String token = UUID.randomUUID().toString();
 
         /** File clean up **/
-        File file = cleanUp(input);
+        File file = writeContentInTempFile(input);
 
         /** Store file content **/
         UserDataContainer userDataContainer = new UserDataContainer();
@@ -74,7 +72,6 @@ public class ExtendedParser extends CommonParser {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
 
         file.deleteOnExit();
@@ -83,15 +80,18 @@ public class ExtendedParser extends CommonParser {
             throw new TupleParserException("Error parsing your interactors overlay", errorResponses);
         }
 
+        Summary summary = new Summary();
+        summary.setToken(token);
+        summary.setInteractions(userDataContainer.getCustomInteractions().size());
+        summary.setInteractors(countInteractors(userDataContainer));
 
-        Summary summary = new Summary(TokenUtil.generateToken(), userDataContainer);
+        TupleResult result = new TupleResult();
+        result.setSummary(summary);
+        result.setWarningMessages(warningResponses);
 
-        summary.setErrorMessages(errorResponses);
-        summary.setWarningMessages(warningResponses);
-        //summary.setHeaderColumns(headerColumnNames);
-        summary.setNumberOfInteractors(userDataContainer.getCustomInteractions().size());
+        CustomInteractorRepository.save(token, userDataContainer);
 
-        return summary;
+        return result;
 
     }
 
@@ -137,32 +137,6 @@ public class ExtendedParser extends CommonParser {
         }
     }
 
-
-    private List<String> checkMandatoriesAttributes(CustomInteraction customInteraction) {
-        List<String> mandatoriesList = new ArrayList<>();
-
-        List<ColumnDefinition> mand = ColumnDefinition.getMandatoryColumns();
-        for (ColumnDefinition columnDefinition : mand) {
-            try {
-                String getter = "get" .concat(StringUtils.capitalize(columnDefinition.attribute));
-                Method method = customInteraction.getClass().getMethod(getter);
-                Object returnValue = method.invoke(customInteraction);
-
-                if (method.getReturnType().equals(String.class)) {
-                    String returnValueStr = (String) returnValue;
-                    if (StringUtils.isBlank(returnValueStr)) {
-                        mandatoriesList.add(columnDefinition.name());
-                    }
-                }
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return mandatoriesList;
-
-    }
-
     private Map<String, ColumnDefinition> getHeaderMapping() {
         /** key, column expected in the file value setter  **/
         Map<String, ColumnDefinition> columnMapping = new HashMap<>();
@@ -179,21 +153,16 @@ public class ExtendedParser extends CommonParser {
         return columnMapping;
     }
 
-    private File cleanUp(List<String> input) throws ParserException {
+    private List<String> cleanAndConvertToCSV(List<String> input) {
         String header = "";
         int firstLineIndex = 0;
         for (String line : input) {
             firstLineIndex++;
             if (StringUtils.isNotEmpty(line)) {
                 header = line.replaceAll("\\t+", ",");
+                headerLine = header;
                 break;
             }
-        }
-
-        // is valid header
-        if (!hasHeaderLine(header)) {
-            errorResponses.add(Response.getMessage(Response.NO_HEADER_ERROR));
-            throw new TupleParserException("Error parsing. Header is not present", errorResponses);
         }
 
         List<String> newInput = new ArrayList<>(input.size());
@@ -208,6 +177,17 @@ public class ExtendedParser extends CommonParser {
             }
         }
 
+        return newInput;
+    }
+
+    private File writeContentInTempFile(List<String> input) throws ParserException {
+        List<String> newInput = cleanAndConvertToCSV(input);
+
+        if (!hasHeaderLine(headerLine)) {
+            errorResponses.add(Response.getMessage(Response.NO_HEADER_ERROR));
+            throw new TupleParserException("Error parsing. Header is not present", errorResponses);
+        }
+
         try {
             File tempFile = File.createTempFile(UUID.randomUUID().toString(), ".txt");
             FileUtils.writeLines(tempFile, newInput);
@@ -219,4 +199,47 @@ public class ExtendedParser extends CommonParser {
         }
     }
 
+    @Override
+    public FileDefinition getParserDefinition(List<String> lines) {
+
+        int right = 0;
+        int attempts = 0;
+
+        boolean isOK = true;
+
+        List<String> csvContent = cleanAndConvertToCSV(lines);
+
+        for (String line : csvContent) {
+            isOK = true;
+
+            attempts++;
+            if (attempts == 50) {
+                break; // don't need to iterate through all the file
+            }
+
+            String[] values = line.split(",");
+
+            if (values.length <= 2) { // wrong
+                continue;
+                //return null;
+            }
+
+            for (String value : values) { // wrong
+                if (value.contains(":") || value.contains("|")) { // then it is potential PSIMITAB file
+                    isOK = false;
+                    break;
+                }
+            }
+
+            if (isOK) {
+                right++;
+            }
+        }
+
+        if (right == 0) {
+            return null;
+        }
+
+        return FileDefinition.EXTENDED_DATA;
+    }
 }
