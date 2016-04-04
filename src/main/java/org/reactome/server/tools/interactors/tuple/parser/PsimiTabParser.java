@@ -21,9 +21,16 @@ import static org.reactome.server.tools.interactors.tuple.parser.response.Respon
  */
 public class PsimiTabParser extends CommonParser {
 
+    private int START_INDEX = 0;
+
     @Override
     public TupleResult parse(List<String> input) throws ParserException {
-        // TODO apply the micluster ?
+        // TODO apply the micluster
+
+        String firstLine = input.get(0);
+        if (hasHeaderLine(firstLine)) {
+            START_INDEX = 1;
+        }
 
         /** Unique id that identifies the data submission **/
         String token = UUID.randomUUID().toString();
@@ -41,7 +48,7 @@ public class PsimiTabParser extends CommonParser {
 
         /** Read parsed lines and apply our rules to provide a nice summary **/
         UserDataContainer userDataContainer = new UserDataContainer();
-        for (int line = 0; line < binaryInteractions.size(); line++) {
+        for (int line = START_INDEX; line < binaryInteractions.size(); line++) {
 
             /** Get binaryInteraction that is retrieved. This is provided the psimitab library **/
             BinaryInteraction binaryInteraction = binaryInteractions.get(line);
@@ -52,17 +59,38 @@ public class PsimiTabParser extends CommonParser {
             /** Check Mandatory fields **/
             List<String> mandatoryMessages = checkMandatoriesAttributes(customInteraction);
             if (mandatoryMessages.size() == 0) {
+                boolean hasDuplicate = false;
+
                 /** Check if an interaction exists based on AccessionA and AccessionB **/
                 if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
                     warningResponses.add(getMessage(DUPLICATE_AB, line + 1, customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
+                    hasDuplicate = true;
                 }
+
 
                 /** Flip a and b and check again if the interactions exists **/
                 customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
 
                 if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
-                    warningResponses.add(getMessage(DUPLICATE_BA, line + 1, customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
-                } else {
+                    //warningResponses.add(getMessage(DUPLICATE_BA, beanReader.getLineNumber(), customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
+                    hasDuplicate = true;
+                }
+
+//                /** Flip a and b and check again if the interactions exists **/
+//                customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
+//
+//                // TODO This piece of code is used in the same way across the parser. reuse.
+//                if (userDataContainer.getCustomInteractions() != null && !userDataContainer.getCustomInteractions().contains(customInteraction)) {
+////                    warningResponses.add(getMessage(DUPLICATE_BA, line + 1, customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
+////                } else {
+//                    /** Flip back to original form **/
+//                    customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
+//
+//                    /** Add to the list **/
+//                    userDataContainer.addCustomInteraction(customInteraction);
+//                }
+
+                if (!hasDuplicate) {
                     /** Flip back to original form **/
                     customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
 

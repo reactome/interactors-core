@@ -113,7 +113,7 @@ public class Interactor {
         if (alias == null) return null;
 
         if(removeOnlyHuman) {
-            newAlias = alias.replace("_HUMAN", "").replaceAll("_", " ");
+            newAlias = alias.replace("_HUMAN", "").replace("HUMAN","").trim().replaceAll("_", " ");
         } else {
             if (alias.contains("_")) { // If alias contains 'underscore' then we split it and take only the first piece
                 String[] aliasSplit = alias.split("_", 2);

@@ -105,24 +105,39 @@ public class ExtendedParser extends CommonParser {
                 /** Check mandatory fields based on column definition enum **/
                 List<String> mandatoryMessages = checkMandatoriesAttributes(customInteraction);
                 if (mandatoryMessages.size() == 0) {
+                    boolean hasDuplicate = false;
 
                     /** Check if an interaction exists based on AccessionA and AccessionB **/
                     if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
                         warningResponses.add(getMessage(DUPLICATE_AB, beanReader.getLineNumber(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
+                        hasDuplicate = true;
                     }
 
                     /** Flip a and b and check again if the interactions exists **/
                     customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
 
                     if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
-                        warningResponses.add(getMessage(DUPLICATE_BA, beanReader.getLineNumber(), customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
-                    } else {
+                        //warningResponses.add(getMessage(DUPLICATE_BA, beanReader.getLineNumber(), customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
+                        hasDuplicate = true;
+                    }
+//                    } else {
+//                        /** Flip back to original form **/
+//                        customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
+//
+//                        //isConfidenceValue
+//
+//                        /** Add to the list **/
+//                        userDataContainer.addCustomInteraction(customInteraction);
+//                    }
+
+                    if (!hasDuplicate) {
                         /** Flip back to original form **/
                         customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
 
                         /** Add to the list **/
                         userDataContainer.addCustomInteraction(customInteraction);
                     }
+
                 } else {
                     errorResponses.add(getMessage(MISSING_MANDATORY_FIELDS, beanReader.getLineNumber(), mandatoryMessages));
                 }

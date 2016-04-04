@@ -51,6 +51,8 @@ public class TupleParser extends CommonParser {
     private int startOnLine = 0;
     private boolean hasHeader = false;
 
+    private final String TUPLE_DEFAULT_SCORE = "1.0";
+
     private List<String> headerColumnNames = new LinkedList<>();
 
     @Override
@@ -198,22 +200,42 @@ public class TupleParser extends CommonParser {
 
             if (values.length > 0) {
                 if (values.length == thresholdColumn) {
+                    boolean hasDuplicate = false;
+
                     CustomInteraction customInteraction = new CustomInteraction();
 
                     customInteraction.setInteractorIdA(values[CustomInteraction.CustomInteractionColumn.ID_INTERACTOR_A.ordinal()]);
                     customInteraction.setInteractorIdB(values[CustomInteraction.CustomInteractionColumn.ID_INTERACTOR_B.ordinal()]);
+                    customInteraction.setConfidenceValue(TUPLE_DEFAULT_SCORE);
 
                     /** Check if an interaction exists based on AccessionA and AccessionB **/
                     if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
                         warningResponses.add(getMessage(DUPLICATE_AB, (i + 1), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
+                        hasDuplicate = true;
                     }
+
+//                    /** Flip a and b and check again if the interactions exists **/
+//                    customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
+//
+//                    if (userDataContainer.getCustomInteractions() != null && !userDataContainer.getCustomInteractions().contains(customInteraction)) {
+//                        //warningResponses.add(getMessage(DUPLICATE_BA, (i + 1), customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
+////                    } else {
+//                        /** Flip back to original form **/
+//                        customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
+//
+//                        /** Add to the list **/
+//                        userDataContainer.addCustomInteraction(customInteraction);
+//                    }
 
                     /** Flip a and b and check again if the interactions exists **/
                     customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
 
                     if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
-                        warningResponses.add(getMessage(DUPLICATE_BA, (i + 1), customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
-                    } else {
+                        //warningResponses.add(getMessage(DUPLICATE_BA, beanReader.getLineNumber(), customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
+                        hasDuplicate = true;
+                    }
+
+                    if (!hasDuplicate) {
                         /** Flip back to original form **/
                         customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
 
