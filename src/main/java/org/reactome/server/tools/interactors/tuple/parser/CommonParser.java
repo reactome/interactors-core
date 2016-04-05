@@ -45,8 +45,16 @@ public abstract class CommonParser implements Parser {
      */
     public abstract FileDefinition getParserDefinition(List<String> lines);
 
-    protected List<String> checkMandatoriesAttributes(CustomInteraction customInteraction) {
-        List<String> mandatoriesList = new ArrayList<>();
+    /**
+     * Generic method that invoke via Reflections the methods in the CustomInteraction class
+     * and check if the attribute has value on it.
+     *
+     * @param customInteraction to check mandatory fields based on the ColumnDefinition enum
+     *
+     * @return List of mandatory fields that are empty.
+     */
+    protected List<String> checkMandatoryAttributes(CustomInteraction customInteraction) {
+        List<String> mandatoryList = new ArrayList<>();
 
         List<ColumnDefinition> mand = ColumnDefinition.getMandatoryColumns();
         for (ColumnDefinition columnDefinition : mand) {
@@ -58,7 +66,14 @@ public abstract class CommonParser implements Parser {
                 if (method.getReturnType().equals(String.class)) {
                     String returnValueStr = (String) returnValue;
                     if (StringUtils.isBlank(returnValueStr)) {
-                        mandatoriesList.add(columnDefinition.name());
+                        mandatoryList.add(columnDefinition.name());
+                    }
+                }
+
+                if (method.getReturnType().equals(List.class)) {
+                    List<String> list = (List<String>) returnValue;
+                    if (list.size() == 0) {
+                        mandatoryList.add(columnDefinition.name());
                     }
                 }
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -66,7 +81,7 @@ public abstract class CommonParser implements Parser {
             }
         }
 
-        return mandatoriesList;
+        return mandatoryList;
 
     }
 

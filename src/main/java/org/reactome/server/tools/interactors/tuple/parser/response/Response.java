@@ -25,6 +25,7 @@ public class Response {
     public final static Integer DUPLICATE_AB = 458;
     public final static Integer DUPLICATE_BA = 459;
     public final static Integer MISSING_MANDATORY_FIELDS = 460;
+    public final static Integer AVOIDED_SCORE = 461;
 
 
 
@@ -42,6 +43,7 @@ public class Response {
     private final static String MESSAGE_DUPLICATE_AB = "Line {0} has duplicated interaction. Accession A: {1} and Accession B: {2}";
     private final static String MESSAGE_DUPLICATE_BA = "Line {0} has duplicated interaction. Accession A: {1} and B: {2}, match existing A: {3} and B: {4}";
     private final static String MESSAGE_MISSING_MANDATORY_FIELDS = "Line {0} does not have mandatory field(s): {1}";
+    private final static String MESSAGE_AVOIDED_SCORE = "{0} entries have been omitted. Their score is less than {1}";
 
     /**
      * handles Error codes to Message strings
@@ -64,6 +66,7 @@ public class Response {
         codeToMessage.put(DUPLICATE_AB, MESSAGE_DUPLICATE_AB);
         codeToMessage.put(DUPLICATE_BA, MESSAGE_DUPLICATE_BA);
         codeToMessage.put(MISSING_MANDATORY_FIELDS, MESSAGE_MISSING_MANDATORY_FIELDS);
+        codeToMessage.put(AVOIDED_SCORE, MESSAGE_AVOIDED_SCORE);
 
     }
 

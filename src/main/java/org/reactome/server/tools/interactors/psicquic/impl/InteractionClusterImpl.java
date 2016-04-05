@@ -100,7 +100,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
         for (String acc : accs) {
             List<Interaction> interactions = new ArrayList<>();
 
-            PsicquicClient psicquicClient = ClientFactory.getClient("CUSTOM-PSI"); // This client does not exist and the GenericClient will be instantiate.
+            PsicquicClient psicquicClient = ClientFactory.getClient(InteractorConstant.GENERIC_CLIENT_FACTORY); // This client does not exist and the GenericClient will be instantiate.
             String databaseNames = psicquicClient.getDatabaseNames();
 
             InteractionClusterScore interactionClusterScore = getInteractionClusterForCustomPsicquic(url, acc, databaseNames);
@@ -237,7 +237,6 @@ public class InteractionClusterImpl implements PsicquicDAO {
      * @throws CustomPsicquicInteractionClusterException
      */
     private InteractionClusterScore getInteractionClusterForCustomPsicquic(String customURL, String acc, String databaseNames) throws CustomPsicquicInteractionClusterException {
-//        final String queryMethod = "interactor/";
         final String queryMethod = "";
 
         try {

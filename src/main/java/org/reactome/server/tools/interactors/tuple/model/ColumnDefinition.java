@@ -15,17 +15,19 @@ public enum ColumnDefinition {
     ALIAS_B("aliasInteractorB", false),
     TAX_ID_A("taxonomyIdInteractorA", false),
     TAX_ID_B("taxonomyIdInteractorB", false),
-    EVIDENCE("interactionIdentifier", false),
+    EVIDENCE("interactionEvidence", false),
     SCORE("confidenceValue", false);
 
     /**
-     * It must have the same name as it has in the CustomInteraction
-     **/
+     * It must have the same attribute name as it has in the CustomInteraction
+     * The automatic parser will read map it based on the getter/setter
+     * This is also used to verify mandatory fields
+     */
     final public String attribute;
 
     /**
-     * Assign true to make an attribute as mandatory
-     **/
+     * Assign true in the constructor to make an attribute as mandatory
+     */
     final public boolean mandatory;
 
     ColumnDefinition(String attribute, boolean mandatory) {
@@ -35,7 +37,7 @@ public enum ColumnDefinition {
 
     /**
      * Retrieve mandatory columns
-     **/
+     */
     public static List<ColumnDefinition> getMandatoryColumns() {
         List<ColumnDefinition> rtnMandatories = new ArrayList<>();
         ColumnDefinition[] all = values();

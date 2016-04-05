@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.reactome.server.tools.interactors.tuple.exception.TupleParserException;
 import org.reactome.server.tools.interactors.tuple.model.*;
 import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
+import org.reactome.server.tools.interactors.util.InteractorConstant;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -50,8 +51,6 @@ public class TupleParser extends CommonParser {
      */
     private int startOnLine = 0;
     private boolean hasHeader = false;
-
-    private final String TUPLE_DEFAULT_SCORE = "1.0";
 
     private List<String> headerColumnNames = new LinkedList<>();
 
@@ -206,7 +205,7 @@ public class TupleParser extends CommonParser {
 
                     customInteraction.setInteractorIdA(values[CustomInteraction.CustomInteractionColumn.ID_INTERACTOR_A.ordinal()]);
                     customInteraction.setInteractorIdB(values[CustomInteraction.CustomInteractionColumn.ID_INTERACTOR_B.ordinal()]);
-                    customInteraction.setConfidenceValue(TUPLE_DEFAULT_SCORE);
+                    customInteraction.setConfidenceValue(InteractorConstant.TUPLE_DEFAULT_SCORE);
 
                     /** Check if an interaction exists based on AccessionA and AccessionB **/
                     if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {

@@ -1,8 +1,9 @@
 package org.reactome.server.tools.interactors.tuple.model;
 
 /**
- *
- *
+ * After parsing the custom file submitted by the user, the
+ * CustomInteraction class is the common format that we use
+ * to store and later on retrieve and query on it.
  *
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
@@ -42,8 +43,8 @@ public class CustomInteraction {
     private String taxonomyIdInteractorB;
     private String interactionType;
     private String sourceDatabase;
-    private String interactionIdentifier;
-    private String confidenceValue;
+    private String interactionEvidence; // TODO: convert to list (supercsv crash with list, study and see how it works)
+    private Double confidenceValue;
 
     public String getInteractorIdA() {
         return interactorIdA;
@@ -149,30 +150,30 @@ public class CustomInteraction {
         this.sourceDatabase = sourceDatabase;
     }
 
-    public String getInteractionIdentifier() {
-        return interactionIdentifier;
-    }
-
-    public void setInteractionIdentifier(String interactionIdentifier) {
-        this.interactionIdentifier = interactionIdentifier;
-    }
-
-    public String getConfidenceValue() {
+    public Double getConfidenceValue() {
         return confidenceValue;
     }
 
-    public void setConfidenceValue(String confidenceValue) {
+    public void setConfidenceValue(Double confidenceValue) {
         this.confidenceValue = confidenceValue;
+    }
+
+    /** SuperCSV library maps attribute using String **/
+    public void setConfidenceValue(String confidenceValue) {
+        setConfidenceValue(Double.valueOf(confidenceValue));
+    }
+
+    public String getInteractionEvidence() {
+        return interactionEvidence;
+    }
+
+    public void setInteractionEvidence(String interactionEvidence) {
+        this.interactionEvidence = interactionEvidence;
     }
 
     public void flip(String a, String b){
         interactorIdA = b;
         interactorIdB = a;
-    }
-
-    public void flipBack(String a, String b){
-        interactorIdA = a;
-        interactorIdB = b;
     }
 
     @Override
@@ -182,17 +183,19 @@ public class CustomInteraction {
 
         CustomInteraction that = (CustomInteraction) o;
 
-        if (interactorIdA != null ? !interactorIdA.equals(that.interactorIdA) : that.interactorIdA != null)
-            return false;
-        return !(interactorIdB != null ? !interactorIdB.equals(that.interactorIdB) : that.interactorIdB != null);
+        // Custom equality check here.
+        boolean equals = this.interactorIdA.equals(that.interactorIdA) && this.interactorIdB.equals(that.interactorIdB);
 
+        if (!equals) {
+            equals =  this.interactorIdA.equals(that.interactorIdB) && this.interactorIdB.equals(that.interactorIdA);
+        }
+
+        return equals;
     }
 
     @Override
     public int hashCode() {
-        int result = interactorIdA != null ? interactorIdA.hashCode() : 0;
-        result = 31 * result + (interactorIdB != null ? interactorIdB.hashCode() : 0);
-        return result;
+        return interactorIdA.hashCode() * interactorIdB.hashCode();
     }
 
     @Override
@@ -200,18 +203,11 @@ public class CustomInteraction {
         return "CustomInteraction{" +
                 "interactorIdA='" + interactorIdA + '\'' +
                 ", interactorIdB='" + interactorIdB + '\'' +
-                ", alternativeInteractorA='" + alternativeInteractorA + '\'' +
-                ", alternativeInteractorB='" + alternativeInteractorB + '\'' +
                 ", aliasInteractorA='" + aliasInteractorA + '\'' +
                 ", aliasInteractorB='" + aliasInteractorB + '\'' +
-                ", interactionDetectionMethod='" + interactionDetectionMethod + '\'' +
-                ", publication1stAuthor='" + publication1stAuthor + '\'' +
-                ", publicationIdentifier='" + publicationIdentifier + '\'' +
                 ", taxonomyIdInteractorA='" + taxonomyIdInteractorA + '\'' +
                 ", taxonomyIdInteractorB='" + taxonomyIdInteractorB + '\'' +
-                ", interactionType='" + interactionType + '\'' +
-                ", sourceDatabase='" + sourceDatabase + '\'' +
-                ", interactionIdentifier='" + interactionIdentifier + '\'' +
+                ", interactionEvidence='" + interactionEvidence + '\'' +
                 ", confidenceValue='" + confidenceValue + '\'' +
                 '}';
     }

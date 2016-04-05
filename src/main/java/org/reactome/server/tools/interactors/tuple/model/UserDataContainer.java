@@ -1,7 +1,8 @@
 package org.reactome.server.tools.interactors.tuple.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User data container is the generic result for any kind of file the user send to our
@@ -11,22 +12,16 @@ import java.util.Set;
  */
 public class UserDataContainer {
 
-    private Set<CustomInteraction> customInteractions;
-    // then here we have the 15 columns that we can map
+    private Map<CustomInteraction, CustomInteraction> customInteractions = new HashMap<>();
 
-    public Set<CustomInteraction> getCustomInteractions() {
-        return customInteractions;
+    public Collection<CustomInteraction> getCustomInteractions() {
+        return customInteractions.values();
     }
 
-    public void setCustomInteractions(Set<CustomInteraction> customInteractions) {
-        this.customInteractions = customInteractions;
-    }
-
-    public void addCustomInteraction(CustomInteraction customInteraction){
-        if (customInteractions == null){
-            customInteractions = new HashSet<>();
+    public void addCustomInteraction(CustomInteraction customInteraction) {
+        CustomInteraction aux = customInteractions.get(customInteraction);
+        if (aux == null || customInteraction.getConfidenceValue() > aux.getConfidenceValue()) {
+            customInteractions.put(customInteraction, customInteraction);
         }
-
-        customInteractions.add(customInteraction);
     }
 }

@@ -7,6 +7,7 @@ import org.reactome.server.tools.interactors.tuple.exception.TupleParserExceptio
 import org.reactome.server.tools.interactors.tuple.model.*;
 import org.reactome.server.tools.interactors.tuple.parser.response.Response;
 import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
+import org.reactome.server.tools.interactors.util.InteractorConstant;
 import org.supercsv.io.CsvBeanReader;
 import org.supercsv.io.ICsvBeanReader;
 import org.supercsv.prefs.CsvPreference;
@@ -60,7 +61,7 @@ public class ExtendedParser extends CommonParser {
                 }
             }
 
-            setCustomInterationFromCsvBeanReader(beanReader, header, userDataContainer);
+            setCustomInteractionFromCsvBeanReader(beanReader, header, userDataContainer);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -95,60 +96,48 @@ public class ExtendedParser extends CommonParser {
 
     }
 
-    private void setCustomInterationFromCsvBeanReader(ICsvBeanReader beanReader, String[] header, UserDataContainer userDataContainer) throws IOException {
+    private void setCustomInteractionFromCsvBeanReader(ICsvBeanReader beanReader, String[] header, UserDataContainer userDataContainer) throws IOException {
         CustomInteraction customInteraction;
 
         try {
+
+            int avoidedByScore = 0;
+
             /** Read method uses reflection in order to set all CustomInteraction attributes based on header **/
             while ((customInteraction = beanReader.read(CustomInteraction.class, header)) != null) {
 
                 /** Check mandatory fields based on column definition enum **/
-                List<String> mandatoryMessages = checkMandatoriesAttributes(customInteraction);
+                List<String> mandatoryMessages = checkMandatoryAttributes(customInteraction);
                 if (mandatoryMessages.size() == 0) {
-                    boolean hasDuplicate = false;
+                    if (customInteraction.getConfidenceValue() < InteractorConstant.MINIMUM_VALID_SCORE) {
+                        avoidedByScore++;
+                        continue;
+                    }
 
                     /** Check if an interaction exists based on AccessionA and AccessionB **/
                     if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
                         warningResponses.add(getMessage(DUPLICATE_AB, beanReader.getLineNumber(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
-                        hasDuplicate = true;
                     }
 
-                    /** Flip a and b and check again if the interactions exists **/
-                    customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
-
-                    if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
-                        //warningResponses.add(getMessage(DUPLICATE_BA, beanReader.getLineNumber(), customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
-                        hasDuplicate = true;
-                    }
-//                    } else {
-//                        /** Flip back to original form **/
-//                        customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
-//
-//                        //isConfidenceValue
-//
-//                        /** Add to the list **/
-//                        userDataContainer.addCustomInteraction(customInteraction);
-//                    }
-
-                    if (!hasDuplicate) {
-                        /** Flip back to original form **/
-                        customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
-
-                        /** Add to the list **/
-                        userDataContainer.addCustomInteraction(customInteraction);
-                    }
+                    /** Add to the list **/
+                    userDataContainer.addCustomInteraction(customInteraction);
 
                 } else {
                     errorResponses.add(getMessage(MISSING_MANDATORY_FIELDS, beanReader.getLineNumber(), mandatoryMessages));
                 }
             }
+
+            if (avoidedByScore > 0) {
+                warningResponses.add(getMessage(AVOIDED_SCORE, avoidedByScore, InteractorConstant.MINIMUM_VALID_SCORE));
+            }
+
         } catch (IllegalArgumentException e) {
             /**
              * SuperCSV throws IllegalArgumentException (RuntimeException) when columns do not match.
              * In order to keep parsing, save the errorResponse and invoke the reader again.
              **/
             errorResponses.add(Response.getMessage(Response.COLUMN_MISMATCH, beanReader.getLineNumber(), header.length, beanReader.length()));
-            setCustomInterationFromCsvBeanReader(beanReader, header, userDataContainer);
+            setCustomInteractionFromCsvBeanReader(beanReader, header, userDataContainer);
         }
     }
 
@@ -218,9 +207,10 @@ public class ExtendedParser extends CommonParser {
     public FileDefinition getParserDefinition(List<String> lines) {
 
         int right = 0;
+        int wrong = 0;
         int attempts = 0;
 
-        boolean isOK = true;
+        boolean isOK;
 
         List<String> csvContent = cleanAndConvertToCSV(lines);
 
@@ -235,8 +225,8 @@ public class ExtendedParser extends CommonParser {
             String[] values = line.split(",");
 
             if (values.length <= 2) { // wrong
+                wrong++;
                 continue;
-                //return null;
             }
 
             for (String value : values) { // wrong
@@ -248,13 +238,15 @@ public class ExtendedParser extends CommonParser {
 
             if (isOK) {
                 right++;
+            } else {
+                wrong++;
             }
         }
 
-        if (right == 0) {
-            return null;
+        if (right > wrong) {
+            return FileDefinition.EXTENDED_DATA;
         }
 
-        return FileDefinition.EXTENDED_DATA;
+        return null;
     }
 }

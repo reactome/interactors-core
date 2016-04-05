@@ -11,7 +11,9 @@ public class InteractorConstant {
 
     public static final Double MINIMUM_VALID_SCORE = 0.45;
 
+    public static final Double TUPLE_DEFAULT_SCORE = 1.0;
     public static final String TUPLE_PREFIX = "PSI-";
+    public static final String GENERIC_CLIENT_FACTORY = "GENERIC";
 
     //public static final String INTERACTOR_BASE_URL = "http://identifiers.org/";
 
