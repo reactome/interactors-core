@@ -78,7 +78,7 @@ public class CustomInteraction {
         this.alternativeInteractorB = alternativeInteractorB;
     }
 
-    public String getAliasInteractorA() {
+    public String getInteractorAliasA() {
         return aliasInteractorA;
     }
 
@@ -86,7 +86,7 @@ public class CustomInteraction {
         this.aliasInteractorA = aliasInteractorA;
     }
 
-    public String getAliasInteractorB() {
+    public String getInteractorAliasB() {
         return aliasInteractorB;
     }
 
