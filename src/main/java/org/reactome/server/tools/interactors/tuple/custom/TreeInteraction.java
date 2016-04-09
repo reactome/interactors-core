@@ -1,7 +1,5 @@
 package org.reactome.server.tools.interactors.tuple.custom;
 
-import com.googlecode.concurrenttrees.radix.node.Node;
-
 import java.util.List;
 
 /**
@@ -15,12 +13,6 @@ public class TreeInteraction {
     private String aliasA;
     private String idB;
     private String aliasB;
-
-    private Node nodeIdA;
-    private Node nodeAliasA;
-
-    private Node nodeIdB;
-    private Node nodeAliasB;
 
     public double getScore() {
         return score;
@@ -39,12 +31,7 @@ public class TreeInteraction {
     }
 
     public String getIdA() {
-        return nodeIdA == null ? idA : nodeIdA.getIncomingEdge().toString();
-    }
-
-    public void setIdA(Node nodeIdA) {
-        this.nodeIdA = nodeIdA;
-        this.idA = null;
+        return idA;
     }
 
     public void setIdA(String idA) {
@@ -52,12 +39,7 @@ public class TreeInteraction {
     }
 
     public String getAliasA() {
-        return nodeAliasA == null ? aliasA : nodeAliasA.getIncomingEdge().toString();
-    }
-
-    public void setAliasA(Node nodeAliasA) {
-        this.nodeAliasA = nodeAliasA;
-        this.aliasA = null;
+        return aliasA;
     }
 
     public void setAliasA(String aliasA) {
@@ -65,12 +47,7 @@ public class TreeInteraction {
     }
 
     public String getIdB() {
-        return nodeIdB == null ? idB : nodeIdB.getIncomingEdge().toString();
-    }
-
-    public void setIdB(Node nodeIdB) {
-        this.nodeIdB = nodeIdB;
-        this.idB = null;
+        return idB;
     }
 
     public void setIdB(String idB) {
@@ -78,18 +55,12 @@ public class TreeInteraction {
     }
 
     public String getAliasB() {
-        return nodeAliasB == null ? aliasB : nodeAliasB.getIncomingEdge().toString();
-    }
-
-    public void setAliasB(Node nodeAliasB) {
-        this.nodeAliasB = nodeAliasB;
-        this.aliasB = null;
+        return aliasB;
     }
 
     public void setAliasB(String aliasB) {
         this.aliasB = aliasB;
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -99,10 +70,10 @@ public class TreeInteraction {
         TreeInteraction that = (TreeInteraction) o;
 
         // Custom equality check here.
-        boolean equals = this.getIdA().equals(that.getIdA()) && this.getIdB().equals(that.getIdB());
+        boolean equals = this.idA.equals(that.idA) && this.idB.equals(that.idB);
 
         if (!equals) {
-            equals = this.getIdA().equals(that.getIdB()) && this.getIdB().equals(that.getIdA());
+            equals = this.idA.equals(that.idB) && this.idB.equals(that.idA);
         }
 
         return equals;
@@ -112,11 +83,10 @@ public class TreeInteraction {
     @Override
     public int hashCode() {
         try {
-            return 31 * getIdA().hashCode() * getIdB().hashCode();
+            return 31 * idA.hashCode() * idB.hashCode();
         } catch (NullPointerException e) {
-            // When using kryo, the hashCode is called before
-            // attributes are populated. Calling the super
-            // solves the problem
+            // When using kryo, the hashCode is called before the attributes
+            // are populated. Calling the super solves the problem.
             return super.hashCode();
         }
     }

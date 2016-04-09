@@ -4,9 +4,12 @@ import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.InteractionDetails;
 import org.reactome.server.tools.interactors.psicquic.PsicquicClient;
 import org.reactome.server.tools.interactors.psicquic.clients.ClientFactory;
+import org.reactome.server.tools.interactors.tuple.custom.CustomResource;
 import org.reactome.server.tools.interactors.tuple.exception.ParserException;
 import org.reactome.server.tools.interactors.tuple.exception.TupleParserException;
-import org.reactome.server.tools.interactors.tuple.model.*;
+import org.reactome.server.tools.interactors.tuple.model.CustomInteraction;
+import org.reactome.server.tools.interactors.tuple.model.Summary;
+import org.reactome.server.tools.interactors.tuple.model.TupleResult;
 import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
 import psidev.psi.mi.tab.PsimiTabException;
@@ -19,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.reactome.server.tools.interactors.tuple.parser.response.Response.*;
 
@@ -33,9 +35,6 @@ public class PsimiTabParser extends CommonParser {
     @Override
     public TupleResult parse(List<String> input) throws ParserException {
         int avoidedByScore = 0;
-
-        /** Unique id that identifies the data submission **/
-        String token = UUID.randomUUID().toString();
 
         /** This is a work-around because the PSI-MITAB reader didn't work fine with the iterator **/
         String file = "";
@@ -61,7 +60,7 @@ public class PsimiTabParser extends CommonParser {
         /** Retrieve results **/
         Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
 
-        UserDataContainer userDataContainer = new UserDataContainer();
+        CustomResource customResource = new CustomResource();
         for (Integer key : interactionMapping.keySet()) {
             EncoreInteraction encoreInteraction = interactionMapping.get(key);
             encoreInteraction.setMappingIdDbNames(interactionClusterScore.getMappingIdDbNames());
@@ -80,7 +79,7 @@ public class PsimiTabParser extends CommonParser {
 
                 /** Add to the list taking into account the MINIMUM_VALID_SCORE **/
                 if (customInteraction.getConfidenceValue() >= InteractorConstant.MINIMUM_VALID_SCORE) {
-                    userDataContainer.addCustomInteraction(customInteraction);
+                    customResource.add(customInteraction);
                 } else {
                     avoidedByScore++;
                 }
@@ -101,15 +100,13 @@ public class PsimiTabParser extends CommonParser {
         }
 
         Summary summary = new Summary();
-        summary.setToken(token);
-        summary.setInteractions(userDataContainer.getCustomInteractions().size());
-        summary.setInteractors(countInteractors(userDataContainer));
+        summary.setInteractions(customResource.getInteractions());
+        summary.setInteractors(customResource.getInteractors());
 
         TupleResult result = new TupleResult();
         result.setSummary(summary);
         result.setWarningMessages(warningResponses);
-
-        CustomInteractorRepository.save(token, userDataContainer);
+        result.setCustomResource(customResource);
 
         return result;
     }
@@ -129,34 +126,6 @@ public class PsimiTabParser extends CommonParser {
             return null;
         }
     }
-
-//    private CustomInteraction getCustomInteraction(BinaryInteraction binaryInteraction) {
-//        CustomInteraction customInteraction = new CustomInteraction();
-//
-//        if (binaryInteraction.getInteractorA() != null) {
-//            customInteraction.setInteractorIdA(binaryInteraction.getInteractorA().getIdentifiers().get(0).getIdentifier());
-//            customInteraction.setAliasInteractorA(binaryInteraction.getInteractorA().getAliases().get(0).getName());
-//            customInteraction.setTaxonomyIdInteractorA(binaryInteraction.getInteractorA().getOrganism().getTaxid());
-//        }
-//
-//        if (binaryInteraction.getInteractorB() != null) {
-//            customInteraction.setInteractorIdB(binaryInteraction.getInteractorB().getIdentifiers().get(0).getIdentifier());
-//            customInteraction.setAliasInteractorB(binaryInteraction.getInteractorB().getAliases().get(0).getName());
-//            customInteraction.setTaxonomyIdInteractorB(binaryInteraction.getInteractorB().getOrganism().getTaxid());
-//        }
-//
-//        if (binaryInteraction.getConfidenceValues() != null && binaryInteraction.getConfidenceValues().size() > 0) {
-//            customInteraction.setConfidenceValue(((ConfidenceImpl) binaryInteraction.getConfidenceValues().get(0)).getValue());
-//        }
-//
-//        if (binaryInteraction.getInteractionAcs() != null && binaryInteraction.getInteractionAcs().size() > 0) {
-//            CrossReference xref = (CrossReference) binaryInteraction.getInteractionAcs().get(0);
-//            customInteraction.setInteractionIdentifier(xref.getText());
-//        }
-//
-//        return customInteraction;
-//    }
-
 
     /**
      * Prepare the CustomInteraction to be stored based on the EncoreInteraction

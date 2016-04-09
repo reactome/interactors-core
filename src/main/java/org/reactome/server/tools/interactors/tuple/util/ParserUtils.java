@@ -1,9 +1,8 @@
 package org.reactome.server.tools.interactors.tuple.util;
 
 import org.apache.commons.io.IOUtils;
+import org.reactome.server.tools.interactors.model.CustomPsicquicResource;
 import org.reactome.server.tools.interactors.tuple.exception.ParserException;
-import org.reactome.server.tools.interactors.tuple.model.CustomPsicquicRepository;
-import org.reactome.server.tools.interactors.tuple.model.Summary;
 import org.reactome.server.tools.interactors.tuple.model.TupleResult;
 import org.reactome.server.tools.interactors.tuple.parser.Parser;
 import org.reactome.server.tools.interactors.tuple.parser.ParserFactory;
@@ -12,7 +11,6 @@ import org.reactome.server.tools.interactors.util.InteractorConstant;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -41,23 +39,13 @@ public class ParserUtils {
 
     }
 
-    public static TupleResult processCustomPsicquic(String name, String url) throws ParserException {
-
-        TupleResult ret = new TupleResult();
-
-        Summary s = new Summary();
-        s.setName(name);
-        s.setToken(InteractorConstant.TUPLE_PREFIX + UUID.randomUUID().toString());
-
-        ret.setSummary(s);
-
+    public static CustomPsicquicResource processCustomPsicquic(String name, String url) throws ParserException {
+        //TODO: Validate whether this is a PSICQUIC end or not!
         if(!url.endsWith("/")) {
             url = url + "/";
         }
-
-        CustomPsicquicRepository.save(s.getToken(), url);
-
-        return ret;
+        int token = name.hashCode() * url.hashCode();
+        return new CustomPsicquicResource(name, url, InteractorConstant.TUPLE_PREFIX + token);
     }
 
 }

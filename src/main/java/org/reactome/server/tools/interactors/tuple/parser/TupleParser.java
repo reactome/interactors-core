@@ -1,16 +1,16 @@
 package org.reactome.server.tools.interactors.tuple.parser;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.reactome.server.tools.interactors.tuple.custom.CustomResource;
 import org.reactome.server.tools.interactors.tuple.exception.TupleParserException;
-import org.reactome.server.tools.interactors.tuple.model.*;
+import org.reactome.server.tools.interactors.tuple.model.CustomInteraction;
+import org.reactome.server.tools.interactors.tuple.model.Summary;
+import org.reactome.server.tools.interactors.tuple.model.TupleResult;
 import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.reactome.server.tools.interactors.tuple.parser.response.Response.*;
@@ -33,13 +33,6 @@ public class TupleParser extends CommonParser {
     private static final String NO_HEADER_DEFAULT_REGEX = "[\\s,;]+";
 
     /**
-     * This is the default header for oneline file and multiple line file
-     * Changing here will propagate in both.
-     */
-    private static final String DEFAULT_IDENTIFIER_HEADER = "Identifier A";
-    private static final String DEFAULT_EXPRESSION_HEADER = "Identifier B";
-
-    /**
      * Threshold number for columns, based on the first line we count columns.
      * All the following lines must match this threshold.
      */
@@ -52,12 +45,9 @@ public class TupleParser extends CommonParser {
     private int startOnLine = 0;
     private boolean hasHeader = false;
 
-    private List<String> headerColumnNames = new LinkedList<>();
-
     @Override
     public TupleResult parse(List<String> input) throws TupleParserException {
-        UserDataContainer userDataContainer = new UserDataContainer();
-        String token = UUID.randomUUID().toString();
+        CustomResource customResource = new CustomResource();
 
         long start = System.currentTimeMillis();
 
@@ -68,7 +58,7 @@ public class TupleParser extends CommonParser {
             analyseHeaderColumns(input);
 
             // Prepare content
-            analyseContent(input, userDataContainer);
+            analyseContent(input, customResource);
         }
 
         long end = System.currentTimeMillis();
@@ -79,17 +69,14 @@ public class TupleParser extends CommonParser {
             throw new TupleParserException("Error parsing your interactors overlay", errorResponses);
         }
 
-
         Summary summary = new Summary();
-        summary.setToken(token);
-        summary.setInteractions(userDataContainer.getCustomInteractions().size());
-        summary.setInteractors(countInteractors(userDataContainer));
+        summary.setInteractions(customResource.getInteractions());
+        summary.setInteractors(customResource.getInteractors());
 
         TupleResult result = new TupleResult();
         result.setSummary(summary);
         result.setWarningMessages(warningResponses);
-
-        CustomInteractorRepository.save(token, userDataContainer);
+        result.setCustomResource(customResource);
 
         return result;
     }
@@ -148,10 +135,6 @@ public class TupleParser extends CommonParser {
         String[] cols = line.split(HEADER_SPLIT_REGEX);
 
         thresholdColumn = cols.length;
-
-        for (String columnName : cols) {
-            headerColumnNames.add(StringEscapeUtils.escapeJava(columnName.trim()));
-        }
     }
 
     /**
@@ -159,19 +142,13 @@ public class TupleParser extends CommonParser {
      */
     private void buildDefaultHeader(Integer colsLength) {
         thresholdColumn = colsLength;
-
-        headerColumnNames.add(DEFAULT_IDENTIFIER_HEADER);
-        for (int i = 1; i < colsLength; i++) {
-            headerColumnNames.add(DEFAULT_EXPRESSION_HEADER + i);
-        }
-
     }
 
     /**
      * Analyse all the data itself.
      * Replace any character like space, comma, semicolon, tab into a space and then replace split by space.
      */
-    private void analyseContent(List<String> content, UserDataContainer userDataContainer) {
+    private void analyseContent(List<String> content, CustomResource customResource) {
         if (hasHeader) {
             startOnLine += 1;
         }
@@ -199,49 +176,17 @@ public class TupleParser extends CommonParser {
 
             if (values.length > 0) {
                 if (values.length == thresholdColumn) {
-                    boolean hasDuplicate = false;
-
                     CustomInteraction customInteraction = new CustomInteraction();
 
                     customInteraction.setInteractorIdA(values[CustomInteraction.CustomInteractionColumn.ID_INTERACTOR_A.ordinal()]);
                     customInteraction.setInteractorIdB(values[CustomInteraction.CustomInteractionColumn.ID_INTERACTOR_B.ordinal()]);
                     customInteraction.setConfidenceValue(InteractorConstant.TUPLE_DEFAULT_SCORE);
 
-                    /** Check if an interaction exists based on AccessionA and AccessionB **/
-                    if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
+                    if (customResource.checkForDuplicates(customInteraction)) {
                         warningResponses.add(getMessage(DUPLICATE_AB, (i + 1), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
-                        hasDuplicate = true;
+                    } else {
+                        customResource.add(customInteraction);
                     }
-
-//                    /** Flip a and b and check again if the interactions exists **/
-//                    customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
-//
-//                    if (userDataContainer.getCustomInteractions() != null && !userDataContainer.getCustomInteractions().contains(customInteraction)) {
-//                        //warningResponses.add(getMessage(DUPLICATE_BA, (i + 1), customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
-////                    } else {
-//                        /** Flip back to original form **/
-//                        customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
-//
-//                        /** Add to the list **/
-//                        userDataContainer.addCustomInteraction(customInteraction);
-//                    }
-
-                    /** Flip a and b and check again if the interactions exists **/
-                    customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
-
-                    if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
-                        //warningResponses.add(getMessage(DUPLICATE_BA, beanReader.getLineNumber(), customInteraction.getInteractorIdB(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
-                        hasDuplicate = true;
-                    }
-
-                    if (!hasDuplicate) {
-                        /** Flip back to original form **/
-                        customInteraction.flip(customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB());
-
-                        /** Add to the list **/
-                        userDataContainer.addCustomInteraction(customInteraction);
-                    }
-
                 } else {
                     //errorResponses.add(Response.getMessage(Response.COLUMN_MISMATCH));
                     errorResponses.add(getMessage(COLUMN_MISMATCH, i + 1, thresholdColumn, values.length));

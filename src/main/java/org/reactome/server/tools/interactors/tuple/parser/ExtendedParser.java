@@ -2,9 +2,13 @@ package org.reactome.server.tools.interactors.tuple.parser;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.reactome.server.tools.interactors.tuple.custom.CustomResource;
 import org.reactome.server.tools.interactors.tuple.exception.ParserException;
 import org.reactome.server.tools.interactors.tuple.exception.TupleParserException;
-import org.reactome.server.tools.interactors.tuple.model.*;
+import org.reactome.server.tools.interactors.tuple.model.ColumnDefinition;
+import org.reactome.server.tools.interactors.tuple.model.CustomInteraction;
+import org.reactome.server.tools.interactors.tuple.model.Summary;
+import org.reactome.server.tools.interactors.tuple.model.TupleResult;
 import org.reactome.server.tools.interactors.tuple.parser.response.Response;
 import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
@@ -29,14 +33,11 @@ public class ExtendedParser extends CommonParser {
 
     @Override
     public TupleResult parse(List<String> input) throws ParserException {
-
-        String token = UUID.randomUUID().toString();
-
         /** File clean up **/
         File file = writeContentInTempFile(input);
 
         /** Store file content **/
-        UserDataContainer userDataContainer = new UserDataContainer();
+        CustomResource customResource = new CustomResource();
 
         /** Instantiate CsvBeanReader based on Standard Preferences **/
         ICsvBeanReader beanReader = null;
@@ -61,7 +62,7 @@ public class ExtendedParser extends CommonParser {
                 }
             }
 
-            setCustomInteractionFromCsvBeanReader(beanReader, header, userDataContainer);
+            setCustomInteractionFromCsvBeanReader(beanReader, header, customResource);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,21 +83,19 @@ public class ExtendedParser extends CommonParser {
         }
 
         Summary summary = new Summary();
-        summary.setToken(token);
-        summary.setInteractions(userDataContainer.getCustomInteractions().size());
-        summary.setInteractors(countInteractors(userDataContainer));
+        summary.setInteractions(customResource.getInteractions());
+        summary.setInteractors(customResource.getInteractors());
 
         TupleResult result = new TupleResult();
         result.setSummary(summary);
         result.setWarningMessages(warningResponses);
-
-        CustomInteractorRepository.save(token, userDataContainer);
+        result.setCustomResource(customResource);
 
         return result;
 
     }
 
-    private void setCustomInteractionFromCsvBeanReader(ICsvBeanReader beanReader, String[] header, UserDataContainer userDataContainer) throws IOException {
+    private void setCustomInteractionFromCsvBeanReader(ICsvBeanReader beanReader, String[] header, CustomResource customResource) throws IOException {
         CustomInteraction customInteraction;
 
         try {
@@ -114,13 +113,11 @@ public class ExtendedParser extends CommonParser {
                         continue;
                     }
 
-                    /** Check if an interaction exists based on AccessionA and AccessionB **/
-                    if (userDataContainer.getCustomInteractions() != null && userDataContainer.getCustomInteractions().contains(customInteraction)) {
+                    if (customResource.checkForDuplicates(customInteraction)) {
                         warningResponses.add(getMessage(DUPLICATE_AB, beanReader.getLineNumber(), customInteraction.getInteractorIdA(), customInteraction.getInteractorIdB()));
+                    } else {
+                        customResource.add(customInteraction);
                     }
-
-                    /** Add to the list **/
-                    userDataContainer.addCustomInteraction(customInteraction);
 
                 } else {
                     errorResponses.add(getMessage(MISSING_MANDATORY_FIELDS, beanReader.getLineNumber(), mandatoryMessages));
@@ -137,7 +134,7 @@ public class ExtendedParser extends CommonParser {
              * In order to keep parsing, save the errorResponse and invoke the reader again.
              **/
             errorResponses.add(Response.getMessage(Response.COLUMN_MISMATCH, beanReader.getLineNumber(), header.length, beanReader.length()));
-            setCustomInteractionFromCsvBeanReader(beanReader, header, userDataContainer);
+            setCustomInteractionFromCsvBeanReader(beanReader, header, customResource);
         }
     }
 

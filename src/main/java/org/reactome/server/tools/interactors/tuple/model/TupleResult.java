@@ -1,5 +1,8 @@
 package org.reactome.server.tools.interactors.tuple.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.reactome.server.tools.interactors.tuple.custom.CustomResource;
+
 import java.util.List;
 
 /**
@@ -10,6 +13,8 @@ public class TupleResult {
 
     private Summary summary;
 
+    private CustomResource customResource;
+
     private List<String> warningMessages;
 
     public Summary getSummary() {
@@ -18,6 +23,15 @@ public class TupleResult {
 
     public void setSummary(Summary summary) {
         this.summary = summary;
+    }
+
+    @JsonIgnore
+    public CustomResource getCustomResource() {
+        return customResource;
+    }
+
+    public void setCustomResource(CustomResource customResource) {
+        this.customResource = customResource;
     }
 
     public List<String> getWarningMessages() {
