@@ -11,11 +11,9 @@ public enum ColumnDefinition {
 
     ID_A("interactorIdA", true),
     ID_B("interactorIdB", true),
-    ALIAS_A("aliasInteractorA", false),
-    ALIAS_B("aliasInteractorB", false),
-    TAX_ID_A("taxonomyIdInteractorA", false),
-    TAX_ID_B("taxonomyIdInteractorB", false),
-    EVIDENCE("interactionEvidence", false),
+    ALIAS_A("interactorAliasA", false),
+    ALIAS_B("interactorAliasB", false),
+    EVIDENCE("csvInteractionEvidence", false),
     SCORE("confidenceValue", false);
 
     /**

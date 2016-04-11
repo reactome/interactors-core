@@ -32,7 +32,7 @@ public enum ResourceURL {
     EBIGOANONINTACT(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, false, false),
     VIRHOSTNET(InteractorConstant.DEFAULT_PROTEIN_URL, null, false, false),
     STATIC(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, true, true),
-    CUSTOM(null, null, false, false);
+    CUSTOM(null, null, true, true);
 
     private String protein;
     private String chemical;

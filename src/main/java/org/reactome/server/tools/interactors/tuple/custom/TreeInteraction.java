@@ -1,5 +1,6 @@
 package org.reactome.server.tools.interactors.tuple.custom;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -60,6 +61,13 @@ public class TreeInteraction {
 
     public void setAliasB(String aliasB) {
         this.aliasB = aliasB;
+    }
+
+    public void addEvidence(String evidence) {
+        if (this.evidence == null) {
+            this.evidence = new LinkedList<>();
+        }
+        this.evidence.add(evidence);
     }
 
     @Override

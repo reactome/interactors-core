@@ -170,16 +170,14 @@ public class TupleParser extends CommonParser {
             /** Note that using String.replaceAll() will compile the regular expression each time you call it. **/
             line = p.matcher(line).replaceAll(" "); // slow slow slow
 
-            //StringTokenizer has more performance to offer than String.slit.
-//            StringTokenizer st = new StringTokenizer(line); //space is default delimiter.
             String[] values = line.split("\\s+");
 
             if (values.length > 0) {
                 if (values.length == thresholdColumn) {
                     CustomInteraction customInteraction = new CustomInteraction();
 
-                    customInteraction.setInteractorIdA(values[CustomInteraction.CustomInteractionColumn.ID_INTERACTOR_A.ordinal()]);
-                    customInteraction.setInteractorIdB(values[CustomInteraction.CustomInteractionColumn.ID_INTERACTOR_B.ordinal()]);
+                    customInteraction.setInteractorIdA(values[0]);
+                    customInteraction.setInteractorIdB(values[1]);
                     customInteraction.setConfidenceValue(InteractorConstant.TUPLE_DEFAULT_SCORE);
 
                     if (customResource.checkForDuplicates(customInteraction)) {
@@ -188,7 +186,6 @@ public class TupleParser extends CommonParser {
                         customResource.add(customInteraction);
                     }
                 } else {
-                    //errorResponses.add(Response.getMessage(Response.COLUMN_MISMATCH));
                     errorResponses.add(getMessage(COLUMN_MISMATCH, i + 1, thresholdColumn, values.length));
                 }
             }

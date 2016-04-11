@@ -4,12 +4,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.reactome.server.tools.interactors.tuple.model.ColumnDefinition;
 import org.reactome.server.tools.interactors.tuple.model.CustomInteraction;
-import org.reactome.server.tools.interactors.tuple.model.UserDataContainer;
 import org.reactome.server.tools.interactors.tuple.util.FileDefinition;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This is what is common between our parsers.
@@ -84,19 +85,4 @@ public abstract class CommonParser implements Parser {
         return mandatoryList;
 
     }
-
-    protected int countInteractors(UserDataContainer userDataContainer) {
-        Set<String> interactors = new HashSet<>(userDataContainer.getCustomInteractions().size());
-
-        for (CustomInteraction interaction : userDataContainer.getCustomInteractions()) {
-            // add interactors into a set in order to count them as unique.
-            interactors.add(interaction.getInteractorIdA());
-            interactors.add(interaction.getInteractorIdB());
-
-        }
-
-        return interactors.size();
-
-    }
-
 }

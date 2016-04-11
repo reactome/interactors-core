@@ -25,6 +25,9 @@ import java.util.*;
 import static org.reactome.server.tools.interactors.tuple.parser.response.Response.*;
 
 /**
+ * The ExtendedParser uses SuperCSV third-party library
+ * that parsers CSV automatically
+ *
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 public class ExtendedParser extends CommonParser {
@@ -146,8 +149,6 @@ public class ExtendedParser extends CommonParser {
         columnMapping.put("ID B", ColumnDefinition.ID_B);
         columnMapping.put("ALIAS A", ColumnDefinition.ALIAS_A);
         columnMapping.put("ALIAS B", ColumnDefinition.ALIAS_B);
-        columnMapping.put("TAX_ID A", ColumnDefinition.TAX_ID_A);
-        columnMapping.put("TAX_ID B", ColumnDefinition.TAX_ID_B);
         columnMapping.put("EVIDENCE", ColumnDefinition.EVIDENCE);
         columnMapping.put("SCORE", ColumnDefinition.SCORE);
 

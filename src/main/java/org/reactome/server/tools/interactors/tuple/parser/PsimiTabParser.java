@@ -30,8 +30,6 @@ import static org.reactome.server.tools.interactors.tuple.parser.response.Respon
  */
 public class PsimiTabParser extends CommonParser {
 
-    //private int START_INDEX = 0;
-
     @Override
     public TupleResult parse(List<String> input) throws ParserException {
         int avoidedByScore = 0;
@@ -142,14 +140,16 @@ public class PsimiTabParser extends CommonParser {
         /** Create the CustomInteraction and populate it getting the values from encoreInteraction **/
         CustomInteraction customInteraction = new CustomInteraction();
         customInteraction.setInteractorIdA(interaction.getInteractorA().getAcc());
-        customInteraction.setAliasInteractorA(interaction.getInteractorA().getAlias());
+        customInteraction.setInteractorAliasA(interaction.getInteractorA().getAlias());
         customInteraction.setInteractorIdB(interaction.getInteractorB().getAcc());
-        customInteraction.setAliasInteractorB(interaction.getInteractorB().getAlias());
+        customInteraction.setInteractorAliasB(interaction.getInteractorB().getAlias());
         customInteraction.setConfidenceValue(interaction.getIntactScore());
 
         /** Right now just retrieving the first one in the list **/
-        List<InteractionDetails> interactionEvidences = interaction.getInteractionDetailsList();
-        customInteraction.setInteractionEvidence(interactionEvidences.get(0).getInteractionAc());
+        List<InteractionDetails> interactionEvidence = interaction.getInteractionDetailsList();
+        for (InteractionDetails ie : interactionEvidence) {
+            customInteraction.addEvidence(ie.getInteractionAc());
+        }
 
         return customInteraction;
     }

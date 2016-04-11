@@ -24,6 +24,10 @@ public class InteractionDetails {
     public InteractionDetails() {
     }
 
+    public InteractionDetails(String interactionAc) {
+        this.interactionAc = interactionAc;
+    }
+
     public Long getId() {
         return id;
     }
