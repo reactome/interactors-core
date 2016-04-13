@@ -7,11 +7,12 @@ import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
+import org.reactome.server.tools.interactors.exception.PsicquicQueryException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.service.PsicquicService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import psidev.psi.mi.tab.PsimiTabException;
 
 import java.util.*;
 
@@ -40,7 +41,7 @@ public class TestPsicquicClustering {
             Assert.assertTrue("No resources have been returned from PSICQUIC", getPsicquicResource().size() > 0);
         } else {
             // Psicquic is down, but we don't want to break our tests because of it.
-            logger.warn("Couldn't get PSICQUIC Resources. Reason: PSCIQUIC is down.");
+            logger.warn("Couldn't get PSICQUIC Resources. Reason: PSICQUIC is down.");
         }
 
     }
@@ -56,9 +57,9 @@ public class TestPsicquicClustering {
 
             Assert.assertTrue("No interactors present in " + resourceName + " database.", interactions.size() >= 1);
 
-        } catch (PsicquicInteractionClusterException e) {
+        } catch (PsicquicQueryException | PsimiTabException | PsicquicRegistryClientException e) {
             // Psicquic is down, but we don't want to break our tests because of it.
-            logger.warn("Couldn't perform PSICQUIC Query. Reason: PSCIQUIC is down");
+            logger.warn("Couldn't perform PSICQUIC Query. Reason: PSICQUIC is down");
         }
     }
 
@@ -72,9 +73,9 @@ public class TestPsicquicClustering {
 
             Assert.assertTrue("No interactors present in " + resourceName + " database.", interactions.size() >= 1);
 
-        } catch (PsicquicInteractionClusterException e) {
+        } catch (PsicquicQueryException | PsimiTabException | PsicquicRegistryClientException e) {
             // Psicquic is down, but we don't want to break our tests because of it.
-            logger.warn("Could perform PSICQUIC Query. Reason: PSCIQUIC is down");
+            logger.warn("Could perform PSICQUIC Query. Reason: PSICQUIC is down");
         }
     }
 

@@ -6,6 +6,7 @@ import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistry
 import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
 import org.reactome.server.tools.interactors.exception.CustomPsicquicInteractionClusterException;
 import org.reactome.server.tools.interactors.exception.PsicquicInteractionClusterException;
+import org.reactome.server.tools.interactors.exception.PsicquicQueryException;
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.model.Interactor;
 import org.reactome.server.tools.interactors.model.PsicquicResource;
@@ -40,10 +41,10 @@ public class InteractionClusterImpl implements PsicquicDAO {
      * @param resource PSICQUIC Resource
      * @param accs     List of accession
      * @return map of accession as key an its list of interaction
-     * @throws PsicquicInteractionClusterException
+     * @throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException
      */
     @Override
-    public Map<String, List<Interaction>> getInteraction(String resource, Collection<String> accs) throws PsicquicInteractionClusterException {
+    public Map<String, List<Interaction>> getInteraction(String resource, Collection<String> accs) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException {
         Map<String, List<Interaction>> ret = new HashMap<>();
 
         for (String acc : accs) {
@@ -145,7 +146,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
     }
 
     @Override
-    public Map<String, Integer> countInteraction(String resource, Collection<String> accs) throws PsicquicInteractionClusterException {
+    public Map<String, Integer> countInteraction(String resource, Collection<String> accs) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException {
         Map<String, Integer> ret = new HashMap<>();
 
         for (String acc : accs) {
@@ -211,9 +212,9 @@ public class InteractionClusterImpl implements PsicquicDAO {
     /**
      * Helper method that create the InteractionClusterScore.
      *
-     * @throws PsicquicInteractionClusterException
+     * @throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException
      */
-    private InteractionClusterScore getInteractionClusterScore(String resource, String acc, String databaseNames) throws PsicquicInteractionClusterException {
+    private InteractionClusterScore getInteractionClusterScore(String resource, String acc, String databaseNames) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException {
         final String queryMethod = "interactor/";
 
         try {
@@ -225,9 +226,8 @@ public class InteractionClusterImpl implements PsicquicDAO {
             String queryRestUrl = service.getRestUrl().concat(queryMethod).concat(URLEncoder.encode(acc, "UTF-8"));
 
             return prepareInteratorClusterScore(queryRestUrl, databaseNames);
-
-        } catch (IOException | PsimiTabException | PsicquicRegistryClientException e) {
-            throw new PsicquicInteractionClusterException(e);
+        } catch (IOException e) {
+            throw new PsicquicQueryException(e);
         }
     }
 
