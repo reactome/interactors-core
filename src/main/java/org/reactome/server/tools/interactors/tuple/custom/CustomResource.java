@@ -26,8 +26,18 @@ public class CustomResource {
         TreeInteraction interaction = new TreeInteraction();
         interaction.setScore(customInteraction.getConfidenceValue());
 
+        /**
+         * When parsing the file, SuperCSV maps the evidence into a String which is CsvInteractionEvidence.
+         */
         if(StringUtils.isNotBlank(customInteraction.getCsvInteractionEvidence())) {
             interaction.addEvidence(customInteraction.getCsvInteractionEvidence());
+        }
+
+        /**
+         * When we parse the PSIMITab, the cluster already maps the evidence into a list.
+         */
+        if(customInteraction.getEvidence() != null && customInteraction.getEvidence().size() > 0){
+            interaction.setEvidence(customInteraction.getEvidence());
         }
 
         interaction.setIdA(customInteraction.getInteractorIdA());

@@ -58,8 +58,9 @@ public class ExtendedParser extends CommonParser {
             /** read the CSV header (and set any unwanted columns to null) **/
             String[] header = beanReader.getHeader(true);
             for (int i = 0; i < header.length; i++) {
-                if (headerColumnMapping.containsKey(header[i].toUpperCase())) {
-                    header[i] = headerColumnMapping.get(header[i]).attribute;
+                if (headerColumnMapping.containsKey(header[i].toUpperCase().trim())) {
+                    header[i] = headerColumnMapping.get(header[i].toUpperCase().trim()
+                    ).attribute;
                 } else {
                     header[i] = null;
                 }

@@ -8,7 +8,6 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.reactome.server.tools.interactors.tuple.exception.ParserException;
-import org.reactome.server.tools.interactors.tuple.model.CustomInteraction;
 import org.reactome.server.tools.interactors.tuple.model.TupleResult;
 import org.reactome.server.tools.interactors.tuple.parser.Parser;
 import org.reactome.server.tools.interactors.tuple.parser.ParserFactory;
@@ -16,7 +15,6 @@ import org.reactome.server.tools.interactors.tuple.parser.ParserFactory;
 import java.io.*;
 import java.net.URL;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -121,33 +119,4 @@ public class TestParser {
 
         return file;
     }
-
-    //@Test
-    public void testSillyTxt() throws IOException, ParserException {
-        File file = getFileFromResources(PATH.concat("silly.txt"));
-
-        List<String> lines = IOUtils.readLines(new FileInputStream(file));
-
-        Parser p = ParserFactory.build(lines);
-        TupleResult result = p.parse(lines);
-
-        //Testing serialisation
-        Kryo kryo = new Kryo();
-        kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
-        Output output = new Output(new ByteArrayOutputStream());
-        kryo.writeClassAndObject(output, result);
-        output.close();
-        Input input = new Input(new ByteArrayInputStream(output.getBuffer()));
-        TupleResult aux = (TupleResult) kryo.readClassAndObject(input);
-        output.close();
-
-
-        Set<CustomInteraction> sssss = aux.getCustomResource().get("Q13501");
-
-        //Checking whether aux contains what result had
-        Assert.assertTrue("Q9H0R8 should be 2 times", aux.getCustomResource().get("Q9H0R8").size() == 2);
-        Assert.assertTrue("Q14596 should be 2 times", aux.getCustomResource().get("Q14596").size() == 2);
-        Assert.assertTrue("Q13501 should be 4 times", aux.getCustomResource().get("Q13501").size() == 4);
-    }
-
 }
