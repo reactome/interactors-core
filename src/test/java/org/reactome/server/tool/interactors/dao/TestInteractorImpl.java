@@ -3,11 +3,11 @@ package org.reactome.server.tool.interactors.dao;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.reactome.server.tools.interactors.dao.InteractorDAO;
-import org.reactome.server.tools.interactors.dao.intact.StaticInteractor;
-import org.reactome.server.tools.interactors.database.InteractorsDatabase;
-import org.reactome.server.tools.interactors.model.Interactor;
-import org.reactome.server.tools.interactors.util.Toolbox;
+import org.reactome.server.interactors.dao.InteractorDAO;
+import org.reactome.server.interactors.dao.intact.StaticInteractor;
+import org.reactome.server.interactors.database.InteractorsDatabase;
+import org.reactome.server.interactors.model.Interactor;
+import org.reactome.server.interactors.util.Toolbox;
 
 import java.sql.SQLException;
 import java.util.List;

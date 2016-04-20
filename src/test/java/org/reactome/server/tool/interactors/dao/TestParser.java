@@ -7,10 +7,10 @@ import com.esotericsoftware.shaded.org.objenesis.strategy.StdInstantiatorStrateg
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.reactome.server.tools.interactors.tuple.exception.ParserException;
-import org.reactome.server.tools.interactors.tuple.model.TupleResult;
-import org.reactome.server.tools.interactors.tuple.parser.Parser;
-import org.reactome.server.tools.interactors.tuple.parser.ParserFactory;
+import org.reactome.server.interactors.tuple.exception.ParserException;
+import org.reactome.server.interactors.tuple.model.TupleResult;
+import org.reactome.server.interactors.tuple.parser.Parser;
+import org.reactome.server.interactors.tuple.parser.ParserFactory;
 
 import java.io.*;
 import java.net.URL;
