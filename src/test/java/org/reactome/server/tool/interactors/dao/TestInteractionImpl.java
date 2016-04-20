@@ -12,10 +12,13 @@ import org.reactome.server.interactors.service.InteractionService;
 import org.reactome.server.interactors.util.InteractorConstant;
 import org.reactome.server.interactors.util.Toolbox;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -31,14 +34,17 @@ public class TestInteractionImpl {
     private final Long RESOURCE_ID = 1L;
 
     @Before
-    public void setUp() {
-        String file = "/Users/reactome/interactors/interactors.db";
+    public void setUp() throws IOException {
+        Properties prop = new Properties();
         InteractorsDatabase interactors = null;
         try {
-            interactors = new InteractorsDatabase(file);
-        } catch (SQLException e) {
+            InputStream is = TestInteractionImpl.class.getResourceAsStream("/db.properties");
+            prop.load(is);
+            interactors = new InteractorsDatabase(prop.getProperty("database"));
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
+
         interactionDAO = new StaticInteraction(interactors);
         interactionService = new InteractionService(interactors);
     }
