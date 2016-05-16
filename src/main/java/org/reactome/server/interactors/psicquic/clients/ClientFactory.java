@@ -28,6 +28,10 @@ public abstract class ClientFactory {
                 return new InnatedbClient(resource);
             case "REACTOME-FIS":
                 return new ReactomeFisClient(resource);
+            case "GENEMANIA":
+                return new GeneManiaClient(resource);
+            case "HPIDB":
+                return new HPIDbClient(resource);
             default:
                 return new GenericClient(resource);
         }

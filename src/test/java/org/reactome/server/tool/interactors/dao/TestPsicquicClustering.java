@@ -48,7 +48,7 @@ public class TestPsicquicClustering {
 
     @Test
     public void testSpecificPsicquicResource() {
-        String resourceName = "Reactome-FIs";
+        String resourceName = "HPIDb";
 
         try {
             //long start = System.currentTimeMillis();
@@ -150,6 +150,7 @@ public class TestPsicquicClustering {
 
             case "HPIDb":
                 accessions.add("Q32PH0");
+                accessions.add("K7Y1A2");
                 break;
 
             case "InnateDB":
