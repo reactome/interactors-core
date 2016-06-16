@@ -32,6 +32,8 @@ public abstract class ClientFactory {
                 return new GeneManiaClient(resource);
             case "HPIDB":
                 return new HPIDbClient(resource);
+            case "ZINC":
+                return new ZincClient(resource);
             default:
                 return new GenericClient(resource);
         }

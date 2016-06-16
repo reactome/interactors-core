@@ -7,6 +7,7 @@ import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.reactome.server.interactors.exception.CustomPsicquicInteractionClusterException;
 import org.reactome.server.interactors.exception.PsicquicQueryException;
 import org.reactome.server.interactors.model.Interaction;
 import org.reactome.server.interactors.service.PsicquicService;
@@ -94,6 +95,34 @@ public class TestPsicquicClustering {
         } catch (PsicquicRegistryClientException e) {
             return null;
         }
+    }
+
+    /**
+     * How to test a Custom Psicquic Resource
+     * 1. Comment out @Test
+     * 2. Set the customUrl and the accession
+     * 3. Check instructions down in the code in order to debug properly.
+     *
+     * @throws CustomPsicquicInteractionClusterException
+     */
+    @Test
+    public void testCustomPsicquicResource() throws CustomPsicquicInteractionClusterException {
+        String customUrl = "http://psicquic.docking.org/psicquic/webservices/current/search/query/";
+        String accession = "P00533";
+
+        try {
+            /**
+             * 3.1 If the interactors list is empty, you may want to check the clustering and the scores.
+             * To do so, go to {@link org.reactome.server.interactors.psicquic.impl.InteractionClusterImpl.getInteractionFromCustomPsicquic()}
+             * and check the interactionMapping.
+             */
+            psicquicService.getInteractionFromCustomPsicquic(customUrl, Collections.singletonList(accession));
+
+        } catch (CustomPsicquicInteractionClusterException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     private Collection<String> getSampleAccessions(String resource) {
@@ -238,6 +267,9 @@ public class TestPsicquicClustering {
                 accessions.add(""); // does not have score, can't find any higher than 0.45.
                 break;
 
+            case "ZINC":
+                accessions.add("Q99720");
+                break;
         }
 
         return accessions;

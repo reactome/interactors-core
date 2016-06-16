@@ -35,5 +35,5 @@ public class InteractorConstant {
     public static final String BIOGRID_MOLECULE_URL = "http://www.ncbi.nlm.nih.gov/gene/##ID##";
     public static final String BINDINGDB_MOLECULE_URL = "http://www.bindingdb.org/bind/chemsearch/marvin/MolStructure.jsp?monomerid=##ID##";
     public static final String CHEMBL_MOLECULE_URL = "https://www.ebi.ac.uk/chembldb/index.php/compound/inspect/##ID##";
-
+    public static final String ZINC_SUBSTANCE_URL = "http://zinc15.docking.org/substances/##ID##";
 }
