@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactome.server.interactors.exception.CustomPsicquicInteractionClusterException;
 import org.reactome.server.interactors.exception.PsicquicQueryException;
+import org.reactome.server.interactors.exception.PsicquicResourceNotFoundException;
 import org.reactome.server.interactors.model.Interaction;
 import org.reactome.server.interactors.service.PsicquicService;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class TestPsicquicClustering {
 
             Assert.assertTrue("No interactors present in " + resourceName + " database.", interactions.size() >= 1);
 
-        } catch (PsicquicQueryException | PsimiTabException | PsicquicRegistryClientException e) {
+        } catch (PsicquicQueryException | PsimiTabException | PsicquicRegistryClientException | PsicquicResourceNotFoundException e) {
             // Psicquic is down, but we don't want to break our tests because of it.
             logger.warn("Couldn't perform PSICQUIC Query. Reason: PSICQUIC is down");
         }
@@ -74,7 +75,7 @@ public class TestPsicquicClustering {
 
             Assert.assertTrue("No interactors present in " + resourceName + " database.", interactions.size() >= 1);
 
-        } catch (PsicquicQueryException | PsimiTabException | PsicquicRegistryClientException e) {
+        } catch (PsicquicQueryException | PsimiTabException | PsicquicRegistryClientException | PsicquicResourceNotFoundException  e) {
             // Psicquic is down, but we don't want to break our tests because of it.
             logger.warn("Could perform PSICQUIC Query. Reason: PSICQUIC is down");
         }
