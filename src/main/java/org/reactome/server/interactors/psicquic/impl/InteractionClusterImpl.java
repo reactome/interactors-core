@@ -7,6 +7,7 @@ import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
 import org.reactome.server.interactors.exception.CustomPsicquicInteractionClusterException;
 import org.reactome.server.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.interactors.exception.PsicquicQueryException;
+import org.reactome.server.interactors.exception.PsicquicResourceNotFoundException;
 import org.reactome.server.interactors.model.Interaction;
 import org.reactome.server.interactors.model.Interactor;
 import org.reactome.server.interactors.model.PsicquicResource;
@@ -44,7 +45,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
      * @throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException
      */
     @Override
-    public Map<String, List<Interaction>> getInteraction(String resource, Collection<String> accs) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException {
+    public Map<String, List<Interaction>> getInteraction(String resource, Collection<String> accs) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException, PsicquicResourceNotFoundException {
         Map<String, List<Interaction>> ret = new HashMap<>();
 
         for (String acc : accs) {
@@ -146,7 +147,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
     }
 
     @Override
-    public Map<String, Integer> countInteraction(String resource, Collection<String> accs) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException {
+    public Map<String, Integer> countInteraction(String resource, Collection<String> accs) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException, PsicquicResourceNotFoundException {
         Map<String, Integer> ret = new HashMap<>();
 
         for (String acc : accs) {
@@ -214,13 +215,17 @@ public class InteractionClusterImpl implements PsicquicDAO {
      *
      * @throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException
      */
-    private InteractionClusterScore getInteractionClusterScore(String resource, String acc, String databaseNames) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException {
+    private InteractionClusterScore getInteractionClusterScore(String resource, String acc, String databaseNames) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException, PsicquicResourceNotFoundException {
         final String queryMethod = "interactor/";
 
         try {
             /** Get PsicquicResource **/
             PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
             ServiceType service = registryClient.getService(resource);
+
+            if (service == null) {
+                throw new PsicquicResourceNotFoundException(resource + " not found");
+            }
 
             /** Build service URL **/
             String queryRestUrl = service.getRestUrl().concat(queryMethod).concat(URLEncoder.encode(acc, "UTF-8"));

@@ -7,13 +7,10 @@ package org.reactome.server.interactors.exception;
  *
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-public class PsicquicQueryException extends Exception {
+public class PsicquicResourceNotFoundException extends Exception {
 
-    public PsicquicQueryException(String message) {
+    public PsicquicResourceNotFoundException(String message) {
         super(message);
     }
 
-    public PsicquicQueryException(Throwable cause) {
-        super(cause);
-    }
 }

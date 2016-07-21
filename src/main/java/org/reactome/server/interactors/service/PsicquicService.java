@@ -4,6 +4,7 @@ import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
 import org.reactome.server.interactors.exception.CustomPsicquicInteractionClusterException;
 import org.reactome.server.interactors.exception.PsicquicInteractionClusterException;
 import org.reactome.server.interactors.exception.PsicquicQueryException;
+import org.reactome.server.interactors.exception.PsicquicResourceNotFoundException;
 import org.reactome.server.interactors.model.Interaction;
 import org.reactome.server.interactors.model.PsicquicResource;
 import org.reactome.server.interactors.psicquic.PsicquicDAO;
@@ -27,7 +28,7 @@ public class PsicquicService {
         psicquicDAO = new InteractionClusterImpl();
     }
 
-    public Map<String, List<Interaction>> getInteractions(String resource, Collection<String> accs) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException {
+    public Map<String, List<Interaction>> getInteractions(String resource, Collection<String> accs) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException, PsicquicResourceNotFoundException {
         return psicquicDAO.getInteraction(resource, accs);
     }
 
@@ -39,7 +40,7 @@ public class PsicquicService {
         return psicquicDAO.getResources();
     }
 
-    public Map<String, Integer> countInteraction(String resource, Collection<String> accs) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException {
+    public Map<String, Integer> countInteraction(String resource, Collection<String> accs) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException, PsicquicResourceNotFoundException {
         return psicquicDAO.countInteraction(resource, accs);
     }
 
