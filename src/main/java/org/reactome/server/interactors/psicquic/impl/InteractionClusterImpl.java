@@ -16,6 +16,8 @@ import org.reactome.server.interactors.psicquic.PsicquicDAO;
 import org.reactome.server.interactors.psicquic.clients.ClientFactory;
 import org.reactome.server.interactors.util.InteractorConstant;
 import org.reactome.server.interactors.util.Toolbox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import psidev.psi.mi.tab.PsimiTabException;
 import psidev.psi.mi.tab.PsimiTabReader;
 import psidev.psi.mi.tab.model.BinaryInteraction;
@@ -32,6 +34,8 @@ import java.util.*;
  */
 
 public class InteractionClusterImpl implements PsicquicDAO {
+
+    private static final Logger infoLogger = LoggerFactory.getLogger("infoLogger");
 
     /**
      * This method queries PSICQUIC for a given resource (retrieve the resource URL directly on the server) and accession
@@ -202,6 +206,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
             }
 
         } catch (PsicquicRegistryClientException e) {
+            infoLogger.warn("[PSI123] Querying psicquic resources...");
             throw new PsicquicInteractionClusterException(e);
         }
 
