@@ -206,7 +206,6 @@ public class InteractionClusterImpl implements PsicquicDAO {
             }
 
         } catch (PsicquicRegistryClientException e) {
-            infoLogger.warn("[PSI123] Querying psicquic resources...");
             throw new PsicquicInteractionClusterException(e);
         }
 
