@@ -8,6 +8,7 @@ import org.reactome.server.interactors.service.InteractionParserService;
 import org.reactome.server.interactors.service.InteractionResourceService;
 import org.reactome.server.interactors.service.InteractorResourceService;
 import org.reactome.server.interactors.util.InteractorConstant;
+import org.reactome.server.interactors.util.InteractorDatabaseGenerator;
 import org.reactome.server.interactors.util.Toolbox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ import java.util.regex.Pattern;
 
 public class IntactParser {
 
-    enum ParserIndex {
+    private enum ParserIndex {
 
         ID_INTERACTOR_A(0),
         ID_INTERACTOR_B(1),
@@ -50,11 +51,9 @@ public class IntactParser {
         }
     }
 
-    static final Logger logger = LoggerFactory.getLogger(IntactParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(IntactParser.class);
 
-    /**
-     * This is the default intact file URL, a program argument can be specified in order to use a different URL
-     **/
+    // This is the default intact file URL, a program argument can be specified in order to use a different URL
     private static final String INTACT_FILE_URL = "ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact-micluster.txt";
 
     private static final String INTACT_SCORE_LABEL = "intact-miscore";
@@ -62,42 +61,33 @@ public class IntactParser {
 
     private static final String PSI_MI_LABEL = "psi-mi";
 
-    /**
-     * Regex that extracts the Taxonid from taxid:9606(human)
-     **/
+    // Regex that extracts the Taxonid from taxid:9606(human)
     private Pattern pattern = Pattern.compile("([0-9]+)");
 
-    /**
-     * Parse file messages
-     **/
+
+    // Parse file messages
     private String outputFileMessages = "";
 
-    /**
-     * Errors report lists
-     **/
+    // Errors report lists
     private Set<String> parserErrorMessages = new HashSet<>();
     private List<String> dbErrorMessages = new ArrayList<>();
 
-    /**
-     * Services Declaration
-     **/
+    // Services Declaration
     private InteractionParserService interactionParserService;
     private InteractorResourceService interactorResourceService;
     private InteractionResourceService interactionResourceService;
 
-    public IntactParser(InteractorsDatabase database) {
+    private IntactParser(InteractorsDatabase database) {
         interactionParserService = new InteractionParserService(database);
         interactorResourceService = new InteractorResourceService(database);
         interactionResourceService = new InteractionResourceService(database);
     }
 
-    /**
-     * Easy access to the Resources.
-     */
+    // Easy access to the Resources.
     private Map<String, InteractionResource> interactionResourceMap = new HashMap<>();
     private Map<String, InteractorResource> interactorResourceMap = new HashMap<>();
 
-    /**
+    /*
      * Parsing the file
      */
     public void parser(String file) {
@@ -108,29 +98,25 @@ public class IntactParser {
             String inputLine;
             BufferedReader br = new BufferedReader(new FileReader(file));
 
-            /**
-             * First line is a header. Calling readLine will point the cursor to the next line.
-             */
+            // First line is a header. Calling readLine will point the cursor to the next line.
             br.readLine();
 
-            /** Intact Identifiers **/
+            // Intact Identifiers
             // intact:EBI-7122727|intact:EBI-7122766|intact:EBI-7122684|intact:EBI-7121552
-
             List<Interaction> interactionList = new ArrayList<>();
             while ((inputLine = br.readLine()) != null) {
                 String[] content = inputLine.split("\\t");
 
-                /** Parse the line **/
+                // Parse the line
                 Interaction interaction = interactionFromFile(content);
 
-                /** Only persist in the Database those interactions with score higher than InteractorConstant.MINIMUM_VALID_SCORE **/
+                // Only persist in the Database those interactions with score higher than InteractorConstant.MINIMUM_VALID_SCORE
                 if (interaction.getIntactScore() >= InteractorConstant.MINIMUM_VALID_SCORE) {
 
                     interactionList.add(interaction);
                     totalLinesIncluded++;
 
-
-                    /** Go to the database every 1000 interactions **/
+                    // Go to the database every 1000 interactions
                     if ((totalLinesIncluded % 1000) == 0) {
                         logger.info("Performing a DB save. Rows parsed [{}]", totalLinesIncluded);
                         try {
@@ -204,13 +190,13 @@ public class IntactParser {
     /**
      * A given interactorA and interactorB can have a list of different InteractionID.
      */
-    public Interaction interactionFromFile(String[] line) {
+    private Interaction interactionFromFile(String[] line) {
 
         Interactor interactorA = new Interactor();
 
         Interactor interactorB = new Interactor();
 
-        /**
+        /*
          * Even though identifiers from multiple databases can be separated by "|", it is recommended to give only one
          * identifier in this column. It is recommended that proteins be identified by stable identifiers such as their
          * UniProtKB or RefSeq accession number. Small molecules should have Chebi identifiers, nucleic acids should
@@ -218,46 +204,46 @@ public class IntactParser {
          * identifiers. This column should never be empty ('-') except for describing intra-molecular interactions or
          * auto-catalysis. Ex: uniprotkb:P12346
          */
-        /** sample of ID Interactor A => intact:EBI-7121510 **/
+        /* sample of ID Interactor A => intact:EBI-7121510 */
         String[] intactIdRawA = line[ParserIndex.ID_INTERACTOR_A.value].split(":");
         interactorA.setIntactId(intactIdRawA[1]);
 
-        /** sample of Alt. ID(s) interactor A => uniprotkb:Q1231 **/
+        // sample of Alt. ID(s) interactor A => uniprotkb:Q1231
         parseAlternativeIds(line[ParserIndex.ALTERNATIVE_INTERACTOR_A.value], interactorA);
 
-        /** gene/ewas name **/
+        // gene/ewas name
         parseAliases(line[ParserIndex.ALIAS_INTERACTOR_A.value], interactorA);
 
-        /** synonyms **/
+        // synonyms
         parseSynonyms(line[ParserIndex.ALIAS_INTERACTOR_A.value], interactorA);
 
-        /** taxid:9606(human) **/
+        // taxid:9606(human)
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_A.value], interactorA);
 
-        /** sample of ID Interactor B => intact:EBI-7121510 **/
+        // sample of ID Interactor B => intact:EBI-7121510
         String[] intactIdRawB = line[ParserIndex.ID_INTERACTOR_B.value].split(":");
         interactorB.setIntactId(intactIdRawB[1]);
 
-        /** sample of Alt. ID(s) interactor B =>  uniprotkb:Q15301 **/
+        // sample of Alt. ID(s) interactor B =>  uniprotkb:Q15301
         parseAlternativeIds(line[ParserIndex.ALTERNATIVE_INTERACTOR_B.value], interactorB);
 
-        /** gene/ewas name **/
+        // gene/ewas name
         parseAliases(line[ParserIndex.ALIAS_INTERACTOR_B.value], interactorB);
 
-        /** synonyms **/
+        // synonyms
         parseSynonyms(line[ParserIndex.ALIAS_INTERACTOR_B.value], interactorB);
 
-        /** taxid:9606(human) **/
+        // taxid:9606(human)
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_B.value], interactorB);
 
-        /** Create interaction **/
+        // Create interaction
         return prepareInteractions(line, interactorA, interactorB);
 
     }
 
     private void parseTaxonomy(String value, Interactor interactor) {
         if (!value.equals("-")) { // not null
-            /** Split at : taxid:9606 **/
+            // Split at : taxid:9606
             String[] taxid = value.split(":");
 
             Matcher m = pattern.matcher(taxid[1]);
@@ -283,7 +269,7 @@ public class IntactParser {
 
         parseConfidenceValue(line[ParserIndex.CONFIDENCE_VALUE.value], interaction);
 
-        /** Get interaction ID column **/
+        // Get interaction ID column
         String allInteractionIds = line[ParserIndex.INTERACTION_IDENTIFIER.value];
 
         String[] interactionIds = allInteractionIds.split("\\|");
@@ -295,11 +281,9 @@ public class IntactParser {
             interactionDetails.setInteractionAc(id);
 
             interaction.addInteractionDetails(interactionDetails);
-
         }
 
         return interaction;
-
     }
 
     /**
@@ -308,18 +292,18 @@ public class IntactParser {
      */
     private void parseAlternativeIds(String value, Interactor interactor) {
         if (!value.equals("-")) { // not null
-            /** Considering only the first split. Otherwise ChEBI id breaks the split. e.g chebi:CHEBI:23423 **/
+            // Considering only the first split. Otherwise ChEBI id breaks the split. e.g chebi:CHEBI:23423
             String[] alternativeId = value.split(":", 2);
             interactor.setAcc(alternativeId[1]);
 
-            /** Set interactor resource id **/
+            // Set interactor resource id
             InteractorResource interactorResource = interactorResourceMap.get(alternativeId[0]);
             if (interactorResource != null) {
                 interactor.setInteractorResourceId(interactorResource.getId());
             }
 
         } else {
-            /** In case alternative ID is null we will set the IntAct id as the accession. This is done in the IntactPortal **/
+            // In case alternative ID is null we will set the IntAct id as the accession. This is done in the IntactPortal
             interactor.setAcc(value);
 
             parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Interactor alternative ID(s) are null.");
@@ -333,12 +317,10 @@ public class IntactParser {
         if (!value.equals("-")) { // not null
             String[] allAliases = value.split("\\|");
             for (String uniqueAlias : allAliases) {
-                /** databaseName:value **/
+                // databaseName:value
                 String[] alias = uniqueAlias.split(":");
 
-                /**
-                 * If alternatives IDs are null, try to figure the resource out in the alias
-                 */
+                // If alternatives IDs are null, try to figure the resource out in the alias
                 if (interactor.getInteractorResourceId() == 0) {
                     InteractorResource interactorResource = interactorResourceMap.get(alias[0]);
                     if (interactorResource != null) {
@@ -346,14 +328,14 @@ public class IntactParser {
                     }
                 }
 
-                /** first occurrence of psi-mi should be taken as the alias **/
+                // first occurrence of psi-mi should be taken as the alias
                 if (alias[0].equalsIgnoreCase(PSI_MI_LABEL) && interactor.getAlias() == null) {
                     interactor.setAlias(alias[1]);
                 }
             }
         }
 
-        /** Some cases like EBI-7121639 there is no resource ???? Yes! There's resource **/
+        // Some cases like EBI-7121639 there is no resource
         if (interactor.getInteractorResourceId() == 0) {
             parserErrorMessages.add("The Interactor ID [" + interactor.getIntactId() + "] do not have alternate identifiers. Can't get Resource.");
             InteractorResource interactorResource = interactorResourceMap.get("undefined");
@@ -363,18 +345,15 @@ public class IntactParser {
         }
     }
 
-    /**
-     * All other
-     */
     private void parseSynonyms(String value, Interactor interactor) {
         String synonyms = "";
         if (!value.equals("-")) { // not null
             String[] allAliases = value.split("\\|");
             for (String uniqueAlias : allAliases) {
-                /** databaseName:value **/
+                // databaseName:value
                 String[] alias = uniqueAlias.split(":", 2);
 
-                /**
+                /*
                  * Saving all the alias in the same column. We don't query by alias, so it is ok.
                  * We can't save it as CSV, otherwise when splitting the list it will split alias that has
                  * comma.
@@ -388,13 +367,9 @@ public class IntactParser {
             }
 
             interactor.setSynonyms(synonyms);
-
         }
     }
 
-    /**
-     *
-     */
     private void parseConfidenceValue(String value, Interaction interaction) {
         if (!value.equals("-")) { // not null
             String[] alternativeIdsRaw = value.split("\\|");
@@ -418,47 +393,55 @@ public class IntactParser {
         }
     }
 
-    public void setOutputFileMessages(String outputFileMessages) {
+    private void setOutputFileMessages(String outputFileMessages) {
         this.outputFileMessages = outputFileMessages;
     }
 
     /**
-     * Call parse
-     * This is a standalone process that will generate an interactors database and
+     * This is a standalone process that will generate an interactors database and parse the IntAct static file
      */
-    public static void main(String[] args) throws JSAPException, IOException {
+    public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         logger.info("Start Parsing IntAct File");
 
         SimpleJSAP jsap = new SimpleJSAP(
                 IntactParser.class.getName(),
-                "A tool for parsing Intact file and create a database",
+                "A tool for parsing Intact file and store information into a SQLite database",
                 new Parameter[]{
                         new FlaggedOption("file", JSAP.STRING_PARSER, "/tmp/intact-micluster.txt", JSAP.NOT_REQUIRED, 'f', "file",
                                 "IntAct file to be parsed")
                         , new FlaggedOption("url", JSAP.STRING_PARSER, INTACT_FILE_URL, JSAP.NOT_REQUIRED, 'u', "url",
-                        "IntAct file URL")
+                                "IntAct file URL")
                         , new QualifiedSwitch("download", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'd', "download",
-                        "Download IntAct File")
+                                "Download IntAct File")
                         , new FlaggedOption("destination", JSAP.STRING_PARSER, "/tmp", JSAP.NOT_REQUIRED, 't', "destination",
-                        "Folder to save the downloaded file")
+                                "Folder to save the downloaded file")
                         , new FlaggedOption("output", JSAP.STRING_PARSER, "/tmp/parser-messages.txt", JSAP.NOT_REQUIRED, 'o', "output",
-                        "Output parser file messages")
+                                "Output parser file messages")
                         , new FlaggedOption("interactors-database-path", JSAP.STRING_PARSER, null, JSAP.REQUIRED, 'g', "interactors-database-path",
-                        "Interactor Database Path")
+                                "Interactor Database Path")
                 }
         );
 
         JSAPResult config = jsap.parse(args);
         if (jsap.messagePrinted()) System.exit(1);
 
+        // Check if database exists and create a new one
         String database = config.getString("interactors-database-path");
-        InteractorsDatabase interactors = null;
         try {
-            interactors = new InteractorsDatabase(database);
+            File dbFile = new File(database);
+            if(dbFile.exists()){
+                logger.error("Database already exists. Please inform a different database name.");
+                System.exit(1);
+            }
+
+            InteractorDatabaseGenerator.create(new InteractorsDatabase(database).getConnection());
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        // Open database connection.
+        InteractorsDatabase interactors = new InteractorsDatabase(database);
         IntactParser intactParser = new IntactParser(interactors);
         intactParser.cacheResources();
 
@@ -486,7 +469,7 @@ public class IntactParser {
      * @return the file path
      * @throws IOException
      */
-    public String downloadFile(String urlFtp, String directory) throws IOException {
+    private String downloadFile(String urlFtp, String directory) throws IOException {
         logger.info("Downloading IntAct File...");
         URL url = new URL(urlFtp);
 
@@ -509,13 +492,13 @@ public class IntactParser {
 
         try {
 
-            /** Load INTERACTOR resources (chebi, uniprot) **/
+            // Load INTERACTOR resources (chebi, uniprot)
             List<InteractorResource> interactorResources = interactorResourceService.getAll();
             for (InteractorResource interactorResource : interactorResources) {
                 interactorResourceMap.put(interactorResource.getName().toLowerCase(), interactorResource);
             }
 
-            /** Load INTERACTION resources (intact, ...) **/
+            //  Load INTERACTION resources (intact, ...)
             List<InteractionResource> interactionResources = interactionResourceService.getAll();
             for (InteractionResource interactionResource : interactionResources) {
                 interactionResourceMap.put(interactionResource.getName().toLowerCase(), interactionResource);
@@ -526,7 +509,6 @@ public class IntactParser {
         }
 
         logger.info("Caching is Done. InteractionResource [{}] and Interactor Resources[{}]", interactionResourceMap.size(), interactorResourceMap.size());
-
     }
 }
 
