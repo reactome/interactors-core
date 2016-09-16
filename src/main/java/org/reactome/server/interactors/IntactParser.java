@@ -87,6 +87,8 @@ public class IntactParser {
     private Map<String, InteractionResource> interactionResourceMap = new HashMap<>();
     private Map<String, InteractorResource> interactorResourceMap = new HashMap<>();
 
+    private Set<Interaction> interactions = new HashSet<>();
+
     /*
      * Parsing the file
      */
@@ -161,8 +163,7 @@ public class IntactParser {
             }
         }
 
-        logger.info("The IntAct parser has finished. [{}] rows have been read and [{}] have been considered as an Interaction.", totalLinesParsed, totalLinesIncluded);
-
+        logger.info("The IntAct parser has finished. [{}] rows have been read and [{}] have been considered as Interaction based on minimum threshold [{}].", totalLinesParsed, totalLinesIncluded, InteractorConstant.MINIMUM_VALID_SCORE);
     }
 
     private void writeOutputFile(Collection<String> messages, String filename) {
@@ -236,6 +237,13 @@ public class IntactParser {
         // taxid:9606(human)
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_B.value], interactorB);
 
+        Interaction interaction = prepareInteractions(line, interactorA, interactorB);
+        if(interactions.contains(interaction)) {
+            logger.info("A Duplicate has been found: " + line[0] + " " + line[1] + " " + line[2] + " " + line[3] + " " + interaction.getIntactScore());
+        } else {
+            interactions.add(interaction);
+        }
+
         // Create interaction
         return prepareInteractions(line, interactorA, interactorB);
 
@@ -254,7 +262,7 @@ public class IntactParser {
 
         } else {
             interactor.setTaxid(-1);
-            parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Does not have taxid.");
+            parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Does not have taxId.");
         }
     }
 
@@ -337,7 +345,7 @@ public class IntactParser {
 
         // Some cases like EBI-7121639 there is no resource
         if (interactor.getInteractorResourceId() == 0) {
-            parserErrorMessages.add("The Interactor ID [" + interactor.getIntactId() + "] do not have alternate identifiers. Can't get Resource.");
+            parserErrorMessages.add("The Interactor ID [" + interactor.getIntactId() + "] does not have alternate identifiers. Can't get Resource.");
             InteractorResource interactorResource = interactorResourceMap.get("undefined");
             if (interactorResource != null) {
                 interactor.setInteractorResourceId(interactorResource.getId());
@@ -378,8 +386,6 @@ public class IntactParser {
                 if (alternativeId[0].equalsIgnoreCase(AUTHOR_SCORE_LABEL)) {
                     if (Toolbox.isNumeric(alternativeId[1])) {
                         interaction.setAuthorScore(new Double(alternativeId[1]));
-                    } else {
-                        parserErrorMessages.add("Interactor A [" + interaction.getInteractorA().getIntactId() + "] - Interactor B [" + interaction.getInteractorB().getIntactId() + "] - The author score is not a number [" + alternativeId[1] + "]");
                     }
                 }
                 if (alternativeId[0].equalsIgnoreCase(INTACT_SCORE_LABEL)) {
@@ -431,7 +437,7 @@ public class IntactParser {
         try {
             File dbFile = new File(database);
             if(dbFile.exists()){
-                logger.error("Database already exists. Please inform a different database name.");
+                logger.error("Database [{}] already exists in this location. Please inform a different database location or name.", database);
                 System.exit(1);
             }
 
@@ -459,7 +465,7 @@ public class IntactParser {
         intactParser.setOutputFileMessages(output);
         intactParser.parser(file);
 
-        logger.info("Database has been populate properly.");
+        logger.info("Database has been populate. The database size is [{} MB]", new File(database).length() / (1024L * 1024L));
         logger.info("End IntAct File parsing. Elapsed Time [{}.ms]", (System.currentTimeMillis() - start));
     }
 
