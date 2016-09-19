@@ -35,3 +35,5 @@ interactors.db
 ReactomeInteractorsCore.log
 intact-micluster.txt
 parser-error-messages.txt
+parser-messages.txt
+logs
