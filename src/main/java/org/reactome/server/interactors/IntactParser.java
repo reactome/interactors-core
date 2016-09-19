@@ -64,10 +64,6 @@ public class IntactParser {
     // Regex that extracts the Taxonid from taxid:9606(human)
     private Pattern pattern = Pattern.compile("([0-9]+)");
 
-
-    // Parse file messages
-    private String outputFileMessages = "";
-
     // Errors report lists
     private Set<String> parserErrorMessages = new HashSet<>();
     private List<String> dbErrorMessages = new ArrayList<>();
@@ -154,7 +150,7 @@ public class IntactParser {
         } finally {
             if (parserErrorMessages.size() > 0) {
                 logger.info("There are [{}] error messages in the IntAct file.", parserErrorMessages.size());
-                writeOutputFile(parserErrorMessages, outputFileMessages);
+                writeOutputFile(parserErrorMessages, "parser-messages.txt");
             }
 
             if (dbErrorMessages.size() > 0) {
@@ -239,7 +235,9 @@ public class IntactParser {
 
         Interaction interaction = prepareInteractions(line, interactorA, interactorB);
         if(interactions.contains(interaction)) {
-            logger.info("A Duplicate has been found: " + line[0] + " " + line[1] + " " + line[2] + " " + line[3] + " " + interaction.getIntactScore());
+            String msg = "A Duplicate entry has been found: " + line[0] + " " + line[1] + " " + line[2] + " " + line[3] + " " + interaction.getIntactScore();
+            logger.info(msg);
+            parserErrorMessages.add(msg);
         } else {
             interactions.add(interaction);
         }
@@ -399,10 +397,6 @@ public class IntactParser {
         }
     }
 
-    private void setOutputFileMessages(String outputFileMessages) {
-        this.outputFileMessages = outputFileMessages;
-    }
-
     /**
      * This is a standalone process that will generate an interactors database and parse the IntAct static file
      */
@@ -422,8 +416,6 @@ public class IntactParser {
                                 "Download IntAct File")
                         , new FlaggedOption("destination", JSAP.STRING_PARSER, "/tmp", JSAP.NOT_REQUIRED, 't', "destination",
                                 "Folder to save the downloaded file")
-                        , new FlaggedOption("output", JSAP.STRING_PARSER, "/tmp/parser-messages.txt", JSAP.NOT_REQUIRED, 'o', "output",
-                                "Output parser file messages")
                         , new FlaggedOption("interactors-database-path", JSAP.STRING_PARSER, null, JSAP.REQUIRED, 'g', "interactors-database-path",
                                 "Interactor Database Path")
                 }
@@ -453,7 +445,6 @@ public class IntactParser {
 
         String file = config.getString("file");
         boolean download = config.getBoolean("download");
-        String output = config.getString("output");
 
         if (download) {
             String url = config.getString("url");
@@ -462,7 +453,6 @@ public class IntactParser {
             file = downloadedFile;
         }
 
-        intactParser.setOutputFileMessages(output);
         intactParser.parser(file);
 
         logger.info("Database has been populate. The database size is [{} MB]", new File(database).length() / (1024L * 1024L));
