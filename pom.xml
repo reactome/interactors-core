@@ -31,29 +31,7 @@
         <dependency>
             <groupId>uk.ac.ebi.enfin.mi.cluster</groupId>
             <artifactId>micluster</artifactId>
-            <version>1.7.3-SNAPSHOT</version>
-            <!--
-                MICluster is using the 1.1.1-SNAPSHOT which is not properly deployed in the nexus.
-                I am using the 1.1.0 (release).
-            -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.hupo.psi.mi.psicquic</groupId>
-                    <artifactId>psicquic-registry-client</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hupo.psi.mi.psicquic</groupId>
-            <artifactId>psicquic-registry-client</artifactId>
-            <version>1.1.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>1.7.7</version>
         </dependency>
 
         <dependency>
