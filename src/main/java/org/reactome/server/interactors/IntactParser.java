@@ -91,6 +91,7 @@ public class IntactParser {
     public void parser(String file) {
         int totalLinesParsed = 1;
         int totalLinesIncluded = 0;
+        int totalIgnoredLines = 0;
 
         try {
             String inputLine;
@@ -105,8 +106,14 @@ public class IntactParser {
             while ((inputLine = br.readLine()) != null) {
                 String[] content = inputLine.split("\\t");
 
+                totalLinesParsed++;
+
                 // Parse the line
                 Interaction interaction = interactionFromFile(content);
+                if (interaction.getInteractorA().getIntactId().equals("-") || interaction.getInteractorB().getIntactId().equals("-") ) {
+                    totalIgnoredLines++;
+                    continue;
+                }
 
                 // Only persist in the Database those interactions with score higher than InteractorConstant.MINIMUM_VALID_SCORE
                 if (interaction.getIntactScore() >= InteractorConstant.MINIMUM_VALID_SCORE) {
@@ -126,8 +133,6 @@ public class IntactParser {
                         }
                     }
                 }
-
-                totalLinesParsed++;
             }
 
             // Persist remaining items
@@ -159,7 +164,7 @@ public class IntactParser {
             }
         }
 
-        logger.info("The IntAct parser has finished. [{}] rows have been read and [{}] have been considered as Interaction based on minimum threshold [{}].", totalLinesParsed, totalLinesIncluded, InteractorConstant.MINIMUM_VALID_SCORE);
+        logger.info("The IntAct parser has finished. [{}] rows have been read. [{}] have been considered as Interaction based on [{}] minimum score. [{}] ignored rows in absence of A or B", totalLinesParsed, totalLinesIncluded, InteractorConstant.MINIMUM_VALID_SCORE, totalIgnoredLines);
     }
 
     private void writeOutputFile(Collection<String> messages, String filename) {
@@ -202,8 +207,8 @@ public class IntactParser {
          * auto-catalysis. Ex: uniprotkb:P12346
          */
         /* sample of ID Interactor A => intact:EBI-7121510 */
-        String[] intactIdRawA = line[ParserIndex.ID_INTERACTOR_A.value].split(":");
-        interactorA.setIntactId(intactIdRawA[1]);
+        parseIntactId(line[ParserIndex.ID_INTERACTOR_A.value], interactorA);
+
 
         // sample of Alt. ID(s) interactor A => uniprotkb:Q1231
         parseAlternativeIds(line[ParserIndex.ALTERNATIVE_INTERACTOR_A.value], interactorA);
@@ -218,8 +223,7 @@ public class IntactParser {
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_A.value], interactorA);
 
         // sample of ID Interactor B => intact:EBI-7121510
-        String[] intactIdRawB = line[ParserIndex.ID_INTERACTOR_B.value].split(":");
-        interactorB.setIntactId(intactIdRawB[1]);
+        parseIntactId(line[ParserIndex.ID_INTERACTOR_B.value], interactorB);
 
         // sample of Alt. ID(s) interactor B =>  uniprotkb:Q15301
         parseAlternativeIds(line[ParserIndex.ALTERNATIVE_INTERACTOR_B.value], interactorB);
@@ -313,6 +317,20 @@ public class IntactParser {
             interactor.setAcc(value);
 
             parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Interactor alternative ID(s) are null.");
+        }
+    }
+
+    /**
+     * Parse IntAct ID A and B
+     * In cases where A or B is a dash (-), just skip it.
+     */
+    private void parseIntactId(String value, Interactor interactor) {
+        if (!value.equals("-")) { // not null
+            String[] intactId = value.split(":");
+            interactor.setIntactId(intactId[1]);
+        } else {
+            // In case IntAct ID is - it means the molecule interacts/modify itself
+            interactor.setIntactId(value);
         }
     }
 
