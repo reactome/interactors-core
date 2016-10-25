@@ -44,6 +44,6 @@ public class ZincClient extends AbstractClient {
             retScore = intactScore;
         }
 
-        return new Double(retScore);
+        return retScore.isEmpty() ? 0 : new Double(retScore);
     }
 }

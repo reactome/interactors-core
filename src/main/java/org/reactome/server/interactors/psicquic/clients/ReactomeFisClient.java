@@ -36,6 +36,6 @@ public class ReactomeFisClient extends AbstractClient {
             retScore = nbcScore;
         }
 
-        return new Double(retScore);
+        return retScore.isEmpty() ? 0 : new Double(retScore);
     }
 }
