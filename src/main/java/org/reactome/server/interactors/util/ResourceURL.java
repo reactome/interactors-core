@@ -37,7 +37,7 @@ public enum ResourceURL {
 
     private String protein;
     private String chemical;
-    private Map<String, String> interactionEvidencesURLs;
+    private Map<String, String> interactionEvidencesURLs = new HashMap<>();
     private boolean multivalued;
     private boolean hasInteractionEvidenceUrl;
 
