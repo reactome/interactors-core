@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import psidev.psi.mi.tab.PsimiTabException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * For mor PSICQUIC examples: https://github.com/EBI-IntAct/micluster/blob/master/micluster-score/src/test/java/TestInteractionClusterScore.java
@@ -25,10 +26,9 @@ import java.util.*;
  */
 public class TestPsicquicClustering {
 
-    Logger logger = LoggerFactory.getLogger(TestPsicquicClustering.class);
+    private Logger logger = LoggerFactory.getLogger(TestPsicquicClustering.class);
 
-    PsicquicService psicquicService;
-
+    private PsicquicService psicquicService;
 
     @Before
     public void setup() {
@@ -81,6 +81,33 @@ public class TestPsicquicClustering {
         }
     }
 
+    //@Test
+    @SuppressWarnings("unused")
+    public void testAllPsicquicResources() {
+        try {
+            PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
+            List<ServiceType> services = registryClient.listActiveServices();
+            List<String> resources = new ArrayList<>(services.size());
+            resources.addAll(services.stream().filter(ServiceType::isActive).map(ServiceType::getName).collect(Collectors.toList()));
+
+            for (String res : resources) {
+                System.out.println("Testing " + res);
+                try {
+                    Map<String, List<Interaction>> interactions = psicquicService.getInteractions(res, getSampleAccessions(res));
+                    for (String key : interactions.keySet()) {
+                        System.out.println("Accession: " + key + " => " + interactions.get(key).size());
+                    }
+                } catch (PsicquicQueryException | PsimiTabException | PsicquicRegistryClientException | PsicquicResourceNotFoundException  e) {
+                    logger.error("Could perform PSICQUIC Query.", e);
+                }
+            }
+        } catch (PsicquicRegistryClientException e) {
+            // Psicquic is down, but we don't want to break our tests because of it.
+            logger.warn("Error getting all resources");
+        }
+    }
+
+
     private List<String> getPsicquicResource() {
         try {
             PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
@@ -88,9 +115,7 @@ public class TestPsicquicClustering {
             List<ServiceType> services = registryClient.listActiveServices();
 
             List<String> resources = new ArrayList<>(services.size());
-            for (ServiceType service : services) {
-                resources.add(service.getName());
-            }
+            resources.addAll(services.stream().map(ServiceType::getName).collect(Collectors.toList()));
 
             return resources;
         } catch (PsicquicRegistryClientException e) {
@@ -122,13 +147,10 @@ public class TestPsicquicClustering {
         } catch (CustomPsicquicInteractionClusterException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private Collection<String> getSampleAccessions(String resource) {
         Collection<String> accessions = new ArrayList<>(1);
-
         switch (resource) {
             case "APID":
                 accessions.add("P00533");
@@ -204,7 +226,7 @@ public class TestPsicquicClustering {
                 break;
 
             case "I2D":
-                accessions.add(""); // does not have score, can't find any higher than 0.45.
+                accessions.add("P00533"); // does not have score, can't find any higher than 0.45.
                 break;
 
             case "I2D-IMEx":
@@ -261,20 +283,17 @@ public class TestPsicquicClustering {
                 break;
 
             case "UniProt":
-                accessions.add("");
+                accessions.add("Q8WV24");
                 break;
 
             case "VirHostNet":
-                accessions.add(""); // does not have score, can't find any higher than 0.45.
+                accessions.add("Q01844"); // does not have score, can't find any higher than 0.45.
                 break;
 
             case "ZINC":
                 accessions.add("Q99720");
                 break;
         }
-
         return accessions;
-
     }
-
 }
