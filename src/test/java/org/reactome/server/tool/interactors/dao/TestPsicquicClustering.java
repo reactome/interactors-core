@@ -11,7 +11,9 @@ import org.reactome.server.interactors.exception.CustomPsicquicInteractionCluste
 import org.reactome.server.interactors.exception.PsicquicQueryException;
 import org.reactome.server.interactors.exception.PsicquicResourceNotFoundException;
 import org.reactome.server.interactors.model.Interaction;
+import org.reactome.server.interactors.model.InteractionDetails;
 import org.reactome.server.interactors.service.PsicquicService;
+import org.reactome.server.interactors.util.Toolbox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import psidev.psi.mi.tab.PsimiTabException;
@@ -93,9 +95,31 @@ public class TestPsicquicClustering {
             for (String res : resources) {
                 System.out.println("Testing " + res);
                 try {
-                    Map<String, List<Interaction>> interactions = psicquicService.getInteractions(res, getSampleAccessions(res));
-                    for (String key : interactions.keySet()) {
-                        System.out.println("Accession: " + key + " => " + interactions.get(key).size());
+                    Map<String, List<Interaction>> interactionMaps = psicquicService.getInteractions(res, getSampleAccessions(res));
+                    for (String accKey : interactionMaps.keySet()) {
+                        System.out.println("Accession: " + accKey + " => " + interactionMaps.get(accKey).size());
+
+                        List<Interaction> interactions = interactionMaps.get(accKey);
+                        /** Remove from output if there is no interaction **/
+                        if (interactions.size() == 0) {
+                            continue;
+                        }
+
+                        for (Interaction interaction : interactions) {
+                            Toolbox.getAccessionURL(interaction.getInteractorB().getAcc(), res);
+
+                            /** This list holds evidences that we are going to use to build the evidences URL. **/
+                            List<String> evidencesWithDbNames = new ArrayList<>();
+
+                            /** Set Evidences as the others Interactions identifiers **/
+                            if (interaction.getInteractionDetailsList() != null) {
+                                for (InteractionDetails interactionDetail : interaction.getInteractionDetailsList()) {
+                                    String evidence = interactionDetail.getInteractionAc();
+                                    evidencesWithDbNames.add(evidence);
+                                }
+                            }
+                            Toolbox.getEvidencesURL(evidencesWithDbNames, res);
+                        }
                     }
                 } catch (PsicquicQueryException | PsimiTabException | PsicquicRegistryClientException | PsicquicResourceNotFoundException  e) {
                     logger.error("Could perform PSICQUIC Query.", e);
@@ -106,7 +130,6 @@ public class TestPsicquicClustering {
             logger.warn("Error getting all resources");
         }
     }
-
 
     private List<String> getPsicquicResource() {
         try {
@@ -243,7 +266,7 @@ public class TestPsicquicClustering {
 
             case "mentha":
                 //accessions.add("Q9NWZ3");
-                accessions.add("Q13501");
+                accessions.add("Q15262");
                 break;
 
             case "MPIDB":
