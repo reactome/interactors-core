@@ -18,9 +18,9 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractClient implements PsicquicClient {
 
-    enum InteractorLink {A, B}
+    private enum InteractorLink {A, B}
 
-    protected final int CHEMICAL_ALIAS_SIZE_THRESHOLD = 15;
+    final int CHEMICAL_ALIAS_SIZE_THRESHOLD = 15;
 
     protected String resource;
 
@@ -42,18 +42,19 @@ public abstract class AbstractClient implements PsicquicClient {
 
         Interactor interactorA = getInteractor(encoreInteraction, InteractorLink.A);
         Interactor interactorB = getInteractor(encoreInteraction, InteractorLink.B);
-
+        if (interactorA.getAcc().isEmpty() || interactorB.getAcc().isEmpty()) {
+            // null means invalid interaction that will be ignored later on
+            return null;
+        }
         interaction.setInteractorA(interactorA);
         interaction.setInteractorB(interactorB);
-
         interaction.setIntactScore(getScore(encoreInteraction.getConfidenceValues()));
-
         interaction.setInteractionDetailsList(getInteractionIdentifier(encoreInteraction.getExperimentToDatabase()));
 
         return interaction;
     }
 
-    public Interactor getInteractor(EncoreInteraction encoreInteraction, InteractorLink link) {
+    private Interactor getInteractor(EncoreInteraction encoreInteraction, InteractorLink link) {
         Interactor interactor = new Interactor();
 
         switch (link){
@@ -151,10 +152,12 @@ public abstract class AbstractClient implements PsicquicClient {
         }
 
         if(interactorAcc == null) {
-            interactorAcc = interactorAccs.values().iterator().next();
+            if(interactorAccs != null && !interactorAccs.isEmpty()) {
+                interactorAcc = interactorAccs.values().iterator().next();
+            }
         }
 
-        return interactorAcc;
+        return interactorAcc == null ? "" : interactorAcc;
     }
 
     /**
@@ -185,18 +188,16 @@ public abstract class AbstractClient implements PsicquicClient {
      */
     public List<InteractionDetails> getInteractionIdentifier(Map<String, List<String>> interactionAcs) {
         List<InteractionDetails> interactionDetailsList = new ArrayList<>();
-        for (String interactionId : interactionAcs.keySet()) {
-            if(interactionId != null && !interactionId.isEmpty()) {
-                InteractionDetails interactionDetails = new InteractionDetails();
-                interactionDetails.setInteractionAc(interactionId);
-                interactionDetailsList.add(interactionDetails);
-            }
-        }
+        interactionAcs.keySet().stream().filter(interactionId -> interactionId != null && !interactionId.isEmpty()).forEach(interactionId -> {
+            InteractionDetails interactionDetails = new InteractionDetails();
+            interactionDetails.setInteractionAc(interactionId);
+            interactionDetailsList.add(interactionDetails);
+        });
 
         return interactionDetailsList;
     }
 
-    protected boolean isPotencialAlias(String pAlias){
+    private boolean isPotencialAlias(String pAlias){
         Pattern p = Pattern.compile("^([a-zA-Z0-9\\s:-_]{2,15})");
         return p.matcher(pAlias).matches();
     }
