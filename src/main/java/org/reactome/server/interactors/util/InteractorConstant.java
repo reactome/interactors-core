@@ -29,6 +29,7 @@ public class InteractorConstant {
     public static final String BIND_EVIDENCE_URL = "http://bond.unleashedinformatics.com/Action?identifier=bindid&idsearch=##ID##";
     public static final String BINDINGDB_EVIDENCE_URL = "http://www.bindingdb.org/bind/chemsearch/marvin/MolStructure.jsp?monomerid=##ID##";
     public static final String CHEMBL_EVIDENCE_URL = "https://www.ebi.ac.uk/chembldb/index.php/assay/inspect/##ID##";
+    public static final String ZINC_EVIDENCE_URL = "http://zinc15.docking.org/genes/NR4A1/observations/?zinc_id=##ID##";
 
     /** Molecules URL **/
     public static final String INNATEDB_MOLECULE_URL = "http://innatedb.com/getGeneCard.do?id=##ID##";

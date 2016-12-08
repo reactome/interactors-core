@@ -32,7 +32,7 @@ public enum ResourceURL {
     EBIGOANONINTACT(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, false, false),
     VIRHOSTNET(InteractorConstant.DEFAULT_PROTEIN_URL, null, false, false),
     STATIC(InteractorConstant.DEFAULT_PROTEIN_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, true, true),
-    ZINC(InteractorConstant.ZINC_SUBSTANCE_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, false, false),
+    ZINC(InteractorConstant.ZINC_SUBSTANCE_URL, InteractorConstant.DEFAULT_CHEMICAL_URL, true, false),
     CUSTOM(null, null, true, true);
 
     private String protein;
@@ -119,6 +119,7 @@ public enum ResourceURL {
         urls.put("MINT", InteractorConstant.DEFAULT_INTERACTION_URL); // mint can be linked to IntAct
         //urls.put("MINT", "http://mint.bio.uniroma2.it/mint/search/interaction.do?ac=MINT-7905142");
         urls.put("CHEMBL", InteractorConstant.CHEMBL_EVIDENCE_URL);
+        urls.put("ZINC", InteractorConstant.ZINC_EVIDENCE_URL);
 
         return urls;
     }
