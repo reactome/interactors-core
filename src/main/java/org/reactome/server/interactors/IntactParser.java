@@ -372,7 +372,8 @@ public class IntactParser {
     private void parseSynonyms(String value, Interactor interactor) {
         String synonyms = "";
         if (!value.equals("-")) { // not null
-            String[] allAliases = value.split("\\|");
+            // Now the alias values has also | on it and make invalid the following split.
+            String[] allAliases = value.split("\\|(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
             for (String uniqueAlias : allAliases) {
                 // databaseName:value
                 String[] alias = uniqueAlias.split(":", 2);
@@ -382,7 +383,11 @@ public class IntactParser {
                  * We can't save it as CSV, otherwise when splitting the list it will split alias that has
                  * comma.
                  */
-                synonyms = synonyms.concat(alias[1]).concat("$");
+                try {
+                    synonyms = synonyms.concat(alias[1]).concat("$");
+                }catch (ArrayIndexOutOfBoundsException e){
+                    e.printStackTrace();
+                }
 
             }
 
