@@ -7,7 +7,7 @@
     <groupId>org.reactome.server.interactors</groupId>
     <artifactId>interactor-core</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.7</version>
+    <version>1.0.8-SNAPSHOT</version>
     <name>Reactome Interactors Core</name>
 
     <developers>
@@ -19,25 +19,40 @@
         </developer>
     </developers>
 
+    <properties>
+        <micluster.version>1.7.12-SNAPSHOT</micluster.version>
+        <psimitab.version>1.8.5</psimitab.version>
+        <sqlite.version>3.8.11.2</sqlite.version>
+        <supercsv.version>2.4.0</supercsv.version>
+        <reflection.version>0.9.10</reflection.version>
+        <jsap.version>2.1</jsap.version>
+        <concurrent.tree.version>2.5.0</concurrent.tree.version>
+        <jackson.databind.version>2.4.1</jackson.databind.version>
+        <kryo.version>2.22</kryo.version>
+        <logging.version>1.2.3</logging.version>
+        <commons.io.version>2.4</commons.io.version>
+        <junit.version>4.12</junit.version>
+
+        <maven.compiler.version>3.5.1</maven.compiler.version>
+        <jdk.version>1.8</jdk.version>
+        <maven.source.version>2.6</maven.source.version>
+        <maven.assembly.version>3.4</maven.assembly.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
-
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-        </dependency>
-
         <!-- MI Cluster dependency -->
         <dependency>
             <groupId>uk.ac.ebi.enfin.mi.cluster</groupId>
             <artifactId>micluster</artifactId>
-            <version>1.7.11</version>
+            <version>${micluster.version}</version>
         </dependency>
 
         <dependency>
             <groupId>psidev.psi.mi</groupId>
             <artifactId>psimitab</artifactId>
-            <version>1.8.5</version>
+            <version>${psimitab.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -50,7 +65,7 @@
         <dependency>
             <groupId>com.esotericsoftware.kryo</groupId>
             <artifactId>kryo</artifactId>
-            <version>2.22</version>
+            <version>${kryo.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -58,7 +73,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.4.1</version>
+            <version>${jackson.databind.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -66,48 +81,56 @@
         <dependency>
             <groupId>com.googlecode.concurrent-trees</groupId>
             <artifactId>concurrent-trees</artifactId>
-            <version>2.5.0</version>
+            <version>${concurrent.tree.version}</version>
         </dependency>
 
         <!-- JSAP command line parameters parser -->
         <dependency>
             <groupId>com.martiansoftware</groupId>
             <artifactId>jsap</artifactId>
-            <version>2.1</version>
+            <version>${jsap.version}</version>
         </dependency>
 
         <!-- SQLite JDBC -->
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.8.11.2</version>
+            <version>${sqlite.version}</version>
         </dependency>
 
         <!-- JUNIT -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${junit.version}</version>
         </dependency>
 
+        <!-- Logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>LATEST</version>
+            <version>${logging.version}</version>
         </dependency>
 
         <!-- SuperCSV -->
         <dependency>
             <groupId>net.sf.supercsv</groupId>
             <artifactId>super-csv</artifactId>
-            <version>2.4.0</version>
+            <version>${supercsv.version}</version>
         </dependency>
 
         <!-- Reflections -->
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.10</version>
+            <version>${reflection.version}</version>
+        </dependency>
+
+        <!-- Commons -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
         </dependency>
 
     </dependencies>
