@@ -372,7 +372,7 @@ public class IntactParser {
     private void parseSynonyms(String value, Interactor interactor) {
         String synonyms = "";
         if (!value.equals("-")) { // not null
-            // Now the alias values has also | on it and make invalid the following split.
+            // Now the alias has also | on it and make invalid the following split.
             String[] allAliases = value.split("\\|(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
             for (String uniqueAlias : allAliases) {
                 // databaseName:value
