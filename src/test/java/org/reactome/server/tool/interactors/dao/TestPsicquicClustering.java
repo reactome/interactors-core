@@ -99,7 +99,7 @@ public class TestPsicquicClustering {
                         System.out.println("Accession: " + accKey + " => " + interactionMaps.get(accKey).size());
 
                         List<Interaction> interactions = interactionMaps.get(accKey);
-                        /** Remove from output if there is no interaction **/
+                        // Remove from output if there is no interaction
                         if (interactions.size() == 0) {
                             continue;
                         }
@@ -107,10 +107,10 @@ public class TestPsicquicClustering {
                         for (Interaction interaction : interactions) {
                             Toolbox.getAccessionURL(interaction.getInteractorB().getAcc(), res);
 
-                            /** This list holds evidences that we are going to use to build the evidences URL. **/
+                            // This list holds evidences that we are going to use to build the evidences URL.
                             List<String> evidencesWithDbNames = new ArrayList<>();
 
-                            /** Set Evidences as the others Interactions identifiers **/
+                            // Set Evidences as the others Interactions identifiers
                             if (interaction.getInteractionDetailsList() != null) {
                                 for (InteractionDetails interactionDetail : interaction.getInteractionDetailsList()) {
                                     String evidence = interactionDetail.getInteractionAc();
@@ -159,7 +159,7 @@ public class TestPsicquicClustering {
         String accession = "P00533";
 
         try {
-            /**
+            /*
              * 3.1 If the interactors list is empty, you may want to check the clustering and the scores.
              * To do so, go to {@link org.reactome.server.interactors.psicquic.impl.InteractionClusterImpl.getInteractionFromCustomPsicquic()}
              * and check the interactionMapping.

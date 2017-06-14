@@ -15,17 +15,23 @@ import org.reactome.server.interactors.psicquic.PsicquicClient;
 import org.reactome.server.interactors.psicquic.PsicquicDAO;
 import org.reactome.server.interactors.psicquic.clients.ClientFactory;
 import org.reactome.server.interactors.util.InteractorConstant;
+import org.reactome.server.interactors.util.PsimiTabReaderRunnable;
 import org.reactome.server.interactors.util.Toolbox;
 import psidev.psi.mi.tab.PsimiTabException;
 import psidev.psi.mi.tab.PsimiTabReader;
 import psidev.psi.mi.tab.model.BinaryInteraction;
 import uk.ac.ebi.enfin.mi.cluster.EncoreInteraction;
 import uk.ac.ebi.enfin.mi.cluster.score.InteractionClusterScore;
+import uk.ac.ebi.enfin.mi.cluster.score.InteractionClusterScoreCache;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -54,7 +60,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
             // Retrieve results
             Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
-            List<Interaction> interactions = getClusteredInteraction(acc,interactionMapping,interactionClusterScore,psicquicClient);
+            List<Interaction> interactions = getClusteredInteraction(acc, interactionMapping, interactionClusterScore, psicquicClient);
             interactions = Toolbox.removeDuplicatedInteractor(interactions);
             Collections.sort(interactions);
             Collections.reverse(interactions);
@@ -73,7 +79,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
             // Retrieve results
             Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
-            List<Interaction> interactions = getClusteredInteraction(acc,interactionMapping,interactionClusterScore,psicquicClient);
+            List<Interaction> interactions = getClusteredInteraction(acc, interactionMapping, interactionClusterScore, psicquicClient);
             interactions = Toolbox.removeDuplicatedInteractor(interactions);
             Collections.sort(interactions);
             Collections.reverse(interactions);
@@ -83,7 +89,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
         return ret;
     }
 
-    private List<Interaction> getClusteredInteraction(String acc, Map<Integer, EncoreInteraction> interactionMapping, InteractionClusterScore interactionClusterScore, PsicquicClient psicquicClient){
+    private List<Interaction> getClusteredInteraction(String acc, Map<Integer, EncoreInteraction> interactionMapping, InteractionClusterScore interactionClusterScore, PsicquicClient psicquicClient) {
         List<Interaction> interactions = new ArrayList<>();
 
         for (Integer key : interactionMapping.keySet()) {
@@ -234,5 +240,75 @@ public class InteractionClusterImpl implements PsicquicDAO {
         interactionClusterScore.runService();
 
         return interactionClusterScore;
+    }
+
+    @Override
+    public Map<String, List<Interaction>> getInteraction(String resource, Collection<String> accs, int numberOfThreads, boolean cache) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException, PsicquicResourceNotFoundException {
+        Map<String, List<Interaction>> ret = new HashMap<>();
+        // Keeps a cache of MITerms.
+        InteractionClusterScoreCache interactionClusterScoreCache = new InteractionClusterScoreCache();
+
+        // Resource is the same, there is no need do be in the loop.
+        ServiceType service = getPsicquicResource(resource);
+
+        PsicquicClient psicquicClient = ClientFactory.getClient(resource);
+        String databaseNames = psicquicClient.getDatabaseNames();
+
+        /*
+         *  Multi-thread mechanism to get the RAW data from the given resource.
+         */
+        // 1) Get Raw data
+        ConcurrentHashMap<String, List<BinaryInteraction>> proteinInteractionsMap = new ConcurrentHashMap<>();
+        ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+        for (String acc : accs) {
+            try {
+                URL url = new URL(service.getRestUrl().concat("interactor/").concat(URLEncoder.encode(acc, "UTF-8")));
+                Runnable worker = new PsimiTabReaderRunnable(acc, url, proteinInteractionsMap);
+                executor.submit(worker);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        executor.shutdown();
+
+        try {
+            // TODO Should we wait MAX_VALUE ?! Research needed.
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            // TODO Add some logs in here ?
+        }
+
+        // 2) Cluster
+        for (String acc : proteinInteractionsMap.keySet()) {
+            InteractionClusterScore interactionClusterScore = new InteractionClusterScore();
+            if(cache){
+                interactionClusterScore = new InteractionClusterScore(interactionClusterScoreCache);
+            }
+            interactionClusterScore.setBinaryInteractionIterator(proteinInteractionsMap.get(acc).iterator());
+            interactionClusterScore.setMappingIdDbNames(databaseNames);
+            interactionClusterScore.runService();
+
+            // Build results
+            Map<Integer, EncoreInteraction> interactionMapping = interactionClusterScore.getInteractionMapping();
+            List<Interaction> interactions = getClusteredInteraction(acc, interactionMapping, interactionClusterScore, psicquicClient);
+            interactions = Toolbox.removeDuplicatedInteractor(interactions);
+            Collections.sort(interactions);
+            Collections.reverse(interactions);
+
+            ret.put(acc, interactions);
+        }
+
+        return ret;
+    }
+
+    private ServiceType getPsicquicResource(String resource) throws PsicquicRegistryClientException, PsicquicResourceNotFoundException, PsicquicQueryException {
+        PsicquicRegistryClient registryClient = new DefaultPsicquicRegistryClient();
+        ServiceType service = registryClient.getService(resource);
+
+        if (service == null) {
+            throw new PsicquicResourceNotFoundException(resource + " not found");
+        }
+
+        return service;
     }
 }

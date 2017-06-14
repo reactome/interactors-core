@@ -44,4 +44,7 @@ public class PsicquicService {
         return psicquicDAO.countInteraction(resource, accs);
     }
 
+    public Map<String, List<Interaction>> getInteractions(String resource, Collection<String> accs, int numberOfThreads, boolean cache) throws PsicquicQueryException, PsicquicResourceNotFoundException, PsicquicRegistryClientException, PsimiTabException {
+        return psicquicDAO.getInteraction(resource, accs, numberOfThreads, cache);
+    }
 }

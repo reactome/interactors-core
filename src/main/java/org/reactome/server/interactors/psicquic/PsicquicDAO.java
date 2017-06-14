@@ -26,4 +26,5 @@ public interface PsicquicDAO {
 
     List<PsicquicResource> getResources() throws PsicquicInteractionClusterException;
 
+    Map<String, List<Interaction>> getInteraction(String resource, Collection<String> accs, int numberOfThreads, boolean cache) throws PsicquicQueryException, PsimiTabException, PsicquicRegistryClientException, PsicquicResourceNotFoundException;
 }
