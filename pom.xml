@@ -7,7 +7,7 @@
     <groupId>org.reactome.server.interactors</groupId>
     <artifactId>interactor-core</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.8</version>
+    <version>1.0.9-SNAPSHOT</version>
     <name>Reactome Interactors Core</name>
 
     <developers>
@@ -20,7 +20,7 @@
     </developers>
 
     <properties>
-        <micluster.version>1.7.12-SNAPSHOT</micluster.version>
+        <micluster.version>1.7.13</micluster.version>
         <psimitab.version>1.8.5</psimitab.version>
         <sqlite.version>3.8.11.2</sqlite.version>
         <supercsv.version>2.4.0</supercsv.version>
