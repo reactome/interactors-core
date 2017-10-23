@@ -10,6 +10,7 @@ import java.sql.SQLException;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 public class InteractorsDatabase {
+
     private Connection connection;
 
     public InteractorsDatabase(String fileName) throws SQLException {
@@ -33,5 +34,15 @@ public class InteractorsDatabase {
 
     public Connection getConnection(){
         return connection;
+    }
+
+    public void closeConnection() {
+        try {
+            if(connection!=null)  connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            connection = null;
+        }
     }
 }
