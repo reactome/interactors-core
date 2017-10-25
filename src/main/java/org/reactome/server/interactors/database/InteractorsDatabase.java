@@ -15,7 +15,7 @@ import java.util.Enumeration;
  */
 public class InteractorsDatabase {
 
-    static final Logger logger = LoggerFactory.getLogger("InteractorsDatabase");
+    private static final Logger logger = LoggerFactory.getLogger("InteractorsDatabase");
 
     private Connection connection;
 
@@ -46,7 +46,7 @@ public class InteractorsDatabase {
         try {
             if(connection!=null)  connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("The connexion was expected to be active. Instead " + e.getMessage());
         } finally {
             connection = null;
 
