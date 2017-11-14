@@ -7,7 +7,7 @@
     <groupId>org.reactome.server.interactors</groupId>
     <artifactId>interactor-core</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.10</version>
+    <version>1.0.11</version>
     <name>Reactome Interactors Core</name>
 
     <developers>
@@ -57,6 +57,11 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <!-- Excluded to use the commons-io -->
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>com.springsource.org.apache.commons.io</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -130,7 +135,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
+            <version>2.5</version>
         </dependency>
 
     </dependencies>
