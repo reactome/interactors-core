@@ -73,7 +73,7 @@ public class IntactParser {
     private InteractorResourceService interactorResourceService;
     private InteractionResourceService interactionResourceService;
 
-    private IntactParser(InteractorsDatabase database) {
+    public IntactParser(InteractorsDatabase database) {
         interactionParserService = new InteractionParserService(database);
         interactorResourceService = new InteractorResourceService(database);
         interactionResourceService = new InteractionResourceService(database);
@@ -88,7 +88,7 @@ public class IntactParser {
     /*
      * Parsing the file
      */
-    public void parser(String file) {
+    private void parser(String file) {
         int totalLinesParsed = 1;
         int totalLinesIncluded = 0;
         int totalIgnoredLines = 0;
@@ -483,10 +483,35 @@ public class IntactParser {
     }
 
     /**
+     * Retrieves the IntAct file, parses it and creates an in-memory database
+     *
+     * @return an InteractorsDatabase in-memory instance
+     * @throws SQLException thrown when there is a problem connecting to the in-memory database
+     * @throws IOException thrown when there is a problem accessing to the IntAct file
+     */
+    public static InteractorsDatabase getInteractors() throws SQLException, IOException {
+        long start = System.currentTimeMillis();
+        logger.info("Start Parsing IntAct File");
+
+        InteractorsDatabase interactors = new InteractorsDatabase(":memory");
+        InteractorDatabaseGenerator.create(interactors.getConnection(), false);
+        IntactParser intactParser = new IntactParser(interactors);
+        intactParser.cacheResources();
+
+        String file = intactParser.downloadFile(INTACT_FILE_URL, "/tmp");
+        logger.info("File has been download. Parse will be executed pointing to this file: " + file);
+
+        intactParser.parser(file);
+        logger.info("End IntAct File parsing. Elapsed Time [{}.ms]", (System.currentTimeMillis() - start));
+
+        return interactors;
+    }
+
+    /**
      * Download the file from Intact server.
      *
      * @return the file path
-     * @throws IOException
+     * @throws IOException thrown when there is a problem accessing to the IntAct file
      */
     private String downloadFile(String urlFtp, String directory) throws IOException {
         logger.info("Downloading IntAct File...");
