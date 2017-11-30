@@ -20,7 +20,7 @@ public class InteractorDatabaseGenerator {
         try {
             Statement statement = connection.createStatement();
 
-            /** Create our tables **/
+            // Create our tables
             logger.info("Creating table Interactor_Resource.");
             statement.executeUpdate(QueryStatement.CREATE_TABLE_INTERACTOR_RESOURCE);
 
@@ -36,14 +36,14 @@ public class InteractorDatabaseGenerator {
             logger.info("Creating participants");
             statement.executeUpdate(QueryStatement.CREATE_TABLE_INTERACTION_DETAILS);
 
-            /** Create indexes **/
+            // Create indexes
             logger.info("Creating indexes");
             statement.executeUpdate(QueryStatement.CREATE_INTERACTOR_ACC_INDEX);
             statement.executeUpdate(QueryStatement.CREATE_INTERACTOR_A_INDEX);
             statement.executeUpdate(QueryStatement.CREATE_INTERACTOR_B_INDEX);
             statement.executeUpdate(QueryStatement.CREATE_INTERACTION_DETAILS_ID_INDEX);
 
-            /** Pre-populate tables **/
+            // Pre-populate tables
             logger.info("Populate table interaction resource");
             statement.executeUpdate(QueryStatement.INSERT_INTERACTION_RESOURCE_STATIC);
 
