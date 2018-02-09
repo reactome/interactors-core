@@ -54,8 +54,11 @@ public class InteractorDatabaseGenerator {
 
             logger.info("Populate table interactor resource");
             statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_UNDEFINED);
+            statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_INTACT);
             statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_UNIPROT);
             statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_CHEBI);
+            statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_ENSEMBL);
+            statement.executeUpdate(QueryStatement.INSERT_INTERACTOR_RESOURCE_EMBL);
 
             logger.info("Database has been created properly");
 

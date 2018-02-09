@@ -27,20 +27,14 @@ import java.util.regex.Pattern;
 public class IntactParser {
 
     private enum ParserIndex {
-
         ID_INTERACTOR_A(0),
         ID_INTERACTOR_B(1),
         ALTERNATIVE_INTERACTOR_A(2),
         ALTERNATIVE_INTERACTOR_B(3),
         ALIAS_INTERACTOR_A(4),
         ALIAS_INTERACTOR_B(5),
-        //INTERACTION_DETECTION_METHOD(6),
-        //PUBLICATION_1ST_AUTHOR(7),
-        //PUBLICATION_IDENTIFIER(8),
         TAXID_INTERACTOR_A(9),
         TAXID_INTERACTOR_B(10),
-        //INTERACTION_TYPE(11),
-        //SOURCE_DATABASE(12),
         INTERACTION_IDENTIFIER(13),
         CONFIDENCE_VALUE(14);
 
@@ -73,10 +67,19 @@ public class IntactParser {
     private InteractorResourceService interactorResourceService;
     private InteractionResourceService interactionResourceService;
 
-    public IntactParser(InteractorsDatabase database) {
+    private static Map<String, String> resourceMapping = new HashMap<>();
+
+    private IntactParser(InteractorsDatabase database) {
         interactionParserService = new InteractionParserService(database);
         interactorResourceService = new InteractorResourceService(database);
         interactionResourceService = new InteractionResourceService(database);
+    }
+
+    static {
+        resourceMapping.put("uniprotkb", "UniProt");
+        resourceMapping.put("chebi", "ChEBI");
+        resourceMapping.put("ensemblgenomes", "ENSEMBL");
+        resourceMapping.put("ddbj/embl/genbank", "EMBL");
     }
 
     // Easy access to the Resources.
@@ -85,7 +88,69 @@ public class IntactParser {
 
     private Set<Interaction> interactions = new HashSet<>();
 
-    /*
+    /**
+     * This is a standalone process that will generate an interactors database and parse the IntAct static file
+     */
+    public static void main(String[] args) throws Exception {
+        long start = System.currentTimeMillis();
+        logger.info("Start Parsing IntAct File");
+
+        SimpleJSAP jsap = new SimpleJSAP(
+                IntactParser.class.getName(),
+                "A tool for parsing Intact file and store information into a SQLite database",
+                new Parameter[]{
+                        new FlaggedOption("file", JSAP.STRING_PARSER, "/tmp/intact-micluster.txt", JSAP.NOT_REQUIRED, 'f', "file",
+                                "IntAct file to be parsed")
+                        , new FlaggedOption("url", JSAP.STRING_PARSER, INTACT_FILE_URL, JSAP.NOT_REQUIRED, 'u', "url",
+                        "IntAct file URL")
+                        , new QualifiedSwitch("download", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'd', "download",
+                        "Download IntAct File")
+                        , new FlaggedOption("destination", JSAP.STRING_PARSER, "/tmp", JSAP.NOT_REQUIRED, 't', "destination",
+                        "Folder to save the downloaded file")
+                        , new FlaggedOption("interactors-database-path", JSAP.STRING_PARSER, null, JSAP.REQUIRED, 'g', "interactors-database-path",
+                        "Interactor Database Path")
+                }
+        );
+
+        JSAPResult config = jsap.parse(args);
+        if (jsap.messagePrinted()) System.exit(1);
+
+        // Check if database exists and create a new one
+        String database = config.getString("interactors-database-path");
+        try {
+            File dbFile = new File(database);
+            if(dbFile.exists()){
+                logger.error("Database [{}] already exists in this location. Please inform a different database location or name.", database);
+                System.exit(1);
+            }
+
+            InteractorDatabaseGenerator.create(new InteractorsDatabase(database).getConnection());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Open database connection.
+        InteractorsDatabase interactors = new InteractorsDatabase(database);
+        IntactParser intactParser = new IntactParser(interactors);
+        intactParser.cacheResources();
+
+        String file = config.getString("file");
+        boolean download = config.getBoolean("download");
+
+        if (download) {
+            String url = config.getString("url");
+            String downloadedFile = intactParser.downloadFile(url, config.getString("destination"));
+            logger.info("File has been download. Parse will be executed pointing to this file: " + downloadedFile);
+            file = downloadedFile;
+        }
+
+        intactParser.parser(file);
+
+        logger.info("Database has been populate. The database size is [{} MB]", new File(database).length() / (1024L * 1024L));
+        logger.info("End IntAct File parsing. Elapsed Time [{}.ms]", (System.currentTimeMillis() - start));
+    }
+
+    /**
      * Parsing the file
      */
     private void parser(String file) {
@@ -301,22 +366,27 @@ public class IntactParser {
      * Based on the alternative id - retrieves the interactor resource
      */
     private void parseAlternativeIds(String value, Interactor interactor) {
-        if (!value.equals("-")) { // not null
-            // Considering only the first split. Otherwise ChEBI id breaks the split. e.g chebi:CHEBI:23423
-            String[] alternativeId = value.split(":", 2);
-            interactor.setAcc(alternativeId[1]);
+        if (value.equals("-")) { // In this case the alternative identifier is ONLY a dash "-"
+            // In case alternative ID is null we will set the IntAct id as the accession. This is done in the IntactPortal
+            interactor.setAcc("IntAct:" + getRawIdentifier(interactor.getIntactId()));
 
-            // Set interactor resource id
-            InteractorResource interactorResource = interactorResourceMap.get(alternativeId[0]);
+            InteractorResource interactorResource = interactorResourceMap.get("IntAct".toLowerCase());
             if (interactorResource != null) {
                 interactor.setInteractorResourceId(interactorResource.getId());
             }
 
-        } else {
-            // In case alternative ID is null we will set the IntAct id as the accession. This is done in the IntactPortal
-            interactor.setAcc(value);
-
             parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Interactor alternative ID(s) are null.");
+        } else {
+            // Considering only the first split. Otherwise ChEBI id breaks the split. e.g chebi:CHEBI:23423
+            String[] alternativeId = value.split(":", 2);
+            String databaseName = getDatabaseName(alternativeId[0]);
+            interactor.setAcc(databaseName + ":" + getRawIdentifier(alternativeId[1]));
+
+            // Set interactor resource id
+            InteractorResource interactorResource = interactorResourceMap.get(databaseName.toLowerCase());
+            if (interactorResource != null) {
+                interactor.setInteractorResourceId(interactorResource.getId());
+            }
         }
     }
 
@@ -346,7 +416,8 @@ public class IntactParser {
 
                 // If alternatives IDs are null, try to figure the resource out in the alias
                 if (interactor.getInteractorResourceId() == 0) {
-                    InteractorResource interactorResource = interactorResourceMap.get(alias[0]);
+                    String resourceName = getDatabaseName(alias[0]);
+                    InteractorResource interactorResource = interactorResourceMap.get(resourceName.toLowerCase());
                     if (interactorResource != null) {
                         interactor.setInteractorResourceId(interactorResource.getId());
                     }
@@ -362,7 +433,7 @@ public class IntactParser {
         // Some cases like EBI-7121639 there is no resource
         if (interactor.getInteractorResourceId() == 0) {
             parserErrorMessages.add("The Interactor ID [" + interactor.getIntactId() + "] does not have alternate identifiers. Can't get Resource.");
-            InteractorResource interactorResource = interactorResourceMap.get("undefined");
+            InteractorResource interactorResource = interactorResourceMap.get("IntAct".toLowerCase());
             if (interactorResource != null) {
                 interactor.setInteractorResourceId(interactorResource.getId());
             }
@@ -420,66 +491,15 @@ public class IntactParser {
         }
     }
 
-    /**
-     * This is a standalone process that will generate an interactors database and parse the IntAct static file
-     */
-    public static void main(String[] args) throws Exception {
-        long start = System.currentTimeMillis();
-        logger.info("Start Parsing IntAct File");
+    private static String getDatabaseName(String resource) {
+        String rtn = resourceMapping.get(resource.toLowerCase().trim());
+        if (rtn != null) return rtn;
+        return resource;
+    }
 
-        SimpleJSAP jsap = new SimpleJSAP(
-                IntactParser.class.getName(),
-                "A tool for parsing Intact file and store information into a SQLite database",
-                new Parameter[]{
-                        new FlaggedOption("file", JSAP.STRING_PARSER, "/tmp/intact-micluster.txt", JSAP.NOT_REQUIRED, 'f', "file",
-                                "IntAct file to be parsed")
-                        , new FlaggedOption("url", JSAP.STRING_PARSER, INTACT_FILE_URL, JSAP.NOT_REQUIRED, 'u', "url",
-                                "IntAct file URL")
-                        , new QualifiedSwitch("download", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'd', "download",
-                                "Download IntAct File")
-                        , new FlaggedOption("destination", JSAP.STRING_PARSER, "/tmp", JSAP.NOT_REQUIRED, 't', "destination",
-                                "Folder to save the downloaded file")
-                        , new FlaggedOption("interactors-database-path", JSAP.STRING_PARSER, null, JSAP.REQUIRED, 'g', "interactors-database-path",
-                                "Interactor Database Path")
-                }
-        );
-
-        JSAPResult config = jsap.parse(args);
-        if (jsap.messagePrinted()) System.exit(1);
-
-        // Check if database exists and create a new one
-        String database = config.getString("interactors-database-path");
-        try {
-            File dbFile = new File(database);
-            if(dbFile.exists()){
-                logger.error("Database [{}] already exists in this location. Please inform a different database location or name.", database);
-                System.exit(1);
-            }
-
-            InteractorDatabaseGenerator.create(new InteractorsDatabase(database).getConnection());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        // Open database connection.
-        InteractorsDatabase interactors = new InteractorsDatabase(database);
-        IntactParser intactParser = new IntactParser(interactors);
-        intactParser.cacheResources();
-
-        String file = config.getString("file");
-        boolean download = config.getBoolean("download");
-
-        if (download) {
-            String url = config.getString("url");
-            String downloadedFile = intactParser.downloadFile(url, config.getString("destination"));
-            logger.info("File has been download. Parse will be executed pointing to this file: " + downloadedFile);
-            file = downloadedFile;
-        }
-
-        intactParser.parser(file);
-
-        logger.info("Database has been populate. The database size is [{} MB]", new File(database).length() / (1024L * 1024L));
-        logger.info("End IntAct File parsing. Elapsed Time [{}.ms]", (System.currentTimeMillis() - start));
+    private static String getRawIdentifier(String identifier) {
+        if (identifier.contains(":")) return identifier.split(":")[1];
+        return identifier;
     }
 
     /**
@@ -534,25 +554,20 @@ public class IntactParser {
      */
     private void cacheResources() {
         logger.info("Caching Interaction and Interactor Resources from DB");
-
         try {
-
             // Load INTERACTOR resources (chebi, uniprot)
             List<InteractorResource> interactorResources = interactorResourceService.getAll();
             for (InteractorResource interactorResource : interactorResources) {
                 interactorResourceMap.put(interactorResource.getName().toLowerCase(), interactorResource);
             }
-
             //  Load INTERACTION resources (intact, ...)
             List<InteractionResource> interactionResources = interactionResourceService.getAll();
             for (InteractionResource interactionResource : interactionResources) {
                 interactionResourceMap.put(interactionResource.getName().toLowerCase(), interactionResource);
             }
-
         } catch (SQLException e) {
             logger.error("Error retrieving resources from database", e);
         }
-
         logger.info("Caching is Done. InteractionResource [{}] and Interactor Resources[{}]", interactionResourceMap.size(), interactorResourceMap.size());
     }
 }

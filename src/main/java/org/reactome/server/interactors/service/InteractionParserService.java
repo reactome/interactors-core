@@ -38,10 +38,10 @@ public class InteractionParserService {
         interactionDetailsDAO = new StaticInteractionDetails(database);
     }
 
-    /** Creating a pre-sized list of interactions. Persist a batch of 1000 interactions **/
+    // Creating a pre-sized list of interactions. Persist a batch of 1000 interactions
     public List<Interaction> interactions = new ArrayList<>(1000);
 
-    /** Creating a pre-sized list of interactions. Persist a batch of 1000 interactions **/
+    // Creating a pre-sized list of interactions. Persist a batch of 1000 interactions
     public List<InteractionDetails> interactionsDetails = new ArrayList<>(15);
 
     /**
@@ -60,7 +60,7 @@ public class InteractionParserService {
             Interactor interactorA = interaction.getInteractorA();
             Interactor interactorB = interaction.getInteractorB();
 
-            /** Don't need a return, values are being set in reference **/
+            // Don't need a return, values are being set in reference
             logger.debug("Searching InteractorA and InteractorB in the Database.");
             interactorDAO.searchByAccessions(interactorA, interactorB);
 
@@ -81,7 +81,7 @@ public class InteractionParserService {
             interactions.add(interaction);
         }
 
-        /** go to db, create and set Ids. **/
+        // go to db, create and set Ids.
         interactionDAO.create(interactions);
 
         for (Interaction interaction : interactions) {
@@ -95,7 +95,7 @@ public class InteractionParserService {
 
         interactionDetailsDAO.create(interactionsDetails);
 
-        /** Clean up list, for next round **/
+        // Clean up list, for next round
         interactions.clear();
         interactionsDetails.clear();
 

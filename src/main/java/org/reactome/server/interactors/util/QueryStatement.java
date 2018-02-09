@@ -47,8 +47,11 @@ public class QueryStatement {
     /** INSERTS **/
     /** Example:EBI-7121639 **/
     public static String INSERT_INTERACTOR_RESOURCE_UNDEFINED = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('undefined','do-not-have-url')";
-    public static String INSERT_INTERACTOR_RESOURCE_UNIPROT = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('UniProtKB','http://www.uniprot.org/uniprot/##ID##')";
+    public static String INSERT_INTERACTOR_RESOURCE_INTACT = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('IntAct','https://www.ebi.ac.uk/intact/query/##ID##')";
+    public static String INSERT_INTERACTOR_RESOURCE_UNIPROT = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('UniProt','http://www.uniprot.org/uniprot/##ID##')";
     public static String INSERT_INTERACTOR_RESOURCE_CHEBI = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('ChEBI','https://www.ebi.ac.uk/chebi/searchId.do?chebiId=##ID##')";
+    public static String INSERT_INTERACTOR_RESOURCE_ENSEMBL = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('ENSEMBL','http://ensemblgenomes.org/id/##ID##')";
+    public static String INSERT_INTERACTOR_RESOURCE_EMBL = "INSERT OR REPLACE INTO INTERACTOR_RESOURCE (NAME, URL) VALUES ('EMBL','http://www.ebi.ac.uk/ena/data/view/##ID##')";
 
     public static String INSERT_INTERACTION_RESOURCE_STATIC = "INSERT OR REPLACE INTO INTERACTION_RESOURCE (NAME, URL) VALUES ('static','http://www.ebi.ac.uk/intact/interaction/##ID##')";
 
