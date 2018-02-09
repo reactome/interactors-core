@@ -116,8 +116,8 @@ public class StaticInteraction implements InteractionDAO {
 
             for (String acc : accs) {
                 PreparedStatement pstm = connection.prepareStatement(query);
-                pstm.setString(1, acc.toUpperCase());
-                pstm.setString(2, acc.toUpperCase());
+                pstm.setString(1, acc);
+                pstm.setString(2, acc);
                 pstm.setLong(3, resourceId);
 
                 ResultSet rs = pstm.executeQuery();
@@ -154,14 +154,14 @@ public class StaticInteraction implements InteractionDAO {
                                 "SELECT   COUNT(*) AS count_, INTERACTORA.acc AS accession " +
                                 "FROM     INTERACTION, INTERACTOR AS INTERACTORA " +
                                 "WHERE    INTERACTORA.ID = INTERACTION.INTERACTOR_A " +
-                                "AND      INTERACTION.INTERACTOR_A IN (select id from interactor where ACC in (" + csvValues.toUpperCase() + ")) " +
+                                "AND      INTERACTION.INTERACTOR_A IN (select id from interactor where ACC in (" + csvValues + ")) " +
                                 "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
                                 "GROUP BY INTERACTORA.acc " +
                                 "UNION ALL " +
                                 "SELECT   COUNT(*) AS count_, INTERACTORB.acc AS accession " +
                                 "FROM     INTERACTION, INTERACTOR AS INTERACTORB " +
                                 "WHERE    INTERACTORB.ID = INTERACTION.INTERACTOR_B " +
-                                "AND      INTERACTION.INTERACTOR_B IN (select id from interactor where ACC in (" + csvValues.toUpperCase() + ")) " +
+                                "AND      INTERACTION.INTERACTOR_B IN (select id from interactor where ACC in (" + csvValues + ")) " +
                                 "AND      INTERACTION.INTERACTOR_A <> INTERACTION.INTERACTOR_B " +
                                 "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
                                 "GROUP BY INTERACTORB.acc " +

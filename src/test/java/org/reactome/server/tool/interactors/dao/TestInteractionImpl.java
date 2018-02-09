@@ -30,7 +30,7 @@ public class TestInteractionImpl {
 
     private InteractionService interactionService;
 
-    private final String ACCESSION = "Q13501";
+    private final String ACCESSION = "UniProt:Q13501";
     private final Long RESOURCE_ID = 1L;
 
     @Before
