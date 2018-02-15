@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class InteractionResourceService {
 
-    public InteractionResourceDAO interactionResourceDAO;
+    private InteractionResourceDAO interactionResourceDAO;
 
     public InteractionResourceService(InteractorsDatabase database){
         interactionResourceDAO = new StaticInteractionResource(database);

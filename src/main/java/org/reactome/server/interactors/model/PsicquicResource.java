@@ -3,7 +3,7 @@ package org.reactome.server.interactors.model;
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-
+@SuppressWarnings("all")
 public class PsicquicResource implements Comparable<PsicquicResource> {
 
     private String name;

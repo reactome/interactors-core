@@ -10,39 +10,25 @@ import java.util.Objects;
 
 public class Interactor {
 
-    /**
-     * Internal Id - autoincrement
-     */
+    // Internal Id - autoincrement
     private Long id;
 
-    /**
-     * This is the intact id
-     */
+    // This is the intact id
     private String intactId;
 
-    /**
-     * Intact
-     */
+    // Intact, UniProt, ChEBI
     private Long interactorResourceId = 0L;
 
-    /**
-     * Alternative ID for ID. In general they are UniprotID or RefSeq
-     */
+    // Alternative ID for ID. In general they are UniprotID or RefSeq
     private String acc;
 
-    /**
-     * The alias is basically the protein name. A text representation for the protein.
-     */
+    // The alias is the protein name. It is the FIRST in the Aliases slot
     private String alias;
 
-    /**
-     * Taxonomy ID
-     */
+    // Taxonomy ID
     private Integer taxid;
 
-    /**
-     * Synonyms list
-     */
+    // Synonyms list -> remove accession if present and remove the entry that was previously assigned to alias. Unique
     private String synonyms;
 
     public Long getId() {
@@ -82,11 +68,6 @@ public class Interactor {
         this.interactorResourceId = interactorResourceId;
     }
 
-    //    public String getAlias() {
-//        if (Objects.equals(alias, acc)) return null;
-//        return alias == null ? null : alias.replace("_HUMAN", "").replaceAll("_", " ");
-//    }
-
     /**
      * Get alias returns the plain alias value. We cannot parse it here,
      * for the reason this alias will be indexed.
@@ -106,6 +87,7 @@ public class Interactor {
      * @param removeOnlyHuman this flag controls either removing _HUMAN or _ANYSPECIES in the alias.
      * @return alias without species
      */
+    @SuppressWarnings("unused")
     public String getAliasWithoutSpecies(boolean removeOnlyHuman) {
         String newAlias = alias;
         if (Objects.equals(alias, acc)) return null;

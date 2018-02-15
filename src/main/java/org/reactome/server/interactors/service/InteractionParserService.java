@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class InteractionParserService {
 
-    final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
+    private final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
 
     private InteractionDAO interactionDAO;
     private InteractorDAO interactorDAO;
@@ -42,7 +42,7 @@ public class InteractionParserService {
     public List<Interaction> interactions = new ArrayList<>(1000);
 
     // Creating a pre-sized list of interactions. Persist a batch of 1000 interactions
-    public List<InteractionDetails> interactionsDetails = new ArrayList<>(15);
+    private List<InteractionDetails> interactionsDetails = new ArrayList<>(15);
 
     /**
      * Saving interactions in the DB requires 4 Steps.
@@ -51,7 +51,6 @@ public class InteractionParserService {
      * 3-Create InteractionDetails in a batch inserter.
      *    (One interaction can have multiple InteractionID - interaction details holds this)
      *
-     * @throws SQLException
      */
     public void save(List<Interaction> interactionList) throws SQLException {
         logger.debug("Interactions bulk saving");

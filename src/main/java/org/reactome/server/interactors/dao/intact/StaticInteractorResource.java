@@ -19,11 +19,10 @@ import java.util.List;
 
 public class StaticInteractorResource implements InteractorResourceDAO {
 
-    final Logger logger = LoggerFactory.getLogger(StaticInteractorResource.class);
+    private final Logger logger = LoggerFactory.getLogger(StaticInteractorResource.class);
 
     private Connection connection;
 
-    private String TABLE = "INTERACTOR_RESOURCE";
     private String ALL_COLUMNS = "NAME, URL";
     private String ALL_COLUMNS_SEL = "ID, ".concat(ALL_COLUMNS);
 
@@ -33,9 +32,8 @@ public class StaticInteractorResource implements InteractorResourceDAO {
 
     public List<InteractorResource> getAll() throws SQLException {
         logger.debug("Retrieving all InteractorResources");
-
+        final String TABLE = "INTERACTOR_RESOURCE";
         List<InteractorResource> ret = new ArrayList<>();
-
         String query = "SELECT " + ALL_COLUMNS_SEL +
                         " FROM " + TABLE;
 
@@ -45,7 +43,6 @@ public class StaticInteractorResource implements InteractorResourceDAO {
             InteractorResource interactorResource = buildInteractorResource(rs);
             ret.add(interactorResource);
         }
-
         return ret;
     }
 
@@ -54,7 +51,6 @@ public class StaticInteractorResource implements InteractorResourceDAO {
         ret.setId(rs.getLong("ID"));
         ret.setName(rs.getString("NAME"));
         ret.setUrl(rs.getString("URL"));
-
         return ret;
     }
 }

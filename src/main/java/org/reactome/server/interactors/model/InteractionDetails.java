@@ -6,19 +6,13 @@ package org.reactome.server.interactors.model;
 
 public class InteractionDetails {
 
-    /**
-     * Internal autoincrement id
-     */
+    // Internal autoincrement id
     private Long id;
 
-    /**
-     * Intenal bi-directional identifier
-     */
+    // Intenal bi-directional identifier
     private Long interactionId;
 
-    /**
-     * Interaction AC: EBI-XXXXX
-     */
+    // Interaction AC: EBI-XXXXX
     private String interactionAc;
 
     public InteractionDetails() {

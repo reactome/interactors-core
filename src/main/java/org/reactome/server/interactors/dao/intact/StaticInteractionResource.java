@@ -19,7 +19,7 @@ import java.util.List;
 
 public class StaticInteractionResource implements InteractionResourceDAO {
 
-    final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
+    private final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
 
     private Connection connection;
 

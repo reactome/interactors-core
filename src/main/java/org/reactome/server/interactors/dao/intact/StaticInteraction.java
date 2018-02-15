@@ -25,24 +25,18 @@ public class StaticInteraction implements InteractionDAO {
         BY_INTACT_ID
     }
 
-    final Logger logger = LoggerFactory.getLogger(StaticInteraction.class);
-
+    private final Logger logger = LoggerFactory.getLogger(StaticInteraction.class);
     private Connection connection;
-
-    private final String TABLE = "INTERACTION";
-    private final String ALL_COLUMNS = "INTERACTOR_A, INTERACTOR_B, AUTHOR_SCORE, MISCORE, INTERACTION_RESOURCE_ID";
 
     public StaticInteraction(InteractorsDatabase database) {
         this.connection = database.getConnection();
     }
 
-    /**
-     * Create interactions using same transaction.
-     *
-     * @throws SQLException
-     */
     public boolean create(List<Interaction> interactions) throws SQLException {
         connection.setAutoCommit(false);
+
+        final String TABLE = "INTERACTION";
+        final String ALL_COLUMNS = "INTERACTOR_A, INTERACTOR_B, AUTHOR_SCORE, MISCORE, INTERACTION_RESOURCE_ID";
 
         try {
             String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
@@ -69,7 +63,7 @@ public class StaticInteraction implements InteractionDAO {
             }
 
             connection.commit();
-        }catch (SQLException e){
+        } catch (SQLException e){
             logger.error("An error has occurred during interaction batch insert. Please check the following exception.");
             connection.rollback();
 
@@ -106,7 +100,7 @@ public class StaticInteraction implements InteractionDAO {
                            "AND      INTERACTION.INTERACTION_RESOURCE_ID = ? " +
                            "ORDER BY INTERACTION.MISCORE DESC";
 
-            /** Both are greater than -1, paginated is enabled **/
+            // Both are greater than -1, paginated is enabled
             if(page > -1 && pageSize > -1){
                 int limit = (pageSize * page) - pageSize;
                 String limitQuery = String.format(" LIMIT %d, %d", limit, pageSize);
@@ -126,15 +120,11 @@ public class StaticInteraction implements InteractionDAO {
 
                     interactions.add(interaction);
                 }
-
             }
-
-        }catch (SQLException e){
+        } catch (SQLException e) {
             logger.error("An error has occurred during interaction batch insert. Please check the following exception.");
             throw new SQLException(e);
-
         }
-
         return interactions;
     }
 
@@ -194,8 +184,6 @@ public class StaticInteraction implements InteractionDAO {
      * @param query is the accession or the intactId
      * @param rs is the result set get from database
      * @param method is the method used to build up the Interaction. This is interaction and just to avoid code duplication
-     *
-     * @throws SQLException
      */
     private Interaction buildInteraction(String query, ResultSet rs, Method method) throws SQLException {
         Interaction interaction = new Interaction();
@@ -219,17 +207,15 @@ public class StaticInteraction implements InteractionDAO {
         interactorB.setTaxid(rs.getInt("TAX_IDB"));
         interactorB.setSynonyms(rs.getString("SYNONYMSB"));
 
-        /**
-         * If A interacts with B and B with A we are talking about the same interaction, so
-         * just to keep it easy to create the JSON - the interactor in the query will be always on side of A
-         * otherwise just set them as A.set(b) and B.set(a).
-         */
+        // If A interacts with B and B with A we are talking about the same interaction, so
+        // just to keep it easy to create the JSON - the interactor in the query will be always on side of A
+        // otherwise just set them as A.set(b) and B.set(a).
         switch (method){
             case BY_ACESSION:
                 if(query.equals(interactorA.getAcc())) {
                     interaction.setInteractorA(interactorA);
                     interaction.setInteractorB(interactorB);
-                }else {
+                } else {
                     interaction.setInteractorA(interactorB);
                     interaction.setInteractorB(interactorA);
                 }
@@ -238,7 +224,7 @@ public class StaticInteraction implements InteractionDAO {
                 if(query.equals(interactorA.getIntactId())) {
                     interaction.setInteractorA(interactorA);
                     interaction.setInteractorB(interactorB);
-                }else {
+                } else {
                     interaction.setInteractorA(interactorB);
                     interaction.setInteractorB(interactorA);
                 }

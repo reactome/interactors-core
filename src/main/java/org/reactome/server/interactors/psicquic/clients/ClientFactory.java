@@ -10,7 +10,7 @@ public abstract class ClientFactory {
 
     public static PsicquicClient getClient(String resource) {
         switch (resource.toUpperCase()) {
-            /** ChEMBL won't query its own client. See comments in ChemblClient. **/
+            /* ChEMBL won't query its own client. See comments in ChemblClient. */
             case "CHEMBL":
                 return new ChemblClient(resource);
             case "BIND":

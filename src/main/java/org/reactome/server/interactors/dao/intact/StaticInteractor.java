@@ -16,7 +16,7 @@ import java.util.List;
 
 public class StaticInteractor implements InteractorDAO {
 
-    final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
+    private final Logger logger = LoggerFactory.getLogger(StaticInteractor.class);
 
     private Connection connection;
 
@@ -56,17 +56,15 @@ public class StaticInteractor implements InteractorDAO {
                 }
             }
         }
-
         return interactor;
-
     }
 
     public Interactor getByAccession(String acc) throws SQLException {
         Interactor ret = null;
 
         String query = "SELECT " + ALL_COLUMNS_SEL +
-                " FROM " + TABLE +
-                " WHERE ACC = ?";
+                       " FROM " + TABLE +
+                       " WHERE ACC = ?";
 
         PreparedStatement pstm = connection.prepareStatement(query);
         pstm.setString(1, acc);
@@ -75,7 +73,6 @@ public class StaticInteractor implements InteractorDAO {
         if (rs.next()) {
             ret = buildInteractor(rs);
         }
-
         return ret;
     }
 
@@ -84,7 +81,6 @@ public class StaticInteractor implements InteractorDAO {
      * Attributes will be set via object reference.
      * @param interactorA link a
      * @param interactorB link b
-     * @throws SQLException
      */
     public void searchByAccessions(Interactor interactorA, Interactor interactorB) throws SQLException {
 
@@ -98,17 +94,15 @@ public class StaticInteractor implements InteractorDAO {
 
         ResultSet rs = pstm.executeQuery();
         while (rs.next()) {
-            /**
-             * Can't predict the query result order in the IN-clause, it means, can't figure out
-             * which is A or B, so the if clause is checking that and setting the object by reference.
-             * If interactor ID remains null, then it does not exist in the database.
-             */
+            // Can't predict the query result order in the IN-clause, it means, can't figure out
+            // which is A or B, so the if clause is checking that and setting the object by reference.
+            // If interactor ID remains null, then it does not exist in the database.
             Interactor tempInteractor = buildInteractor(rs);
 
             if(interactorA.getAcc().equals(interactorB.getAcc())){
                 interactorA.setId(tempInteractor.getId());
                 interactorB.setId(tempInteractor.getId());
-            }else {
+            } else {
                 // is A
                 if (tempInteractor.getAcc().equals(interactorA.getAcc())) {
                     interactorA.setId(tempInteractor.getId());
@@ -124,9 +118,8 @@ public class StaticInteractor implements InteractorDAO {
 
     public List<Interactor> getAll() throws SQLException {
         List<Interactor> ret = new ArrayList<>();
-
         String query = "SELECT " + ALL_COLUMNS_SEL +
-                " FROM " + TABLE;
+                       " FROM " + TABLE;
 
         PreparedStatement pstm = connection.prepareStatement(query);
         ResultSet rs = pstm.executeQuery();
@@ -134,7 +127,6 @@ public class StaticInteractor implements InteractorDAO {
             Interactor interactor = buildInteractor(rs);
             ret.add(interactor);
         }
-
         return ret;
     }
 
@@ -145,24 +137,19 @@ public class StaticInteractor implements InteractorDAO {
         ret.setIntactId(rs.getString("INTACT_ID"));
         ret.setInteractorResourceId(rs.getLong("INTERACTOR_RESOURCE_ID"));
         ret.setAlias(rs.getString("ALIAS"));
-        //ret.setCreateDate(rs.getTimestamp("CREATE_DATE"));
         ret.setTaxid(rs.getInt("TAXID"));
         ret.setSynonyms(rs.getString("SYNONYMS"));
-
         return ret;
     }
 
     public List<String> getAllAccessions() throws SQLException {
         List<String> ret = new ArrayList<>();
-
         String query = "SELECT ACC FROM " + TABLE;
-
         PreparedStatement pstm = connection.prepareStatement(query);
         ResultSet rs = pstm.executeQuery();
         while (rs.next()) {
             ret.add(rs.getString("ACC"));
         }
-
         return ret;
     }
 }

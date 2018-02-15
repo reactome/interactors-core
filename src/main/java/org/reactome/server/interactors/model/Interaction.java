@@ -8,9 +8,7 @@ import java.util.List;
  */
 public class Interaction implements Comparable<Interaction> {
 
-    /**
-     * Internal autoincrement identifier
-     */
+    // Internal autoincrement identifier
     private Long id;
 
     private Interactor interactorA;
@@ -121,9 +119,7 @@ public class Interaction implements Comparable<Interaction> {
 
         Interaction that = (Interaction) o;
 
-        if (interactorA != null ? !interactorA.equals(that.interactorA) : that.interactorA != null) return false;
-        return !(interactorB != null ? !interactorB.equals(that.interactorB) : that.interactorB != null);
-
+        return (interactorA != null ? interactorA.equals(that.interactorA) : that.interactorA == null) && !(interactorB != null ? !interactorB.equals(that.interactorB) : that.interactorB != null);
     }
 
     @Override
