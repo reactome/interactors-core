@@ -26,54 +26,13 @@ import java.util.regex.Pattern;
 
 public class IntactParser {
 
-    private enum ParserIndex {
-        ID_INTERACTOR_A(0),
-        ID_INTERACTOR_B(1),
-        ALTERNATIVE_INTERACTOR_A(2),
-        ALTERNATIVE_INTERACTOR_B(3),
-        ALIAS_INTERACTOR_A(4),
-        ALIAS_INTERACTOR_B(5),
-        TAXID_INTERACTOR_A(9),
-        TAXID_INTERACTOR_B(10),
-        INTERACTION_IDENTIFIER(13),
-        CONFIDENCE_VALUE(14);
-
-        final int value;
-
-        ParserIndex(int value) {
-            this.value = value;
-        }
-    }
-
     private static final Logger logger = LoggerFactory.getLogger(IntactParser.class);
-
     // This is the default intact file URL, a program argument can be specified in order to use a different URL
     private static final String INTACT_FILE_URL = "ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact-micluster.txt";
-
     private static final String INTACT_SCORE_LABEL = "intact-miscore";
     private static final String AUTHOR_SCORE_LABEL = "author score";
-
     private static final String PSI_MI_LABEL = "psi-mi";
-
-    // Regex that extracts the Taxonid from taxid:9606(human)
-    private Pattern pattern = Pattern.compile("([0-9]+)");
-
-    // Errors report lists
-    private Set<String> parserErrorMessages = new HashSet<>();
-    private List<String> dbErrorMessages = new ArrayList<>();
-
-    // Services Declaration
-    private InteractionParserService interactionParserService;
-    private InteractorResourceService interactorResourceService;
-    private InteractionResourceService interactionResourceService;
-
     private static Map<String, String> resourceMapping = new HashMap<>();
-
-    private IntactParser(InteractorsDatabase database) {
-        interactionParserService = new InteractionParserService(database);
-        interactorResourceService = new InteractorResourceService(database);
-        interactionResourceService = new InteractionResourceService(database);
-    }
 
     static {
         resourceMapping.put("uniprotkb", "UniProt");
@@ -82,11 +41,25 @@ public class IntactParser {
         resourceMapping.put("ddbj/embl/genbank", "EMBL");
     }
 
+    // Regex that extracts the Taxonid from taxid:9606(human)
+    private Pattern pattern = Pattern.compile("([0-9]+)");
+    // Errors report lists
+    private Set<String> parserErrorMessages = new HashSet<>();
+    private List<String> dbErrorMessages = new ArrayList<>();
+    // Services Declaration
+    private InteractionParserService interactionParserService;
+    private InteractorResourceService interactorResourceService;
+    private InteractionResourceService interactionResourceService;
     // Easy access to the Resources.
     private Map<String, InteractionResource> interactionResourceMap = new HashMap<>();
     private Map<String, InteractorResource> interactorResourceMap = new HashMap<>();
-
     private Set<Interaction> interactions = new HashSet<>();
+
+    private IntactParser(InteractorsDatabase database) {
+        interactionParserService = new InteractionParserService(database);
+        interactorResourceService = new InteractorResourceService(database);
+        interactionResourceService = new InteractionResourceService(database);
+    }
 
     /**
      * This is a standalone process that will generate an interactors database and parse the IntAct static file
@@ -119,7 +92,7 @@ public class IntactParser {
         String database = config.getString("interactors-database-path");
         try {
             File dbFile = new File(database);
-            if(dbFile.exists()){
+            if (dbFile.exists()) {
                 logger.error("Database [{}] already exists in this location. Please inform a different database location or name.", database);
                 System.exit(1);
             }
@@ -150,6 +123,43 @@ public class IntactParser {
         logger.info("End IntAct File parsing. Elapsed Time [{}.ms]", (System.currentTimeMillis() - start));
     }
 
+    private static String getDatabaseName(String resource) {
+        String rtn = resourceMapping.get(resource.toLowerCase().trim());
+        if (rtn != null) return rtn;
+        return resource;
+    }
+
+    private static String getRawIdentifier(String identifier) {
+        if (identifier.contains(":")) return identifier.split(":")[1];
+        return identifier;
+    }
+
+    /**
+     * Retrieves the IntAct file, parses it and creates an temporary database
+     *
+     * @return an InteractorsDatabase in-memory instance
+     * @throws SQLException thrown when there is a problem connecting to the temporary database
+     * @throws IOException  thrown when there is a problem accessing to the IntAct file
+     */
+    public static InteractorsDatabase getInteractors(String fileDatabaseName) throws SQLException, IOException {
+        long start = System.currentTimeMillis();
+        logger.info("Start Parsing IntAct File");
+
+        FileUtils.deleteQuietly(new File(fileDatabaseName));
+        InteractorsDatabase interactors = new InteractorsDatabase(fileDatabaseName);
+        InteractorDatabaseGenerator.create(interactors.getConnection(), false);
+        IntactParser intactParser = new IntactParser(interactors);
+        intactParser.cacheResources();
+
+        String file = intactParser.downloadFile(INTACT_FILE_URL, "/tmp");
+        logger.info("File has been download. Parse will be executed pointing to this file: " + file);
+
+        intactParser.parser(file);
+        logger.info("End IntAct File parsing. Elapsed Time [{}.ms]", (System.currentTimeMillis() - start));
+
+        return interactors;
+    }
+
     /**
      * Parsing the file
      */
@@ -175,7 +185,7 @@ public class IntactParser {
 
                 // Parse the line
                 Interaction interaction = interactionFromFile(content);
-                if (interaction.getInteractorA().getIntactId().equals("-") || interaction.getInteractorB().getIntactId().equals("-") ) {
+                if (interaction.getInteractorA().getIntactId().equals("-") || interaction.getInteractorB().getIntactId().equals("-")) {
                     totalIgnoredLines++;
                     continue;
                 }
@@ -303,7 +313,7 @@ public class IntactParser {
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_B.value], interactorB);
 
         Interaction interaction = prepareInteractions(line, interactorA, interactorB);
-        if(interactions.contains(interaction)) {
+        if (interactions.contains(interaction)) {
             String msg = "A Duplicate entry has been found: " + line[0] + " " + line[1] + " " + line[2] + " " + line[3] + " " + interaction.getIntactScore();
             logger.info(msg);
             parserErrorMessages.add(msg);
@@ -424,7 +434,8 @@ public class IntactParser {
                 }
 
                 // first occurrence of psi-mi should be taken as the alias
-                if (alias[0].equalsIgnoreCase(PSI_MI_LABEL) && interactor.getAlias() == null) {
+                // however there cases where the first in the alias is the accession.
+                if (alias[0].equalsIgnoreCase(PSI_MI_LABEL) && interactor.getAlias() == null && !getRawIdentifier(interactor.getAcc()).equalsIgnoreCase(alias[1])) {
                     interactor.setAlias(alias[1]);
                 }
             }
@@ -441,32 +452,29 @@ public class IntactParser {
     }
 
     private void parseSynonyms(String value, Interactor interactor) {
-        String synonyms = "";
         if (!value.equals("-")) { // not null
             // Now the alias has also | on it and make invalid the following split.
             String[] allAliases = value.split("\\|(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+            Set<String> uniqueSynonyms = new LinkedHashSet<>();
             for (String uniqueAlias : allAliases) {
                 // databaseName:value
                 String[] alias = uniqueAlias.split(":", 2);
-
-                /*
-                 * Saving all the alias in the same column. We don't query by alias, so it is ok.
-                 * We can't save it as CSV, otherwise when splitting the list it will split alias that has
-                 * comma.
-                 */
+                // Saving all the alias in the same column. We don't query by alias, so it is ok.
+                // We can't save it as CSV, otherwise when splitting the list it will split alias that has comma.
                 try {
-                    synonyms = synonyms.concat(alias[1]).concat("$");
-                }catch (ArrayIndexOutOfBoundsException e){
+                    String synonym = alias[1];
+                    // at this point, accession has the databaseName, ignoring the aliases that are equals to accession
+                    if (!synonym.equalsIgnoreCase(getRawIdentifier(interactor.getAcc())) && !synonym.equalsIgnoreCase(interactor.getAlias())) {
+                        uniqueSynonyms.add(synonym);
+                    }
+                } catch (ArrayIndexOutOfBoundsException e) {
                     e.printStackTrace();
                 }
-
             }
 
-            if (synonyms.endsWith("$")) {
-                synonyms = synonyms.substring(0, synonyms.length() - 1);
-            }
-
+            String synonyms = String.join("$", uniqueSynonyms);
             interactor.setSynonyms(synonyms);
+            uniqueSynonyms.clear();
         }
     }
 
@@ -489,43 +497,6 @@ public class IntactParser {
                 }
             }
         }
-    }
-
-    private static String getDatabaseName(String resource) {
-        String rtn = resourceMapping.get(resource.toLowerCase().trim());
-        if (rtn != null) return rtn;
-        return resource;
-    }
-
-    private static String getRawIdentifier(String identifier) {
-        if (identifier.contains(":")) return identifier.split(":")[1];
-        return identifier;
-    }
-
-    /**
-     * Retrieves the IntAct file, parses it and creates an temporary database
-     *
-     * @return an InteractorsDatabase in-memory instance
-     * @throws SQLException thrown when there is a problem connecting to the temporary database
-     * @throws IOException thrown when there is a problem accessing to the IntAct file
-     */
-    public static InteractorsDatabase getInteractors(String fileDatabaseName) throws SQLException, IOException {
-        long start = System.currentTimeMillis();
-        logger.info("Start Parsing IntAct File");
-
-        FileUtils.deleteQuietly(new File(fileDatabaseName));
-        InteractorsDatabase interactors = new InteractorsDatabase(fileDatabaseName);
-        InteractorDatabaseGenerator.create(interactors.getConnection(), false);
-        IntactParser intactParser = new IntactParser(interactors);
-        intactParser.cacheResources();
-
-        String file = intactParser.downloadFile(INTACT_FILE_URL, "/tmp");
-        logger.info("File has been download. Parse will be executed pointing to this file: " + file);
-
-        intactParser.parser(file);
-        logger.info("End IntAct File parsing. Elapsed Time [{}.ms]", (System.currentTimeMillis() - start));
-
-        return interactors;
     }
 
     /**
@@ -569,6 +540,25 @@ public class IntactParser {
             logger.error("Error retrieving resources from database", e);
         }
         logger.info("Caching is Done. InteractionResource [{}] and Interactor Resources[{}]", interactionResourceMap.size(), interactorResourceMap.size());
+    }
+
+    private enum ParserIndex {
+        ID_INTERACTOR_A(0),
+        ID_INTERACTOR_B(1),
+        ALTERNATIVE_INTERACTOR_A(2),
+        ALTERNATIVE_INTERACTOR_B(3),
+        ALIAS_INTERACTOR_A(4),
+        ALIAS_INTERACTOR_B(5),
+        TAXID_INTERACTOR_A(9),
+        TAXID_INTERACTOR_B(10),
+        INTERACTION_IDENTIFIER(13),
+        CONFIDENCE_VALUE(14);
+
+        final int value;
+
+        ParserIndex(int value) {
+            this.value = value;
+        }
     }
 }
 
