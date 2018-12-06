@@ -5,7 +5,7 @@
 
 ### Introduction
 
-This project parses IntAct clustered interactions and save them into a lightweight database (SQLite). Once the database is created, the Service layer can be used to access interactor data.
+This project parses IntAct clustered interactions and save them into a lightweight database (SQLite). Once the database is created, the graph-importer will consume it and then interactor will be part of the Graph Database.
 
 
 ### Clone and Package
@@ -16,41 +16,23 @@ This project parses IntAct clustered interactions and save them into a lightweig
 git clone https://github.com/reactome-pwp/interactors-core.git
 cd interactors-core
 # Note: You must skip test because at this point the database hasn't been created yet.
-mvn package -DskipTests
+mvn clean package -DskipTests
 ```
 
-### How to run the parser in order to create the database ?
+### Main: IntactParser.java
 
-- IntActParser CLI
+#### Parameters:
+* ````-d```` download the latest version 'intact-micluster.txt' from IntAct (see -t and -u)
+* ````-f```` file to be parsed (cannot be used if -d is specified)
+* ````-g```` database file (must be unique in the folder)
+* ````-t```` folder to save the file when downloaded
+* ````-u```` specify another ftp URL to download the file from IntAct.
 
-```console
-java -jar target/InteractorsParser-jar-with-dependencies.jar
-  -f <IntAct file to be parsed>
-  -g <Interactor Database Path> ** Required **
-  -d <Flag to download IntAct file>
-  -t <Folder to save the downloaded file>
-```
 
-* Running IntactParser and download (-d) `intact-micluster.txt` (Recommended)
+#### Recommend:
 
 ```console
-java -jar target/InteractorsParser-jar-with-dependencies.jar -g interactors.db -d
-```
-
-or
-
-* intact-micluster.txt is going to be saved in /tmp by default. Specify -t <path> and change the destination folder.
-
-```console
-java -jar target/InteractorsParser-jar-with-dependencies.jar -g interactors.db -d -t download
-```
-
-or
-
-* Instead of downloading intact-micluster.txt every execution, using -f is possible to point to an existing file
-
-```console
-java -jar target/InteractorsParser-jar-with-dependencies.jar -g interactors.db -f download/intact-micluster.txt
+java -jar target/InteractorsParser-jar-with-dependencies.jar -g /path/to/interactors.db -d
 ```
 
 ### Validate 
@@ -64,4 +46,4 @@ mvn package -Dinteractors.SQLite=interactors.db
 ### Extras
 
 * Logs: The logs are stored in logs/ directory
-* parser-messages.txt: This file stores all the parser messages. Any oddity is written on it.
+* parser-messages.txt: This file stores all the parser messages. Any oddity will be written on it.
