@@ -68,20 +68,13 @@ public class IntactParser {
         long start = System.currentTimeMillis();
         logger.info("Start Parsing IntAct File");
 
-        SimpleJSAP jsap = new SimpleJSAP(
-                IntactParser.class.getName(),
-                "A tool for parsing Intact file and store information into a SQLite database",
+        SimpleJSAP jsap = new SimpleJSAP(IntactParser.class.getName(),"A tool for parsing Intact file and store information into a SQLite database",
                 new Parameter[]{
-                        new FlaggedOption("file", JSAP.STRING_PARSER, "/tmp/intact-micluster.txt", JSAP.NOT_REQUIRED, 'f', "file",
-                                "IntAct file to be parsed")
-                        , new FlaggedOption("url", JSAP.STRING_PARSER, INTACT_FILE_URL, JSAP.NOT_REQUIRED, 'u', "url",
-                        "IntAct file URL")
-                        , new QualifiedSwitch("download", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'd', "download",
-                        "Download IntAct File")
-                        , new FlaggedOption("destination", JSAP.STRING_PARSER, "/tmp", JSAP.NOT_REQUIRED, 't', "destination",
-                        "Folder to save the downloaded file")
-                        , new FlaggedOption("interactors-database-path", JSAP.STRING_PARSER, null, JSAP.REQUIRED, 'g', "interactors-database-path",
-                        "Interactor Database Path")
+                        new FlaggedOption("file", JSAP.STRING_PARSER, "/tmp/intact-micluster.txt", JSAP.NOT_REQUIRED, 'f', "file","IntAct file to be parsed"),
+                        new FlaggedOption("url", JSAP.STRING_PARSER, INTACT_FILE_URL, JSAP.NOT_REQUIRED, 'u', "url","IntAct file URL"),
+                        new QualifiedSwitch("download", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'd', "download","Download IntAct File"),
+                        new FlaggedOption("destination", JSAP.STRING_PARSER, "/tmp", JSAP.NOT_REQUIRED, 't', "destination","Folder to save the downloaded file"),
+                        new FlaggedOption("interactors-database-path", JSAP.STRING_PARSER, null, JSAP.REQUIRED, 'g', "interactors-database-path","Interactor Database Path")
                 }
         );
 
