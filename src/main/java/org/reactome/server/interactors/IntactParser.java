@@ -32,6 +32,7 @@ public class IntactParser {
     private static final String INTACT_SCORE_LABEL = "intact-miscore";
     private static final String AUTHOR_SCORE_LABEL = "author score";
     private static final String PSI_MI_LABEL = "psi-mi";
+    private static final String PUBMED_LABEL = "pubmed";
     private static Map<String, String> resourceMapping = new HashMap<>();
 
     static {
@@ -315,7 +316,7 @@ public class IntactParser {
         }
 
         // Create interaction
-        return prepareInteractions(line, interactorA, interactorB);
+        return interaction;
 
     }
 
@@ -346,6 +347,8 @@ public class IntactParser {
         interaction.setInteractionResourceId(intactResourceId);
 
         parseConfidenceValue(line[ParserIndex.CONFIDENCE_VALUE.value], interaction);
+
+        parsePubmedIdentifier(line[ParserIndex.PUBMED_IDENTIFIER.value], interaction);
 
         // Get interaction ID column
         String allInteractionIds = line[ParserIndex.INTERACTION_IDENTIFIER.value];
@@ -492,6 +495,22 @@ public class IntactParser {
         }
     }
 
+    private void parsePubmedIdentifier(String value, Interaction interaction) {
+        if (!value.equals("-")) { // not null
+            String[] pubmedIdsRaw = value.split("\\|");
+            for (String pubmedIds : pubmedIdsRaw) {
+                String[] pubmedId = pubmedIds.split(":");
+                if (pubmedId[0].equalsIgnoreCase(PUBMED_LABEL)) {
+                    if (Toolbox.isNumeric(pubmedId[1])) {
+                        interaction.addPubmedIdentifier(pubmedId[1]);
+                    } else {
+                        parserErrorMessages.add("Interactor A [" + interaction.getInteractorA().getIntactId() + "] - Interactor B [" + interaction.getInteractorB().getIntactId() + "] - The intact-miscore is not a number [" + pubmedId[1] + "]");
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Download the file from Intact server.
      *
@@ -542,6 +561,7 @@ public class IntactParser {
         ALTERNATIVE_INTERACTOR_B(3),
         ALIAS_INTERACTOR_A(4),
         ALIAS_INTERACTOR_B(5),
+        PUBMED_IDENTIFIER(8),
         TAXID_INTERACTOR_A(9),
         TAXID_INTERACTOR_B(10),
         INTERACTION_IDENTIFIER(13),

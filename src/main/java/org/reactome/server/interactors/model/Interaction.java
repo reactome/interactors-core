@@ -20,6 +20,7 @@ public class Interaction implements Comparable<Interaction> {
     private Long interactionResourceId;
 
     private List<InteractionDetails> interactionDetailsList;
+    private List<String> pubmedIdentifiers;
 
     public Long getId() {
         return id;
@@ -82,6 +83,21 @@ public class Interaction implements Comparable<Interaction> {
 
     public void setInteractionResourceId(Long interactionResourceId) {
         this.interactionResourceId = interactionResourceId;
+    }
+
+    public List<String> getPubmedIdentifiers() {
+        return pubmedIdentifiers;
+    }
+
+    public void setPubmedIdentifiers(List<String> pubmedIdentifiers) {
+        this.pubmedIdentifiers = pubmedIdentifiers;
+    }
+
+    public void addPubmedIdentifier(String pubmedIdentifier) {
+        if (pubmedIdentifiers == null) {
+            pubmedIdentifiers = new ArrayList<>();
+        }
+        pubmedIdentifiers.add(pubmedIdentifier);
     }
 
     @Override

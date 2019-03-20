@@ -31,6 +31,7 @@ public class QueryStatement {
                     "AUTHOR_SCORE NUMERIC, " +
                     "MISCORE NUMERIC, " +
                     "INTERACTION_RESOURCE_ID NUMERIC, " +
+                    "PUBMEDIDS VARCHAR(2048), " +
                     "FOREIGN KEY(INTERACTOR_A) REFERENCES INTERACTOR(ID), " +
                     "FOREIGN KEY(INTERACTOR_B) REFERENCES INTERACTOR(ID), " +
                     "FOREIGN KEY(INTERACTION_RESOURCE_ID) REFERENCES  INTERACTION_RESOURCE(ID) " +

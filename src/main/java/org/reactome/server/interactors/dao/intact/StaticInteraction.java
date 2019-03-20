@@ -1,5 +1,6 @@
 package org.reactome.server.interactors.dao.intact;
 
+import org.apache.commons.lang.StringUtils;
 import org.reactome.server.interactors.dao.InteractionDAO;
 import org.reactome.server.interactors.database.InteractorsDatabase;
 import org.reactome.server.interactors.model.Interaction;
@@ -36,11 +37,11 @@ public class StaticInteraction implements InteractionDAO {
         connection.setAutoCommit(false);
 
         final String TABLE = "INTERACTION";
-        final String ALL_COLUMNS = "INTERACTOR_A, INTERACTOR_B, AUTHOR_SCORE, MISCORE, INTERACTION_RESOURCE_ID";
+        final String ALL_COLUMNS = "INTERACTOR_A, INTERACTOR_B, AUTHOR_SCORE, MISCORE, INTERACTION_RESOURCE_ID, PUBMEDIDS";
 
         try {
             String query = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
-                    + "VALUES(?, ?, ?, ?, ?)";
+                    + "VALUES(?, ?, ?, ?, ?, ?)";
 
             PreparedStatement pstm = connection.prepareStatement(query);
 
@@ -50,6 +51,9 @@ public class StaticInteraction implements InteractionDAO {
                 pstm.setDouble(3, interaction.getAuthorScore());
                 pstm.setDouble(4, Toolbox.roundScore(interaction.getIntactScore())); // Rounding score 0.###, the score is higher than InteractorConstant.MINIMUM_VALID_SCORE
                 pstm.setLong(5, interaction.getInteractionResourceId());
+                if (interaction.getPubmedIdentifiers() != null && !interaction.getPubmedIdentifiers().isEmpty()) {
+                    pstm.setString(6, String.join(",", interaction.getPubmedIdentifiers()));
+                }
 
                 if (pstm.executeUpdate() > 0) {
                     try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
@@ -92,6 +96,7 @@ public class StaticInteraction implements InteractionDAO {
                                     "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB', INTERACTORB.TAXID AS 'TAX_IDB', INTERACTORB.SYNONYMS AS 'SYNONYMSB', " +
                                     "INTERACTION.AUTHOR_SCORE, " +
                                     "INTERACTION.MISCORE, " +
+                                    "INTERACTION.PUBMEDIDS, " +
                                     "INTERACTION.INTERACTION_RESOURCE_ID " +
                            "FROM     INTERACTION, INTERACTOR AS INTERACTORA, INTERACTOR AS INTERACTORB " +
                            "WHERE    INTERACTORA.ID = INTERACTION.INTERACTOR_A " +
@@ -234,6 +239,10 @@ public class StaticInteraction implements InteractionDAO {
         interaction.setAuthorScore(rs.getDouble("AUTHOR_SCORE"));
         interaction.setIntactScore(rs.getDouble("MISCORE"));
         interaction.setInteractionResourceId(rs.getLong("INTERACTION_RESOURCE_ID"));
+        String pubmedIds = rs.getString("PUBMEDIDS");
+        if (StringUtils.isNotEmpty(pubmedIds)) {
+            interaction.setPubmedIdentifiers(Arrays.asList(pubmedIds.split(",")));
+        }
 
         return interaction;
     }
