@@ -10,6 +10,7 @@ import org.reactome.server.interactors.util.InteractorConstant;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -19,11 +20,11 @@ import java.util.List;
 public class ParserUtils {
 
     public static TupleResult getUserDataContainer(String name, String filename, InputStream is) throws IOException, ParserException {
-        List<String> linesList = IOUtils.readLines(is);
+        List<String> linesList = IOUtils.readLines(is, Charset.defaultCharset());
 
         TupleResult ret = processData(linesList);
 
-        /** set filename and name to be part as the json **/
+        // set filename and name to be part as the json
         ret.getSummary().setFileName(filename);
         ret.getSummary().setName(name);
 

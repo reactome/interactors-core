@@ -14,7 +14,11 @@ import org.reactome.server.interactors.tuple.parser.ParserFactory;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -30,18 +34,18 @@ public class TestParser {
     public void testExtendedTxt() throws IOException, ParserException {
         File file = getFileFromResources(EXTENDED_TXT);
 
-        List<String> lines = IOUtils.readLines(new FileInputStream(file));
+        List<String> lines = IOUtils.readLines(new FileInputStream(file), Charset.defaultCharset());
 
         Parser p = ParserFactory.build(lines);
         TupleResult result = p.parse(lines);
 
-        Assert.assertTrue("Haven't found six interactions", result.getSummary().getInteractions() == 6);
-        Assert.assertNotNull("Warning messages list is null", result.getWarningMessages());
-        Assert.assertTrue("Haven't found one warning messages", result.getWarningMessages().size() == 1);
+        assertEquals("Haven't found six interactions", 6, (int) result.getSummary().getInteractions());
+        assertNotNull("Warning messages list is null", result.getWarningMessages());
+        assertEquals("Haven't found one warning messages", 1, result.getWarningMessages().size());
 
-        Assert.assertTrue("Q9H0R8 should be 2 times", result.getCustomResource().get("Q9H0R8").size() == 2);
-        Assert.assertTrue("Q14596 should be 2 times", result.getCustomResource().get("Q14596").size() == 2);
-        Assert.assertTrue("Q13501 should be 4 times", result.getCustomResource().get("Q13501").size() == 4);
+        assertEquals("Q9H0R8 should be 2 times", 2, result.getCustomResource().get("Q9H0R8").size());
+        assertEquals("Q14596 should be 2 times", 2, result.getCustomResource().get("Q14596").size());
+        assertEquals("Q13501 should be 4 times", 4, result.getCustomResource().get("Q13501").size());
 
         //Testing serialisation
         Kryo kryo = new Kryo();
@@ -54,32 +58,23 @@ public class TestParser {
         output.close();
 
         //Checking whether aux contains what result had
-        Assert.assertTrue("Q9H0R8 should be 2 times", aux.getCustomResource().get("Q9H0R8").size() == 2);
-        Assert.assertTrue("Q14596 should be 2 times", aux.getCustomResource().get("Q14596").size() == 2);
-        Assert.assertTrue("Q13501 should be 4 times", aux.getCustomResource().get("Q13501").size() == 4);
-    }
-
-    private static Object read(InputStream file) {
-        Kryo kryo = new Kryo();
-        kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
-        Input input = new Input(file);
-        Object obj = kryo.readClassAndObject(input);
-        input.close();
-        return obj;
+        assertEquals("Q9H0R8 should be 2 times", 2, aux.getCustomResource().get("Q9H0R8").size());
+        assertEquals("Q14596 should be 2 times", 2, aux.getCustomResource().get("Q14596").size());
+        assertEquals("Q13501 should be 4 times", 4, aux.getCustomResource().get("Q13501").size());
     }
 
     @Test
     public void testExtendedCsv() throws IOException, ParserException {
         File file = getFileFromResources(EXTENDED_CSV);
 
-        List<String> lines = IOUtils.readLines(new FileInputStream(file));
+        List<String> lines = IOUtils.readLines(new FileInputStream(file), Charset.defaultCharset());
 
         Parser p = ParserFactory.build(lines);
         TupleResult result = p.parse(lines);
 
-        Assert.assertTrue("Haven't found six interactions", result.getSummary().getInteractions() == 6);
-        Assert.assertNotNull("Warning messages list is null", result.getWarningMessages());
-        Assert.assertTrue("Haven't found one warning messages", result.getWarningMessages().size() == 1);
+        assertEquals("Haven't found six interactions", 6, (int) result.getSummary().getInteractions());
+        assertNotNull("Warning messages list is null", result.getWarningMessages());
+        assertEquals("Haven't found one warning messages", 1, result.getWarningMessages().size());
 
         //Testing serialisation
         Kryo kryo = new Kryo();
@@ -92,9 +87,9 @@ public class TestParser {
         output.close();
 
         //Checking whether aux contains what result had
-        Assert.assertTrue("Q9H0R8 should be 2 times", aux.getCustomResource().get("Q9H0R8").size() == 2);
-        Assert.assertTrue("Q14596 should be 2 times", aux.getCustomResource().get("Q14596").size() == 2);
-        Assert.assertTrue("Q13501 should be 4 times", aux.getCustomResource().get("Q13501").size() == 4);
+        assertEquals("Q9H0R8 should be 2 times", 2, aux.getCustomResource().get("Q9H0R8").size());
+        assertEquals("Q14596 should be 2 times", 2, aux.getCustomResource().get("Q14596").size());
+        assertEquals("Q13501 should be 4 times", 4, aux.getCustomResource().get("Q13501").size());
     }
 
     // TODO: create more test cases
