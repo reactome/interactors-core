@@ -27,7 +27,7 @@
         <reflection.version>0.9.10</reflection.version>
         <jsap.version>2.1</jsap.version>
         <concurrent.tree.version>2.5.0</concurrent.tree.version>
-        <jackson.databind.version>2.4.1</jackson.databind.version>
+        <jackson.databind.version>2.9.10.4</jackson.databind.version>
         <kryo.version>2.22</kryo.version>
         <logging.version>1.2.3</logging.version>
         <commons.io.version>2.4</commons.io.version>
