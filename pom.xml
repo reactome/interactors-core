@@ -31,7 +31,7 @@
         <kryo.version>2.22</kryo.version>
         <logging.version>1.2.3</logging.version>
         <commons.io.version>2.4</commons.io.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
 
         <maven.compiler.version>3.5.1</maven.compiler.version>
         <jdk.version>1.8</jdk.version>
