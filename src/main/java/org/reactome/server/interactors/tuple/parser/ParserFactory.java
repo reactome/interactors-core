@@ -4,6 +4,7 @@ import org.reactome.server.interactors.tuple.exception.ParserException;
 import org.reactome.server.interactors.tuple.util.FileDefinition;
 import org.reactome.server.interactors.util.Toolbox;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
@@ -60,7 +61,7 @@ public class ParserFactory {
         try {
             Set<Class<? extends CommonParser>> parsers = Toolbox.getSubTypesOf(PARSER_PACKAGE, CommonParser.class);
             for (Class aClass : parsers) {
-                CommonParser commonParser = (CommonParser) aClass.newInstance();
+                CommonParser commonParser = (CommonParser) aClass.getDeclaredConstructor().newInstance();
 
                 FileDefinition fileDef = commonParser.getParserDefinition(lines);
                 if (fileDef != null) {
@@ -71,6 +72,8 @@ public class ParserFactory {
             throw new ParserException("Couldn't instantiate the parser which identifies the format", e);
         } catch (IllegalAccessException e) {
             throw new ParserException("Illegal access to the parser. Couldn't identify the format", e);
+        } catch (InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
         }
 
         return null;

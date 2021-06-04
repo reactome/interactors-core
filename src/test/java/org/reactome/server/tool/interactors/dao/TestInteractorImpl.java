@@ -1,8 +1,9 @@
 package org.reactome.server.tool.interactors.dao;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactome.server.interactors.dao.InteractorDAO;
 import org.reactome.server.interactors.dao.intact.StaticInteractor;
 import org.reactome.server.interactors.database.InteractorsDatabase;
@@ -23,7 +24,7 @@ public class TestInteractorImpl {
 
     private InteractorDAO interactorDAO;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         Properties prop = new Properties();
         InteractorsDatabase interactors = null;
@@ -42,18 +43,18 @@ public class TestInteractorImpl {
     public void testSimpleQuery() throws SQLException {
         List<Interactor> allInteractors = interactorDAO.getAll();
 
-        Assert.assertTrue("No interactor present in the database.", allInteractors.size() > 1);
+        Assertions.assertTrue(allInteractors.size() > 1, "No interactor present in the database.");
 
     }
 
     @Test
-    public void testUniprotAccessionRegex(){
-        Assert.assertTrue("Not a valid Uniprot accession.", Toolbox.isUniprotAccession("A2BC19"));
-        Assert.assertTrue("Not a valid Uniprot accession.", Toolbox.isUniprotAccession("P12345"));
-        Assert.assertTrue("Not a valid Uniprot accession.", Toolbox.isUniprotAccession("A0A022YWF9"));
-        Assert.assertTrue("Not a valid Uniprot accession.", Toolbox.isUniprotAccession("Q9WMX2-PRO_0000037552"));
-        Assert.assertTrue("Not a valid Uniprot accession.", Toolbox.isUniprotAccession("Q9WMX2-2"));
-        Assert.assertFalse("Accession XX1323 is not a valid one.", Toolbox.isUniprotAccession("XX1323"));
-        Assert.assertFalse("Accession 123445 is not a valid one.", Toolbox.isUniprotAccession("123445"));
+    public void testUniprotAccessionRegex() {
+        Assertions.assertTrue(Toolbox.isUniprotAccession("A2BC19"), "Not a valid Uniprot accession.");
+        Assertions.assertTrue(Toolbox.isUniprotAccession("P12345"), "Not a valid Uniprot accession.");
+        Assertions.assertTrue(Toolbox.isUniprotAccession("A0A022YWF9"), "Not a valid Uniprot accession.");
+        Assertions.assertTrue(Toolbox.isUniprotAccession("Q9WMX2-PRO_0000037552"), "Not a valid Uniprot accession.");
+        Assertions.assertTrue(Toolbox.isUniprotAccession("Q9WMX2-2"), "Not a valid Uniprot accession.");
+        Assertions.assertFalse(Toolbox.isUniprotAccession("XX1323"), "Accession XX1323 is not a valid one.");
+        Assertions.assertFalse(Toolbox.isUniprotAccession("123445"), "Accession 123445 is not a valid one.");
     }
 }

@@ -1,5 +1,6 @@
 package org.reactome.server.interactors.psicquic.clients;
 
+
 import org.reactome.server.interactors.model.Interaction;
 import org.reactome.server.interactors.model.InteractionDetails;
 import org.reactome.server.interactors.model.Interactor;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -94,7 +96,7 @@ public abstract class AbstractClient implements PsicquicClient {
             retScore = intactMiscore;
         }
 
-        return new Double(retScore);
+        return Double.parseDouble(retScore);
     }
 
     /**

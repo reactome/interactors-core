@@ -20,6 +20,10 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.Double.parseDouble;
+import static java.lang.Double.valueOf;
+import static java.lang.Integer.parseInt;
+
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
@@ -328,7 +332,7 @@ public class IntactParser {
             Matcher m = pattern.matcher(taxid[1]);
 
             if (m.find()) {
-                interactor.setTaxid(new Integer(m.group(1)));
+                interactor.setTaxid(parseInt(m.group(1)));
             }
 
         } else {
@@ -481,12 +485,12 @@ public class IntactParser {
                 String[] alternativeId = alternativeIds.split(":");
                 if (alternativeId[0].equalsIgnoreCase(AUTHOR_SCORE_LABEL)) {
                     if (Toolbox.isNumeric(alternativeId[1])) {
-                        interaction.setAuthorScore(new Double(alternativeId[1]));
+                        interaction.setAuthorScore(parseDouble(alternativeId[1]));
                     }
                 }
                 if (alternativeId[0].equalsIgnoreCase(INTACT_SCORE_LABEL)) {
                     if (Toolbox.isNumeric(alternativeId[1])) {
-                        interaction.setIntactScore(new Double(alternativeId[1]));
+                        interaction.setIntactScore(valueOf(alternativeId[1]));
                     } else {
                         parserErrorMessages.add("Interactor A [" + interaction.getInteractorA().getIntactId() + "] - Interactor B [" + interaction.getInteractorB().getIntactId() + "] - The intact-miscore is not a number [" + alternativeId[1] + "]");
                     }
