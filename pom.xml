@@ -186,7 +186,6 @@
                         </goals>
                         <configuration>
                             <excludes>
-                                <exclude>**/IntactParser.class</exclude>
                                 <exclude>**/logback.xml</exclude>
                             </excludes>
                         </configuration>
