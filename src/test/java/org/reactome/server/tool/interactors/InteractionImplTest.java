@@ -1,4 +1,4 @@
-package org.reactome.server.tool.interactors.dao;
+package org.reactome.server.tool.interactors;
 
 
 import org.junit.jupiter.api.Assertions;
@@ -24,8 +24,7 @@ import java.util.Properties;
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-
-public class TestInteractionImpl {
+public class InteractionImplTest {
 
     private InteractionDAO interactionDAO;
 
@@ -39,7 +38,7 @@ public class TestInteractionImpl {
         Properties prop = new Properties();
         InteractorsDatabase interactors = null;
         try {
-            InputStream is = TestInteractionImpl.class.getResourceAsStream("/db.properties");
+            InputStream is = InteractionImplTest.class.getResourceAsStream("/db.properties");
             prop.load(is);
             interactors = new InteractorsDatabase(prop.getProperty("database"));
         } catch (SQLException | IOException e) {
@@ -78,30 +77,28 @@ public class TestInteractionImpl {
 
     @Test
     public void testRoundScore() {
-        Assertions.assertEquals(Double.parseDouble("1- Score not round properly"), Toolbox.roundScore(0.467866), 0.468);
-        Assertions.assertEquals(Double.parseDouble("2- Score not round properly"), Toolbox.roundScore(0.457123), 0.457);
-        Assertions.assertEquals(Double.parseDouble("3- Score not round properly"), Toolbox.roundScore(0.444444), 0.444);
-        Assertions.assertEquals(Double.parseDouble("4- Score not round properly"), Toolbox.roundScore(1.5555), 1.556);
-        Assertions.assertEquals(Double.parseDouble("5- Score not round properly"), Toolbox.roundScore(0.45555), 0.456);
-        Assertions.assertEquals(Double.parseDouble("6- Score not round properly"), Toolbox.roundScore(0.4490), 0.449);
-        Assertions.assertEquals(Double.parseDouble("7- Score not round properly"), Toolbox.roundScore(0.4499), 0.45);
-        Assertions.assertEquals(Double.parseDouble("8- Score not round properly"), Toolbox.roundScore(0.45), 0.45);
-        Assertions.assertEquals(Double.parseDouble("8- Score not round properly"), Toolbox.roundScore(0.4499999), 0.45); // ask
-        Assertions.assertEquals(Double.parseDouble("9- Score not round properly"), Toolbox.roundScore(0.4445), 0.445);
-        Assertions.assertEquals(Double.parseDouble("10- Score not round properly"), Toolbox.roundScore(0.4466), 0.447);
-
-        Assertions.assertEquals(Double.parseDouble("11- Score not round properly"), Toolbox.roundScore(0.447), 0.447);
-        Assertions.assertEquals(Double.parseDouble("12- Score not round properly"), Toolbox.roundScore(0.44295776), 0.443);
-        Assertions.assertEquals(Double.parseDouble("13- Score not round properly"), Toolbox.roundScore(0.44547057), 0.445);
-        Assertions.assertEquals(Double.parseDouble("14- Score not round properly"), Toolbox.roundScore(0.44611502), 0.446);
-        Assertions.assertEquals(Double.parseDouble("15- Score not round properly"), Toolbox.roundScore(0.44681886), 0.447);
-        Assertions.assertEquals(Double.parseDouble("16- Score not round properly"), Toolbox.roundScore(0.44962552), 0.45); // ask
-        Assertions.assertEquals(Double.parseDouble("17- Score not round properly"), Toolbox.roundScore(0.9921667), 0.992);
-        Assertions.assertEquals(Double.parseDouble("18- Score not round properly"), Toolbox.roundScore(0.9919758), 0.992);
-        Assertions.assertEquals(Double.parseDouble("19- Score not round properly"), Toolbox.roundScore(0.98239964), 0.982);
-        Assertions.assertEquals(Double.parseDouble("20- Score not round properly"), Toolbox.roundScore(0.999), 0.999);
-
-        Assertions.assertEquals(Double.parseDouble("21- Score not round properly"), Toolbox.roundScore(0.9999), 1.0); // ask
+        Assertions.assertEquals(0.468, Toolbox.roundScore(0.467866), "1- Score not round properly");
+        Assertions.assertEquals(0.457, Toolbox.roundScore(0.457123), "2- Score not round properly");
+        Assertions.assertEquals(0.444, Toolbox.roundScore(0.444444), "3- Score not round properly");
+        Assertions.assertEquals(1.556, Toolbox.roundScore(1.5555), "4- Score not round properly");
+        Assertions.assertEquals(0.456, Toolbox.roundScore(0.45555), "5- Score not round properly");
+        Assertions.assertEquals(0.449, Toolbox.roundScore(0.4490), "6- Score not round properly");
+        Assertions.assertEquals(0.45, Toolbox.roundScore(0.4499), "7- Score not round properly");
+        Assertions.assertEquals(0.45, Toolbox.roundScore(0.45), "8- Score not round properly");
+        Assertions.assertEquals(0.45, Toolbox.roundScore(0.4499999), "8- Score not round properly");
+        Assertions.assertEquals(0.445, Toolbox.roundScore(0.4445), "9- Score not round properly");
+        Assertions.assertEquals(0.447, Toolbox.roundScore(0.4466), "10- Score not round properly");
+        Assertions.assertEquals(0.447, Toolbox.roundScore(0.447), "11- Score not round properly");
+        Assertions.assertEquals(0.443, Toolbox.roundScore(0.44295776), "12- Score not round properly");
+        Assertions.assertEquals(0.445, Toolbox.roundScore(0.44547057), "13- Score not round properly");
+        Assertions.assertEquals(0.446, Toolbox.roundScore(0.44611502), "14- Score not round properly");
+        Assertions.assertEquals(0.447, Toolbox.roundScore(0.44681886), "15- Score not round properly");
+        Assertions.assertEquals(0.45, Toolbox.roundScore(0.44962552), "16- Score not round properly");
+        Assertions.assertEquals(0.992, Toolbox.roundScore(0.9921667), "17- Score not round properly");
+        Assertions.assertEquals(0.992, Toolbox.roundScore(0.9919758), "18- Score not round properly");
+        Assertions.assertEquals(0.982, Toolbox.roundScore(0.98239964), "19- Score not round properly");
+        Assertions.assertEquals(0.999, Toolbox.roundScore(0.999), "20- Score not round properly");
+        Assertions.assertEquals(1.0, Toolbox.roundScore(0.9999),"21- Score not round properly");
     }
 
     @Test
