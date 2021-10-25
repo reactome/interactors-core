@@ -4,9 +4,10 @@ import org.hupo.psi.mi.psicquic.registry.ServiceType;
 import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
 import org.hupo.psi.mi.psicquic.registry.client.registry.DefaultPsicquicRegistryClient;
 import org.hupo.psi.mi.psicquic.registry.client.registry.PsicquicRegistryClient;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactome.server.interactors.exception.CustomPsicquicInteractionClusterException;
 import org.reactome.server.interactors.exception.PsicquicQueryException;
 import org.reactome.server.interactors.exception.PsicquicResourceNotFoundException;
@@ -32,7 +33,7 @@ public class TestPsicquicClustering {
 
     private PsicquicService psicquicService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         psicquicService = new PsicquicService();
     }
@@ -42,7 +43,7 @@ public class TestPsicquicClustering {
         List<String> psicquicResources = getPsicquicResource();
 
         if (psicquicResources != null) {
-            Assert.assertTrue("No resources have been returned from PSICQUIC", getPsicquicResource().size() > 0);
+            Assertions.assertTrue(getPsicquicResource().size() > 0, "No resources have been returned from PSICQUIC");
         } else {
             // Psicquic is down, but we don't want to break our tests because of it.
             logger.warn("Couldn't get PSICQUIC Resources. Reason: PSICQUIC is down.");
@@ -58,7 +59,7 @@ public class TestPsicquicClustering {
             Map<String, List<Interaction>> interactions = psicquicService.getInteractions(resourceName, getSampleAccessions(resourceName));
             //long elapsedTime = System.currentTimeMillis() - start;
 
-            Assert.assertTrue("No interactors present in " + resourceName + " database.", interactions.size() >= 1);
+            Assertions.assertTrue(interactions.size() >= 1, "No interactors present in " + resourceName + " database.");
 
         } catch (PsicquicQueryException | PsimiTabException | PsicquicRegistryClientException | PsicquicResourceNotFoundException e) {
             // Psicquic is down, but we don't want to break our tests because of it.
@@ -74,7 +75,7 @@ public class TestPsicquicClustering {
         try {
             Map<String, List<Interaction>> interactions = psicquicService.getInteractions(resourceName, Collections.singleton(accession));
 
-            Assert.assertTrue("No interactors present in " + resourceName + " database.", interactions.size() >= 1);
+            Assertions.assertTrue(interactions.size() >= 1, "No interactors present in " + resourceName + " database.");
 
         } catch (PsicquicQueryException | PsimiTabException | PsicquicRegistryClientException | PsicquicResourceNotFoundException  e) {
             // Psicquic is down, but we don't want to break our tests because of it.
@@ -156,6 +157,7 @@ public class TestPsicquicClustering {
     @Test
     public void testCustomPsicquicResource() throws CustomPsicquicInteractionClusterException {
         String customUrl = "http://psicquic.docking.org/psicquic/webservices/current/search/query/";
+        //http://www.ebi.ac.uk/Tools/webservices/psicquic/intact/webservices/current/search/query
         String accession = "P00533";
 
         try {

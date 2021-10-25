@@ -4,6 +4,8 @@ import psidev.psi.mi.tab.model.Confidence;
 
 import java.util.List;
 
+import static java.lang.Double.parseDouble;
+
 /**
  * Zinc resource
  */
@@ -44,6 +46,6 @@ public class ZincClient extends AbstractClient {
             retScore = intactScore;
         }
 
-        return retScore.isEmpty() ? 0 : new Double(retScore);
+        return retScore.isEmpty() ? 0 : parseDouble(retScore);
     }
 }
