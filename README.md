@@ -32,7 +32,7 @@ mvn clean package -DskipTests
 #### Recommend:
 
 ```console
-java -jar target/InteractorsParser-jar-with-dependencies.jar -g /path/to/interactors.db -d
+java -jar target/InteractorsParser-exec.jar -g /path/to/interactors.db -d
 ```
 
 ### Validate 

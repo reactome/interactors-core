@@ -4,6 +4,8 @@ import psidev.psi.mi.tab.model.Confidence;
 
 import java.util.List;
 
+import static java.lang.Double.parseDouble;
+
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
@@ -36,6 +38,6 @@ public class ReactomeFisClient extends AbstractClient {
             retScore = nbcScore;
         }
 
-        return retScore.isEmpty() ? 0 : new Double(retScore);
+        return retScore.isEmpty() ? 0 : parseDouble(retScore);
     }
 }
