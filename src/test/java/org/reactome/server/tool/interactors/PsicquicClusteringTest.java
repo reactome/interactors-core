@@ -1,4 +1,4 @@
-package org.reactome.server.tool.interactors.dao;
+package org.reactome.server.tool.interactors;
 
 import org.hupo.psi.mi.psicquic.registry.ServiceType;
 import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;
@@ -27,9 +27,9 @@ import java.util.stream.Collectors;
  *
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-public class TestPsicquicClustering {
+public class PsicquicClusteringTest {
 
-    private Logger logger = LoggerFactory.getLogger(TestPsicquicClustering.class);
+    private Logger logger = LoggerFactory.getLogger(PsicquicClusteringTest.class);
 
     private PsicquicService psicquicService;
 
@@ -156,8 +156,7 @@ public class TestPsicquicClustering {
      */
     @Test
     public void testCustomPsicquicResource() throws CustomPsicquicInteractionClusterException {
-        String customUrl = "http://psicquic.docking.org/psicquic/webservices/current/search/query/";
-        //http://www.ebi.ac.uk/Tools/webservices/psicquic/intact/webservices/current/search/query
+        String customUrl = "http://www.ebi.ac.uk/Tools/webservices/psicquic/intact/webservices/current/search/query/";
         String accession = "P00533";
 
         try {

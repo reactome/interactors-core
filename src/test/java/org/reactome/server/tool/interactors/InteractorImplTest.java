@@ -1,4 +1,4 @@
-package org.reactome.server.tool.interactors.dao;
+package org.reactome.server.tool.interactors;
 
 
 import org.junit.jupiter.api.Assertions;
@@ -20,7 +20,7 @@ import java.util.Properties;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
-public class TestInteractorImpl {
+public class InteractorImplTest {
 
     private InteractorDAO interactorDAO;
 
@@ -29,7 +29,7 @@ public class TestInteractorImpl {
         Properties prop = new Properties();
         InteractorsDatabase interactors = null;
         try {//src/test/resources/
-            InputStream is = TestInteractionImpl.class.getResourceAsStream("/db.properties");
+            InputStream is = InteractionImplTest.class.getResourceAsStream("/db.properties");
             prop.load(is);
             interactors = new InteractorsDatabase(prop.getProperty("database"));
         } catch (SQLException | IOException e) {

@@ -1,4 +1,4 @@
-package org.reactome.server.tool.interactors.dao;
+package org.reactome.server.tool.interactors;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-public class TestParser {
+public class ParserTest {
 
     private static final String PATH = "tuple.samples/";
     private static final String EXTENDED_TXT = PATH.concat("extended.txt");
