@@ -159,6 +159,29 @@ public class IntactParser {
     }
 
     /**
+     * Retrieves the IntAct file, parses it and creates an temporary database
+     *
+     * @return an InteractorsDatabase in-memory instance
+     * @throws SQLException thrown when there is a problem connecting to the temporary database
+     * @throws IOException  thrown when there is a problem accessing to the IntAct file
+     */
+    public static InteractorsDatabase getInteractors(String fileDatabaseName, String intactFile) throws SQLException, IOException {
+        long start = System.currentTimeMillis();
+        logger.info("Start Parsing IntAct File");
+
+        FileUtils.deleteQuietly(new File(fileDatabaseName));
+        InteractorsDatabase interactors = new InteractorsDatabase(fileDatabaseName);
+        InteractorDatabaseGenerator.create(interactors.getConnection(), false);
+        IntactParser intactParser = new IntactParser(interactors);
+        intactParser.cacheResources();
+
+        intactParser.parser(intactFile);
+        logger.info("End IntAct File parsing. Elapsed Time [{}.ms]", (System.currentTimeMillis() - start));
+
+        return interactors;
+    }
+
+    /**
      * Parsing the file
      */
     private void parser(String file) {
