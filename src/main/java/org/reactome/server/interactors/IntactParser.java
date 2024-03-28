@@ -318,6 +318,8 @@ public class IntactParser {
         // taxid:9606(human)
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_A.value], interactorA);
 
+        parseType(line[ParserIndex.TYPE_A.value], interactorA);
+
         // sample of ID Interactor B => intact:EBI-7121510
         parseIntactId(line[ParserIndex.ID_INTERACTOR_B.value], interactorB);
 
@@ -332,6 +334,8 @@ public class IntactParser {
 
         // taxid:9606(human)
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_B.value], interactorB);
+
+        parseType(line[ParserIndex.TYPE_B.value], interactorB);
 
         Interaction interaction = prepareInteractions(line, interactorA, interactorB);
         if (interactions.contains(interaction)) {
@@ -361,6 +365,26 @@ public class IntactParser {
         } else {
             interactor.setTaxid(-1);
             parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Does not have taxId.");
+        }
+    }
+
+
+    private void parseType(String value, Interactor interactor) {
+        //Value: psi-mi:"MI:0326"(protein)
+        //Define the regular expression pattern to match substring within double quotes
+        Pattern pattern = Pattern.compile(":([^\\(]+)");
+        Matcher matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            String identifier = matcher.group(1).replace("\"", "");
+           // Toolbox.getMiIdToReactomeType().forEach((n, v) -> System.out.println("id is " + n +  " type is " + v));
+            String type = Toolbox.getMiIdToReactomeType().getOrDefault(identifier, "Protein");
+            System.out.println("identifier is " + identifier);
+            System.out.println("type is " + type);
+            interactor.setType(type);
+        } else {
+            System.out.println("No match found.");
+            interactor.setType("unknown");
+            parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Does not have type.");
         }
     }
 
@@ -592,7 +616,10 @@ public class IntactParser {
         TAXID_INTERACTOR_A(9),
         TAXID_INTERACTOR_B(10),
         INTERACTION_IDENTIFIER(13),
-        CONFIDENCE_VALUE(14);
+        CONFIDENCE_VALUE(14),
+
+        TYPE_A(20),
+        TYPE_B(21);
 
         final int value;
 

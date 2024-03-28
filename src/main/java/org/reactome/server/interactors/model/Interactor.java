@@ -31,6 +31,9 @@ public class Interactor {
     // Synonyms list -> remove accession if present and remove the entry that was previously assigned to alias. Unique
     private String synonyms;
 
+    // Type, protein or gene
+    private String type;
+
     public Long getId() {
         return id;
     }
@@ -157,5 +160,13 @@ public class Interactor {
         if (synonyms != null) {
             this.synonyms = synonyms.replaceAll("\"", "");
         }
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
