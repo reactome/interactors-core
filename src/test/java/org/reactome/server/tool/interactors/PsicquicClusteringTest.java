@@ -69,8 +69,8 @@ public class PsicquicClusteringTest {
 
     @Test
     public void testSpecificPsicquicResourceAndAccession() {
-        String resourceName = "Reactome-FIs";
-        String accession = "Q02750";
+        String resourceName = "IntAct";
+        String accession = "EBI-26651326";
 
         try {
             Map<String, List<Interaction>> interactions = psicquicService.getInteractions(resourceName, Collections.singleton(accession));
