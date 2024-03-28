@@ -378,8 +378,6 @@ public class IntactParser {
             String identifier = matcher.group(1).replace("\"", "");
            // Toolbox.getMiIdToReactomeType().forEach((n, v) -> System.out.println("id is " + n +  " type is " + v));
             String type = Toolbox.getMiIdToReactomeType().getOrDefault(identifier, "Protein");
-            System.out.println("identifier is " + identifier);
-            System.out.println("type is " + type);
             interactor.setType(type);
         } else {
             System.out.println("No match found.");
