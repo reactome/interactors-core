@@ -5,6 +5,7 @@ import org.reactome.server.interactors.model.Interaction;
 import org.reactome.server.interactors.model.InteractionDetails;
 import org.reactome.server.interactors.model.Interactor;
 import org.reactome.server.interactors.psicquic.PsicquicClient;
+import org.reactome.server.interactors.util.Toolbox;
 import psidev.psi.mi.tab.model.Confidence;
 import uk.ac.ebi.enfin.mi.cluster.EncoreInteraction;
 
@@ -59,14 +60,16 @@ public abstract class AbstractClient implements PsicquicClient {
     private Interactor getInteractor(EncoreInteraction encoreInteraction, InteractorLink link) {
         Interactor interactor = new Interactor();
 
-        switch (link){
+        switch (link) {
             case A:
                 interactor.setAcc(getAcc(encoreInteraction.getInteractorAccsA()));
                 interactor.setAlias(getAlias(encoreInteraction.getOtherInteractorAccsA()));
+                interactor.setType(getType(encoreInteraction.getInteractorTypesA()));
                 break;
             case B:
                 interactor.setAcc(getAcc(encoreInteraction.getInteractorAccsB()));
                 interactor.setAlias(getAlias(encoreInteraction.getOtherInteractorAccsB()));
+                interactor.setType(getType(encoreInteraction.getInteractorTypesB()));
                 break;
         }
 
@@ -92,7 +95,7 @@ public abstract class AbstractClient implements PsicquicClient {
         }
 
         String retScore = miscore;
-        if(!intactMiscore.isEmpty()){
+        if (!intactMiscore.isEmpty()) {
             retScore = intactMiscore;
         }
 
@@ -112,9 +115,9 @@ public abstract class AbstractClient implements PsicquicClient {
         for (String dbSource : accessions.keySet()) {
             if (dbSource.equalsIgnoreCase("psi-mi") && psimiAlias.isEmpty()) {
                 //psimiAlias = accessions.get(dbSource).get(0);
-                for (String alias : accessions.get(dbSource)){
+                for (String alias : accessions.get(dbSource)) {
                     // if it matches the regex : assign
-                    if(isPotencialAlias(alias) && psimiAlias.isEmpty()) {
+                    if (isPotencialAlias(alias) && psimiAlias.isEmpty()) {
                         psimiAlias = alias;
                     }
                 }
@@ -126,14 +129,20 @@ public abstract class AbstractClient implements PsicquicClient {
         }
 
         String rtn = otherAlias;
-        if (!psimiAlias.isEmpty()){
+        if (!psimiAlias.isEmpty()) {
             rtn = psimiAlias;
-        } else if (!uniprotAlias.isEmpty()){
+        } else if (!uniprotAlias.isEmpty()) {
             rtn = uniprotAlias;
         }
 
         // Checking the size is a save the day solution.
         return rtn.length() > CHEMICAL_ALIAS_SIZE_THRESHOLD ? null : rtn.toUpperCase();
+    }
+
+
+    private String getType(List<String> interactorTypes) {
+        if (interactorTypes.isEmpty()) return "Protein";
+        return Toolbox.getMiIdToReactomeType().getOrDefault(interactorTypes.get(0), "Protein");
     }
 
     /**
@@ -147,14 +156,14 @@ public abstract class AbstractClient implements PsicquicClient {
         String interactorAcc = null;
         String[] databaseNames = getDatabaseNames().split(",");
         for (String db : databaseNames) {
-            if(interactorAccs.containsKey(db)) {
+            if (interactorAccs.containsKey(db)) {
                 interactorAcc = interactorAccs.get(db);
                 break;
             }
         }
 
-        if(interactorAcc == null) {
-            if(interactorAccs != null && !interactorAccs.isEmpty()) {
+        if (interactorAcc == null) {
+            if (interactorAccs != null && !interactorAccs.isEmpty()) {
                 interactorAcc = interactorAccs.values().iterator().next();
             }
         }
@@ -172,12 +181,12 @@ public abstract class AbstractClient implements PsicquicClient {
     public String getSynonyms(Map<String, List<String>> accessions) {
         String allSynonyms = "";
         for (String dbSource : accessions.keySet()) {
-            for(String alias : accessions.get(dbSource)){
+            for (String alias : accessions.get(dbSource)) {
                 allSynonyms = allSynonyms.concat(alias).concat("$");
             }
         }
 
-        if(allSynonyms.endsWith("$")){
+        if (allSynonyms.endsWith("$")) {
             allSynonyms = allSynonyms.substring(0, allSynonyms.length() - 1);
         }
 
@@ -199,7 +208,7 @@ public abstract class AbstractClient implements PsicquicClient {
         return interactionDetailsList;
     }
 
-    private boolean isPotencialAlias(String pAlias){
+    private boolean isPotencialAlias(String pAlias) {
         Pattern p = Pattern.compile("^([a-zA-Z0-9\\s:-_]{2,15})");
         return p.matcher(pAlias).matches();
     }
