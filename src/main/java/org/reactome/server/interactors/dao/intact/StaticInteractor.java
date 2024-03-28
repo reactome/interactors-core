@@ -21,7 +21,7 @@ public class StaticInteractor implements InteractorDAO {
     private Connection connection;
 
     private String TABLE = "INTERACTOR";
-    private String ALL_COLUMNS = "ACC, INTACT_ID, INTERACTOR_RESOURCE_ID, ALIAS, TAXID, SYNONYMS";
+    private String ALL_COLUMNS = "ACC, INTACT_ID, INTERACTOR_RESOURCE_ID, ALIAS, TAXID, SYNONYMS, TYPE";
     private String ALL_COLUMNS_SEL = "ID, CREATE_DATE, ".concat(ALL_COLUMNS);
 
     public StaticInteractor(InteractorsDatabase database) {
@@ -31,7 +31,7 @@ public class StaticInteractor implements InteractorDAO {
     public Interactor create(Interactor interactor) throws SQLException {
 
         String insert = "INSERT INTO " + TABLE + " (" + ALL_COLUMNS + ") "
-                + "VALUES(?, ?, ?, ?, ?, ?)";
+                + "VALUES(?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement pstm = connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
         pstm.setString(1, interactor.getAcc());
@@ -46,6 +46,7 @@ public class StaticInteractor implements InteractorDAO {
         }
         pstm.setInt(5, taxId);
         pstm.setString(6, interactor.getSynonyms());
+        pstm.setString(7, interactor.getType());
 
         if(pstm.executeUpdate() > 0) {
             try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
@@ -139,6 +140,7 @@ public class StaticInteractor implements InteractorDAO {
         ret.setAlias(rs.getString("ALIAS"));
         ret.setTaxid(rs.getInt("TAXID"));
         ret.setSynonyms(rs.getString("SYNONYMS"));
+        ret.setType(rs.getString("TYPE"));
         return ret;
     }
 
