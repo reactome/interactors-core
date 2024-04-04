@@ -202,6 +202,7 @@ public class StaticInteraction implements InteractionDAO {
         interactorA.setIntactId(rs.getString("INTACT_IDA"));
         interactorA.setTaxid(rs.getInt("TAX_IDA"));
         interactorA.setSynonyms(rs.getString("SYNONYMSA"));
+        interactorA.setType(rs.getString("TYPE_A"));
 
         Interactor interactorB = new Interactor();
         interactorB.setId(rs.getLong("ID_B"));
@@ -211,6 +212,7 @@ public class StaticInteraction implements InteractionDAO {
         interactorB.setIntactId(rs.getString("INTACT_IDB"));
         interactorB.setTaxid(rs.getInt("TAX_IDB"));
         interactorB.setSynonyms(rs.getString("SYNONYMSB"));
+        interactorB.setType(rs.getString("TYPE_B"));
 
         // If A interacts with B and B with A we are talking about the same interaction, so
         // just to keep it easy to create the JSON - the interactor in the query will be always on side of A
