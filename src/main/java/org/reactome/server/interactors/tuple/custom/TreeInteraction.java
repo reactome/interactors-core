@@ -14,6 +14,8 @@ public class TreeInteraction {
     private String aliasA;
     private String idB;
     private String aliasB;
+    private String typeA;
+    private String typeB;
 
     public double getScore() {
         return score;
@@ -61,6 +63,22 @@ public class TreeInteraction {
 
     public void setAliasB(String aliasB) {
         this.aliasB = aliasB;
+    }
+
+    public String getTypeA() {
+        return typeA;
+    }
+
+    public void setTypeA(String typeA) {
+        this.typeA = typeA;
+    }
+
+    public String getTypeB() {
+        return typeB;
+    }
+
+    public void setTypeB(String typeB) {
+        this.typeB = typeB;
     }
 
     public void addEvidence(String evidence) {
