@@ -13,7 +13,7 @@ This project parses IntAct clustered interactions and save them into a lightweig
 - Clone project
 
 ```console
-git clone https://github.com/reactome-pwp/interactors-core.git
+git clone https://github.com/reactome/interactors-core.git
 cd interactors-core
 # Note: You must skip test because at this point the database hasn't been created yet.
 mvn clean package -DskipTests
