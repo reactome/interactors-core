@@ -235,6 +235,13 @@
             </snapshots>
         </repository>
 
+        <repository>
+            <id>Camunda</id>
+            <name>Camunda Public</name>
+            <url>https://artifacts.camunda.com/artifactory/public/</url>
+            <layout>default</layout>
+        </repository>
+
         <!-- Needed for MI-CLUSTER-->
         <repository>
             <id>nexus</id>
