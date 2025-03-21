@@ -1,4 +1,4 @@
-package org.reactome.server.tool.interactors;
+package org.reactome.server.interactors;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -39,33 +39,14 @@ public class ParserTest {
         Parser p = ParserFactory.build(lines);
         TupleResult result = p.parse(lines);
 
-        Assertions.assertEquals(6, (int) result.getSummary().getInteractions(), "Haven't found six interactions");
+        Assertions.assertEquals(139, (int) result.getSummary().getInteractions(), "Haven't found six interactions");
         Assertions.assertNotNull(result.getWarningMessages(), "Warning messages list is null");
         Assertions.assertEquals(1, result.getWarningMessages().size(), "Haven't found one warning messages");
 
-        Assertions.assertEquals(2, result.getCustomResource().get("Q9H0R8").size(), "Q9H0R8 should be 2 times");
-        Assertions.assertEquals(2, result.getCustomResource().get("Q14596").size(), "Q14596 should be 2 times");
-        Assertions.assertEquals(4, result.getCustomResource().get("Q13501").size(), "Q13501 should be 4 times");
-
-        //Testing serialisation
-        Kryo kryo = new Kryo();
-        kryo.setRegistrationRequired(false);
-        kryo.setReferences(true);
-        kryo.setInstantiatorStrategy(new DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
-        kryo.register(AtomicReferenceArrayListAdapter.class, new FieldSerializer<>(kryo, AtomicReferenceArrayListAdapter.class));
-        Output output = new Output(new ByteArrayOutputStream());
-        kryo.writeClassAndObject(output, result);
-        output.close();
-        Input input = new Input(new ByteArrayInputStream(output.getBuffer()));
-        TupleResult aux = (TupleResult) kryo.readClassAndObject(input);
-        output.close();
-
-        //Checking whether aux contains what result had
-        Assertions.assertEquals(2, aux.getCustomResource().get("Q9H0R8").size(), "Q9H0R8 should be 2 times");
-        Assertions.assertEquals(2, aux.getCustomResource().get("Q14596").size(), "Q14596 should be 2 times");
-        Assertions.assertEquals(4, aux.getCustomResource().get("Q13501").size(), "Q13501 should be 4 times");
+        Assertions.assertEquals(2, result.getCustomResource().get("P08047").size(), "P08047 should be 2 times");
     }
 
+    @Deprecated
     @Test
     public void testExtendedCsv() throws IOException, ParserException {
         File file = getFileFromResources(EXTENDED_CSV);

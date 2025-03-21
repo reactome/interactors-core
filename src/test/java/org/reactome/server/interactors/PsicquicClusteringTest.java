@@ -1,4 +1,4 @@
-package org.reactome.server.tool.interactors;
+package org.reactome.server.interactors;
 
 import org.hupo.psi.mi.psicquic.registry.ServiceType;
 import org.hupo.psi.mi.psicquic.registry.client.PsicquicRegistryClientException;

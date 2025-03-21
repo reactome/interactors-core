@@ -1,4 +1,4 @@
-package org.reactome.server.tool.interactors;
+package org.reactome.server.interactors;
 
 
 import org.junit.jupiter.api.Assertions;
@@ -20,7 +20,7 @@ import java.util.Properties;
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
 
-public class InteractorImplTest {
+public class InteractorImplTest extends BaseImplTest{
 
     private InteractorDAO interactorDAO;
 

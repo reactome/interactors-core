@@ -60,7 +60,7 @@ public class IntactParser {
     private Map<String, InteractorResource> interactorResourceMap = new HashMap<>();
     private Set<Interaction> interactions = new HashSet<>();
 
-    private IntactParser(InteractorsDatabase database) {
+    IntactParser(InteractorsDatabase database) {
         interactionParserService = new InteractionParserService(database);
         interactorResourceService = new InteractorResourceService(database);
         interactionResourceService = new InteractionResourceService(database);
@@ -184,7 +184,7 @@ public class IntactParser {
     /**
      * Parsing the file
      */
-    private void parser(String file) {
+    void parser(String file) {
         int totalLinesParsed = 1;
         int totalLinesIncluded = 0;
         int totalIgnoredLines = 0;
@@ -562,7 +562,7 @@ public class IntactParser {
     /**
      * Caching InteractorResource and InteractionResource
      */
-    private void cacheResources() {
+    void cacheResources() {
         logger.info("Caching Interaction and Interactor Resources from DB");
         try {
             // Load INTERACTOR resources (chebi, uniprot)

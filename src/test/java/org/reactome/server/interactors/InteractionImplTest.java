@@ -1,4 +1,4 @@
-package org.reactome.server.tool.interactors;
+package org.reactome.server.interactors;
 
 
 import org.junit.jupiter.api.Assertions;
@@ -24,13 +24,13 @@ import java.util.Properties;
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-public class InteractionImplTest {
+public class InteractionImplTest extends BaseImplTest {
 
     private InteractionDAO interactionDAO;
 
     private InteractionService interactionService;
 
-    private final String ACCESSION = "UniProt:Q13501";
+    private final String ACCESSION = "UniProt:P49418";
     private final Long RESOURCE_ID = 1L;
 
     @BeforeEach
@@ -106,7 +106,7 @@ public class InteractionImplTest {
         List<Interaction> interactions = interactionService.getInteractions(ACCESSION, InteractorConstant.STATIC);
 
         Assertions.assertFalse(interactions.isEmpty(), "Interactors list is Empty");
-        Assertions.assertTrue(interactions.size() > 10, "Interactor less than 10");
+        Assertions.assertTrue(interactions.size() == 3, "Incorrect number of interactions");
 
     }
 }
