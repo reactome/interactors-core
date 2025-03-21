@@ -7,7 +7,7 @@
     <groupId>org.reactome.server.interactors</groupId>
     <artifactId>interactor-core</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.5</version>
+    <version>1.1.6-SNAPSHOT</version>
 
     <name>Interactors Core</name>
 
@@ -37,6 +37,7 @@
         <dependency>
             <groupId>uk.ac.ebi.enfin.mi.cluster</groupId>
             <artifactId>micluster</artifactId>
+            <version>1.9.0</version>
         </dependency>
 
         <dependency>
@@ -148,7 +149,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M5</version>
+                <version>3.5.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
