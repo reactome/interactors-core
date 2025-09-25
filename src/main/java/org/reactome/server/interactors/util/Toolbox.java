@@ -2,10 +2,11 @@ package org.reactome.server.interactors.util;
 
 import org.reactome.server.interactors.model.Interaction;
 import org.reflections.Reflections;
+import uk.ac.ebi.enfin.mi.score.ols.MIOntology;
+import uk.ac.ebi.pride.utilities.ols.web.service.client.OLSClient;
+import uk.ac.ebi.pride.utilities.ols.web.service.config.OLSWsConfigProd;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -232,4 +233,40 @@ public class Toolbox {
         Reflections reflections = new Reflections(packageName);
         return reflections.getSubTypesOf(superClazz);
     }
+
+
+    /**
+     * Create a map that contains interactor type(Ontologies MI ID) and Reactome type
+     * https://www.ebi.ac.uk/ols4/ontologies/mi/classes/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FMI_0313?lang=en
+     *
+     * @return  miIdToReactomeType
+     */
+    public static Map<String, String> getMiIdToReactomeType() {
+        Map<String, String> miIdToReactomeType = new HashMap<>();
+        Map<String, String> seedMiIdToReactomeType = getSeedMiIdToReactomeType();
+        OLSClient ols = new OLSClient(new OLSWsConfigProd());
+        MIOntology olsHelper = new MIOntology();
+        seedMiIdToReactomeType.forEach((miId, type) -> {
+            miIdToReactomeType.put(miId, type);
+            olsHelper.getJsonChildren(miId).forEach((childId, name) -> {
+                miIdToReactomeType.put(childId, type);
+            });
+        });
+
+        return miIdToReactomeType;
+    }
+
+    private static Map<String, String> getSeedMiIdToReactomeType() {
+        Map<String, String> seedMiIdToReactomeType = new LinkedHashMap<>();
+        // Order is important, we need to put lower types in the ontology after their parent types
+        seedMiIdToReactomeType.put("MI:1100", "Chemical"); // Small Molecule
+        seedMiIdToReactomeType.put("MI:0383", "Protein"); // Polymer (Protein + peptide)
+        seedMiIdToReactomeType.put("MI:0318", "Entity"); // DNA
+        seedMiIdToReactomeType.put("MI:0320", "RNA"); // RNA
+        seedMiIdToReactomeType.put("MI:0314", "Complex"); // Complex
+        seedMiIdToReactomeType.put("MI:0250", "Gene"); // Gene
+        seedMiIdToReactomeType.put("MI:1304", "EntitySet"); // Molecule Set
+        return seedMiIdToReactomeType;
+    }
+
 }

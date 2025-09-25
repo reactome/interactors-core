@@ -92,8 +92,8 @@ public class StaticInteraction implements InteractionDAO {
 
         try {
             String query = "SELECT   INTERACTION.ID AS 'INTERACTION_ID', " +
-                                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA', INTERACTORA.TAXID AS 'TAX_IDA', INTERACTORA.SYNONYMS AS 'SYNONYMSA', " +
-                                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB', INTERACTORB.TAXID AS 'TAX_IDB', INTERACTORB.SYNONYMS AS 'SYNONYMSB', " +
+                                    "INTERACTORA.ID AS 'ID_A', INTERACTORA.ACC AS 'ACC_A', INTERACTORA.ALIAS AS 'ALIAS_A', INTERACTORA.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_A_ID', INTERACTORA.INTACT_ID AS 'INTACT_IDA', INTERACTORA.TAXID AS 'TAX_IDA', INTERACTORA.SYNONYMS AS 'SYNONYMSA', INTERACTORA.TYPE AS 'TYPE_A'," +
+                                    "INTERACTORB.ID AS 'ID_B', INTERACTORB.ACC AS 'ACC_B', INTERACTORB.ALIAS AS 'ALIAS_B', INTERACTORB.INTERACTOR_RESOURCE_ID AS 'INTERACTOR_RESOURCE_B_ID', INTERACTORB.INTACT_ID AS 'INTACT_IDB', INTERACTORB.TAXID AS 'TAX_IDB', INTERACTORB.SYNONYMS AS 'SYNONYMSB', INTERACTORB.TYPE AS 'TYPE_B'," +
                                     "INTERACTION.AUTHOR_SCORE, " +
                                     "INTERACTION.MISCORE, " +
                                     "INTERACTION.PUBMEDIDS, " +
@@ -202,6 +202,7 @@ public class StaticInteraction implements InteractionDAO {
         interactorA.setIntactId(rs.getString("INTACT_IDA"));
         interactorA.setTaxid(rs.getInt("TAX_IDA"));
         interactorA.setSynonyms(rs.getString("SYNONYMSA"));
+        interactorA.setType(rs.getString("TYPE_A"));
 
         Interactor interactorB = new Interactor();
         interactorB.setId(rs.getLong("ID_B"));
@@ -211,6 +212,7 @@ public class StaticInteraction implements InteractionDAO {
         interactorB.setIntactId(rs.getString("INTACT_IDB"));
         interactorB.setTaxid(rs.getInt("TAX_IDB"));
         interactorB.setSynonyms(rs.getString("SYNONYMSB"));
+        interactorB.setType(rs.getString("TYPE_B"));
 
         // If A interacts with B and B with A we are talking about the same interaction, so
         // just to keep it easy to create the JSON - the interactor in the query will be always on side of A

@@ -42,8 +42,11 @@ public class CustomResource {
 
         interaction.setIdA(customInteraction.getInteractorIdA());
         interaction.setAliasA(customInteraction.getInteractorAliasA());
+        interaction.setTypeA(customInteraction.getInteractorTypeA());
         interaction.setIdB(customInteraction.getInteractorIdB());
         interaction.setAliasB(customInteraction.getInteractorAliasB());
+        interaction.setTypeB(customInteraction.getInteractorTypeB());
+
 
         getOrCreateInteractions(customInteraction.getInteractorIdA()).add(interaction);
 
@@ -70,9 +73,11 @@ public class CustomResource {
             CustomInteraction i = new CustomInteraction();
             i.setInteractorIdA(interaction.getIdA());
             i.setInteractorAliasA(interaction.getAliasA());
+            i.setInteractorTypeA(interaction.getTypeA());
 
             i.setInteractorIdB(interaction.getIdB());
             i.setInteractorAliasB(interaction.getAliasB());
+            i.setInteractorTypeB(interaction.getTypeB());
 
             i.setConfidenceValue(interaction.getScore());
             i.setEvidence(interaction.getEvidence());
