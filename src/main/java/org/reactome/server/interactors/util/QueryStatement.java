@@ -20,6 +20,7 @@ public class QueryStatement {
                 "ALIAS VARCHAR, " +
                 "SYNONYMS VARCHAR, " +
                 "TAXID INTEGER, " +
+                "TYPE VARCHAR, " +
                 "FOREIGN KEY(INTERACTOR_RESOURCE_ID) REFERENCES  INTERACTOR_RESOURCE(ID) " +
             ")";
 

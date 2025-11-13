@@ -39,6 +39,8 @@ import java.util.concurrent.TimeUnit;
 
 public class InteractionClusterImpl implements PsicquicDAO {
 
+    public static final String FORMAT = "?format=tab26";
+
     /**
      * This method queries PSICQUIC for a given resource (retrieve the resource URL directly on the server) and accession
      * list and retrieves the interactions clustered. This method only take into account those interactions which the
@@ -190,7 +192,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
             }
 
             // Build service URL
-            String queryRestUrl = service.getRestUrl().concat(queryMethod).concat(URLEncoder.encode(acc, "UTF-8"));
+            String queryRestUrl = service.getRestUrl().concat(queryMethod).concat(URLEncoder.encode(acc, "UTF-8").concat(FORMAT));
 
             return prepareInteratorClusterScore(queryRestUrl, databaseNames);
         } catch (IOException e) {
@@ -208,7 +210,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
 
         try {
             // Build service URL
-            String queryRestUrl = customURL.concat(queryMethod).concat(URLEncoder.encode(acc, "UTF-8"));
+            String queryRestUrl = customURL.concat(queryMethod).concat(URLEncoder.encode(acc, "UTF-8")).concat(FORMAT);
 
             return prepareInteratorClusterScore(queryRestUrl, databaseNames);
 
@@ -281,7 +283,7 @@ public class InteractionClusterImpl implements PsicquicDAO {
         // 2) Cluster
         for (String acc : proteinInteractionsMap.keySet()) {
             InteractionClusterScore interactionClusterScore = new InteractionClusterScore();
-            if(cache){
+            if (cache) {
                 interactionClusterScore = new InteractionClusterScore(interactionClusterScoreCache);
             }
             interactionClusterScore.setBinaryInteractionIterator(proteinInteractionsMap.get(acc).iterator());

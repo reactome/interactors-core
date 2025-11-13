@@ -140,8 +140,10 @@ public class PsimiTabParser extends CommonParser {
         CustomInteraction customInteraction = new CustomInteraction();
         customInteraction.setInteractorIdA(interaction.getInteractorA().getAcc());
         customInteraction.setInteractorAliasA(interaction.getInteractorA().getAlias());
+        customInteraction.setInteractorTypeA(interaction.getInteractorA().getType());
         customInteraction.setInteractorIdB(interaction.getInteractorB().getAcc());
         customInteraction.setInteractorAliasB(interaction.getInteractorB().getAlias());
+        customInteraction.setInteractorTypeB(interaction.getInteractorB().getType());
         customInteraction.setConfidenceValue(interaction.getIntactScore());
 
         /** Right now just retrieving the first one in the list **/

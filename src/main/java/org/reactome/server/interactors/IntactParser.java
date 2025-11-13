@@ -48,6 +48,10 @@ public class IntactParser {
 
     // Regex that extracts the Taxonid from taxid:9606(human)
     private Pattern pattern = Pattern.compile("([0-9]+)");
+    // Value: psi-mi:"MI:0326"(protein)
+    // Define the regular expression pattern to match substring within double quotes
+    private Pattern miIdPattern = Pattern.compile(":([^\\(]+)");
+
     // Errors report lists
     private Set<String> parserErrorMessages = new HashSet<>();
     private List<String> dbErrorMessages = new ArrayList<>();
@@ -59,6 +63,7 @@ public class IntactParser {
     private Map<String, InteractionResource> interactionResourceMap = new HashMap<>();
     private Map<String, InteractorResource> interactorResourceMap = new HashMap<>();
     private Set<Interaction> interactions = new HashSet<>();
+    private Map<String, String>  miIdToReactomeType = new HashMap<>();
 
     IntactParser(InteractorsDatabase database) {
         interactionParserService = new InteractionParserService(database);
@@ -104,6 +109,7 @@ public class IntactParser {
         InteractorsDatabase interactors = new InteractorsDatabase(database);
         IntactParser intactParser = new IntactParser(interactors);
         intactParser.cacheResources();
+        intactParser.cacheMiIdToReactomeType();
 
         String file = config.getString("file");
         boolean download = config.getBoolean("download");
@@ -148,6 +154,7 @@ public class IntactParser {
         InteractorDatabaseGenerator.create(interactors.getConnection(), false);
         IntactParser intactParser = new IntactParser(interactors);
         intactParser.cacheResources();
+        intactParser.cacheMiIdToReactomeType();
 
         String file = intactParser.downloadFile(INTACT_FILE_URL, "/tmp");
         logger.info("File has been download. Parse will be executed pointing to this file: " + file);
@@ -174,6 +181,7 @@ public class IntactParser {
         InteractorDatabaseGenerator.create(interactors.getConnection(), false);
         IntactParser intactParser = new IntactParser(interactors);
         intactParser.cacheResources();
+        intactParser.cacheMiIdToReactomeType();
 
         intactParser.parser(intactFile);
         logger.info("End IntAct File parsing. Elapsed Time [{}.ms]", (System.currentTimeMillis() - start));
@@ -333,6 +341,10 @@ public class IntactParser {
         // taxid:9606(human)
         parseTaxonomy(line[ParserIndex.TAXID_INTERACTOR_B.value], interactorB);
 
+        parseType(line[ParserIndex.TYPE_A.value], interactorA);
+
+        parseType(line[ParserIndex.TYPE_B.value], interactorB);
+
         Interaction interaction = prepareInteractions(line, interactorA, interactorB);
         if (interactions.contains(interaction)) {
             String msg = "A Duplicate entry has been found: " + line[0] + " " + line[1] + " " + line[2] + " " + line[3] + " " + interaction.getIntactScore();
@@ -361,6 +373,18 @@ public class IntactParser {
         } else {
             interactor.setTaxid(-1);
             parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Does not have taxId.");
+        }
+    }
+
+    private void parseType(String value, Interactor interactor) {
+        Matcher matcher = miIdPattern.matcher(value);
+        if (matcher.find()) {
+            String identifier = matcher.group(1).replace("\"", "");
+            String type = miIdToReactomeType.getOrDefault(identifier, "Protein");
+            interactor.setType(type);
+        } else {
+            interactor.setType("unknown");
+            parserErrorMessages.add("Interactor ID [" + interactor.getAcc() + "] - Does not have type.");
         }
     }
 
@@ -581,6 +605,12 @@ public class IntactParser {
         logger.info("Caching is Done. InteractionResource [{}] and Interactor Resources[{}]", interactionResourceMap.size(), interactorResourceMap.size());
     }
 
+    private void cacheMiIdToReactomeType() {
+        logger.info("Caching MiId To ReactomeType");
+        miIdToReactomeType = Toolbox.getMiIdToReactomeType();
+        logger.info("Caching is Done. Type size  [{}]", miIdToReactomeType.size());
+    }
+
     private enum ParserIndex {
         ID_INTERACTOR_A(0),
         ID_INTERACTOR_B(1),
@@ -592,7 +622,10 @@ public class IntactParser {
         TAXID_INTERACTOR_A(9),
         TAXID_INTERACTOR_B(10),
         INTERACTION_IDENTIFIER(13),
-        CONFIDENCE_VALUE(14);
+        CONFIDENCE_VALUE(14),
+
+        TYPE_A(20),
+        TYPE_B(21);
 
         final int value;
 

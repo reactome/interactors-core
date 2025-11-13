@@ -20,6 +20,8 @@ public class CustomInteraction {
     private String interactorAliasA;
     private String interactorAliasB;
     private Double confidenceValue;
+    private String interactorTypeA;
+    private String interactorTypeB;
 
     /**
      * Interaction Evidence received from custom tuple file. Will be added in the evidences later on
@@ -62,6 +64,22 @@ public class CustomInteraction {
 
     public void setInteractorAliasB(String interactorAliasB) {
         this.interactorAliasB = interactorAliasB;
+    }
+
+    public String getInteractorTypeA() {
+        return interactorTypeA;
+    }
+
+    public void setInteractorTypeA(String interactorTypeA) {
+        this.interactorTypeA = interactorTypeA;
+    }
+
+    public String getInteractorTypeB() {
+        return interactorTypeB;
+    }
+
+    public void setInteractorTypeB(String interactorTypeB) {
+        this.interactorTypeB = interactorTypeB;
     }
 
     public Double getConfidenceValue() {
